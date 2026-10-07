@@ -1,0 +1,19 @@
+{
+  "name": "@imo/venues",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@imo/core": "*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.15"
+  }
+}

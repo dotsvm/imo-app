@@ -1,0 +1,31 @@
+{
+ "provider": "kalshi",
+ "marketId": "SENATETX-26-D",
+ "status": "open",
+ "result": null,
+ "marketResultPubkey": null,
+ "title": "James Talarico",
+ "openTime": 1733238000,
+ "closeTime": 1825254000,
+ "isTeamMarket": false,
+ "rulesPrimary": "If a representative of the Democratic party is sworn in as a Senator of Texas for the term beginning in 2027, then the market resolves to Yes.",
+ "rulesSecondary": "This market is eligible for accelerated determination after a consensus of media organizations project the winner. See full rules for details.",
+ "resolveAt": null,
+ "pricing": {
+  "buyYesPriceUsd": 670000,
+  "sellYesPriceUsd": 650000,
+  "sellNoPriceUsd": 330000,
+  "buyNoPriceUsd": 350000,
+  "volume": 8142100
+ },
+ "imageUrl": null,
+ "team": null,
+ "outcomes": null,
+ "marketOptions": null,
+ "sportsMarketType": null,
+ "sportsLine": null,
+ "periodType": null,
+ "periodNumber": null,
+ "gameNumber": null,
+ "eventId": "SENATETX-26"
+}

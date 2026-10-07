@@ -1,0 +1,247 @@
+{
+ "data": [
+  {
+   "eventId": "POLY-30829",
+   "isActive": true,
+   "isLive": false,
+   "category": "politics",
+   "subcategory": "politics",
+   "tags": [
+    "world-elections",
+    "global-elections",
+    "elections",
+    "politics",
+    "us-presidential-election",
+    "earn-4",
+    "primaries",
+    "united-states",
+    "international-election-props"
+   ],
+   "metadata": {
+    "slug": "democratic-presidential-nominee-2028",
+    "title": "Democratic Presidential Nominee 2028",
+    "isLive": false,
+    "series": "polymarket",
+    "eventId": "POLY-30829",
+    "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/democrats+2028+donkey.png",
+    "subtitle": "",
+    "closeTime": "2028-11-07T00:00:00Z"
+   },
+   "volumeUsd": "1289678316000000",
+   "volume24hr": "1413550000000",
+   "beginAt": "1857211200",
+   "closeCondition": "This market will close and expire after a winner is declared.",
+   "rulesPdf": "",
+   "markets": [
+    {
+     "provider": "polymarket",
+     "marketId": "POLY-559653",
+     "status": "open",
+     "result": null,
+     "marketResultPubkey": null,
+     "title": "Alexandria Ocasio-Cortez",
+     "openTime": 1752258959,
+     "closeTime": 1857272340,
+     "isTeamMarket": false,
+     "rulesPrimary": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.",
+     "rulesSecondary": "",
+     "resolveAt": null,
+     "pricing": {
+      "buyYesPriceUsd": 180000,
+      "sellYesPriceUsd": 179000,
+      "sellNoPriceUsd": 820000,
+      "buyNoPriceUsd": 821000,
+      "volume": 15442240
+     },
+     "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-alexandria-ocasio-cortez-win-the-2028-us-presidential-election-eX2nG09sPJUu.png",
+     "team": null,
+     "outcomes": [
+      "Yes",
+      "No"
+     ],
+     "marketOptions": [
+      {
+       "label": "Yes",
+       "buyYes": true
+      },
+      {
+       "label": "No",
+       "buyYes": false
+      }
+     ],
+     "sportsMarketType": null,
+     "sportsLine": null,
+     "periodType": null,
+     "periodNumber": null,
+     "gameNumber": null
+    },
+    {
+     "provider": "polymarket",
+     "marketId": "POLY-559652",
+     "status": "open",
+     "result": null,
+     "marketResultPubkey": null,
+     "title": "Gavin Newsom",
+     "openTime": 1752258956,
+     "closeTime": 1857272340,
+     "isTeamMarket": false,
+     "rulesPrimary": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.",
+     "rulesSecondary": "",
+     "resolveAt": null,
+     "pricing": {
+      "buyYesPriceUsd": 168000,
+      "sellYesPriceUsd": 167000,
+      "sellNoPriceUsd": 832000,
+      "buyNoPriceUsd": 833000,
+      "volume": 27899443
+     },
+     "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-gavin-newsom-win-the-2028-us-presidential-election-x9lPL7_gXn--.png",
+     "team": null,
+     "outcomes": [
+      "Yes",
+      "No"
+     ],
+     "marketOptions": [
+      {
+       "label": "Yes",
+       "buyYes": true
+      },
+      {
+       "label": "No",
+       "buyYes": false
+      }
+     ],
+     "sportsMarketType": null,
+     "sportsLine": null,
+     "periodType": null,
+     "periodNumber": null,
+     "gameNumber": null
+    }
+   ],
+   "sportsMarketGroups": []
+  },
+  {
+   "eventId": "POLY-79987",
+   "isActive": true,
+   "isLive": false,
+   "category": "politics",
+   "subcategory": "election",
+   "tags": [
+    "elections",
+    "global-elections",
+    "world",
+    "france",
+    "politics",
+    "french-election",
+    "main-election"
+   ],
+   "metadata": {
+    "slug": "next-french-presidential-election",
+    "title": "Next French Presidential Election",
+    "isLive": false,
+    "series": "polymarket",
+    "eventId": "POLY-79987",
+    "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/france-presidential-election-2027-U5QY3acvfubZ.png",
+    "subtitle": "",
+    "closeTime": "2027-04-30T00:00:00Z"
+   },
+   "volumeUsd": "146152593000000",
+   "volume24hr": "1154588000000",
+   "beginAt": "1806598800",
+   "closeCondition": "This market will close and expire after a winner is declared.",
+   "rulesPdf": "",
+   "markets": [
+    {
+     "provider": "polymarket",
+     "marketId": "POLY-679018",
+     "status": "open",
+     "result": null,
+     "marketResultPubkey": null,
+     "title": "Marine Le Pen",
+     "openTime": 1763075375,
+     "closeTime": 1808107140,
+     "isTeamMarket": false,
+     "rulesPrimary": "The next French presidential election is currently expected to be held around April 2027.  This market pertains to the outcome of the next French presidential election, regardless of whether it follows the scheduled end of the current term or is held earlier. \n\nThe President of F",
+     "rulesSecondary": "",
+     "resolveAt": null,
+     "pricing": {
+      "buyYesPriceUsd": 433000,
+      "sellYesPriceUsd": 432000,
+      "sellNoPriceUsd": 567000,
+      "buyNoPriceUsd": 568000,
+      "volume": 3348611
+     },
+     "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-marine-le-pen-win-the-2027-french-presidential-election-8hg67PHSk27M.jpg",
+     "team": null,
+     "outcomes": [
+      "Yes",
+      "No"
+     ],
+     "marketOptions": [
+      {
+       "label": "Yes",
+       "buyYes": true
+      },
+      {
+       "label": "No",
+       "buyYes": false
+      }
+     ],
+     "sportsMarketType": null,
+     "sportsLine": null,
+     "periodType": null,
+     "periodNumber": null,
+     "gameNumber": null
+    },
+    {
+     "provider": "polymarket",
+     "marketId": "POLY-679021",
+     "status": "open",
+     "result": null,
+     "marketResultPubkey": null,
+     "title": "Édouard Philippe",
+     "openTime": 1763075378,
+     "closeTime": 1808107140,
+     "isTeamMarket": false,
+     "rulesPrimary": "The next French presidential election is currently expected to be held around April 2027.  This market pertains to the outcome of the next French presidential election, regardless of whether it follows the scheduled end of the current term or is held earlier. \n\nThe President of F",
+     "rulesSecondary": "",
+     "resolveAt": null,
+     "pricing": {
+      "buyYesPriceUsd": 180000,
+      "sellYesPriceUsd": 170000,
+      "sellNoPriceUsd": 820000,
+      "buyNoPriceUsd": 830000,
+      "volume": 1964082
+     },
+     "imageUrl": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-douard-philippe-win-the-2027-french-presidential-election-ypj2C7J2t8lv.jpg",
+     "team": null,
+     "outcomes": [
+      "Yes",
+      "No"
+     ],
+     "marketOptions": [
+      {
+       "label": "Yes",
+       "buyYes": true
+      },
+      {
+       "label": "No",
+       "buyYes": false
+      }
+     ],
+     "sportsMarketType": null,
+     "sportsLine": null,
+     "periodType": null,
+     "periodNumber": null,
+     "gameNumber": null
+    }
+   ],
+   "sportsMarketGroups": []
+  }
+ ],
+ "pagination": {
+  "start": 0,
+  "end": 2,
+  "hasNext": false
+ }
+}
