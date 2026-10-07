@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@web/*": [
+        "../web/src/*"
+      ],
+      "@imo/core/*": [
+        "../../packages/core/src/*"
+      ],
+      "@imo/venues/*": [
+        "../../packages/venues/src/*"
+      ],
+      "@imo/domain/*": [
+        "../../packages/domain/src/*"
+      ],
+      "@imo/server/*": [
+        "../../packages/server/src/*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

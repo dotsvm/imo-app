@@ -1,0 +1,297 @@
+/*
+ * The founding pass. Its box is a size container: from 240px wide the pass
+ * draws at its full size (the design's 280 × 416) with every detail; below
+ * that it's the phone's 190 × 282, the facts on one line. A miniature is the
+ * full pass, scaled.
+ */
+.box {
+  --w: 190px;
+  --h: 282px;
+  container: pass / inline-size;
+  width: var(--w);
+  height: var(--h);
+  perspective: 900px;
+}
+@media (min-width: 600px) and (min-height: 820px), (min-width: 1024px) and (min-height: 720px) {
+  .box {
+    --w: 280px;
+    --h: 416px;
+    perspective: 1100px;
+  }
+}
+.float {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+.pass {
+  --r: 15px;
+  --step: -0.8px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateY(-14deg) rotateX(6deg);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+/* Thickness: the edge, stacked behind the face. */
+.layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r);
+  background: var(--edge);
+  transform: translateZ(calc(var(--i) * var(--step)));
+}
+.face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  border-radius: var(--r);
+  background: var(--face);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  color: var(--ink);
+  transform: translateZ(1px);
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.brand img {
+  width: auto;
+  height: 16px;
+}
+.brand img[data-light] {
+  filter: brightness(0);
+}
+.tag {
+  padding: 3px 6px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.holder {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.micro {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+.handle {
+  padding: 0 3px 3px 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--handle-sm);
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+.meta > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.meta .micro {
+  display: none;
+}
+.code {
+  display: none;
+}
+.glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--gx, 30%) var(--gy, 20%),
+    rgba(255, 255, 255, 0.38),
+    rgba(255, 255, 255, 0) 45%
+  );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url(/brand/grain.png);
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+/* The print head: a band of light that runs down the face while issuing. */
+.scan {
+  display: none;
+}
+.pass[data-printing] .scan {
+  display: block;
+  position: absolute;
+  top: -36%;
+  right: 0;
+  left: 0;
+  height: 36%;
+  background: linear-gradient(
+    180deg,
+    rgba(181, 230, 161, 0),
+    rgba(181, 230, 161, 0.16) 80%,
+    rgba(236, 255, 226, 0.8) 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ------------------------------------------- The full pass, 240px and up */
+@container pass (min-width: 240px) {
+  .pass {
+    --r: 22px;
+    --step: -0.9px;
+  }
+  .face {
+    padding: 20px;
+  }
+  .brand {
+    gap: 8px;
+    font-size: 22px;
+  }
+  .brand img {
+    height: 24px;
+  }
+  .tag {
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px;
+    font-size: 9px;
+  }
+  .holder {
+    gap: 4px;
+  }
+  .micro {
+    font-size: 9px;
+  }
+  .handle {
+    padding: 0 4px 4px 0;
+    font-size: var(--handle-lg);
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 12px;
+  }
+  .meta .micro {
+    display: block;
+    opacity: 0.6;
+  }
+  .code {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 9px;
+  }
+  .code > span:last-child {
+    opacity: 0.7;
+  }
+  .barcode {
+    flex: 1;
+    height: 30px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--ink) 0 2px,
+      transparent 2px 4px,
+      var(--ink) 4px 5px,
+      transparent 5px 8px,
+      var(--ink) 8px 11px,
+      transparent 11px 13px
+    );
+    opacity: 0.75;
+  }
+}
+
+/* -------------------------------------------- A still miniature, any size */
+.mini {
+  flex: none;
+  position: relative;
+}
+.mini > .box {
+  --w: 280px;
+  --h: 416px;
+  perspective: 1100px;
+  transform: scale(var(--scale));
+  transform-origin: 0 0;
+}
+.mini .pass {
+  transform: rotateX(4deg) rotateY(-18deg);
+  transition: none;
+}
+
+/* --------------------------------------------------------------- Motion */
+@media (prefers-reduced-motion: no-preference) {
+  .float {
+    animation: pass-float 7s ease-in-out infinite;
+  }
+  .mini .float {
+    animation: none;
+  }
+  .pass[data-printing] .scan {
+    animation: pass-scan 1.1s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+  .inked {
+    animation: pass-ink 0.45s ease-out both;
+  }
+  .handle {
+    transition: font-size 0.2s ease-out;
+  }
+}
+@keyframes pass-float {
+  0%,
+  100% {
+    transform: translateY(-6px) rotateZ(-0.6deg);
+  }
+  50% {
+    transform: translateY(6px) rotateZ(0.6deg);
+  }
+}
+@keyframes pass-scan {
+  to {
+    transform: translateY(380%);
+  }
+}
+@keyframes pass-ink {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}

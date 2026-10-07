@@ -1,0 +1,28 @@
+{
+  "name": "@imo/waitlist",
+  "version": "0.1.0",
+  "private": true,
+  "description": "imo's waitlist: claim a username before the beta lets you in. Its own app, on the main app's database and sign-in.",
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@imo/core": "*",
+    "@imo/server": "*",
+    "@imo/web": "*",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3"
+  }
+}

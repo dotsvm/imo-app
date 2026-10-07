@@ -1,0 +1,487 @@
+/*
+ * The share composer. Phones: a sheet from the bottom, the post, the card,
+ * tones and a full-width Post. From 640px: the design's 580px dialog, the
+ * author's avatar beside the post and the actions in a footer.
+ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(5, 7, 6, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 51;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 16px calc(24px + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0;
+  background: #111814;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #eeefea;
+  font-variant-numeric: tabular-nums;
+}
+.sheet:focus {
+  outline: none;
+}
+.grabber {
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.wide {
+  display: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+.bonus {
+  color: #b5e6a1;
+  font-size: 12px;
+}
+.close {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #a7afab;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    color 0.15s ease-out;
+}
+.close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #eeefea;
+}
+
+.avatar {
+  display: none;
+}
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.text {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #eeefea;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+}
+
+/* The card your link unfurls into, drawn from the same pass. */
+.preview {
+  position: relative;
+  height: 186px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    radial-gradient(60% 80% at 75% 50%, var(--glow), rgba(0, 0, 0, 0)),
+    #0a0c0b;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.card {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wordmark {
+  align-self: flex-start;
+  width: auto;
+  height: 14px;
+}
+.cardHandle {
+  max-width: 190px;
+  margin-top: 34px;
+  padding-bottom: 3px;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-style: italic;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cardKind {
+  color: #a7afab;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+}
+.cardCta {
+  display: none;
+}
+.cardPass {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  scale: 0.6533;
+  transform-origin: top right;
+}
+
+/* The card to take with you: copy it into a post, or save it. */
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: -4px;
+}
+.cardAction {
+  flex: 1;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  color: #eeefea;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    color 0.15s ease-out,
+    scale 0.12s ease-out;
+}
+.cardAction:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #eeefea;
+}
+.cardAction:active {
+  scale: 0.97;
+}
+.cardAction[data-state="copied"] {
+  color: #b5e6a1;
+}
+.cardAction[aria-busy="true"] {
+  cursor: progress;
+}
+.cardNote {
+  min-height: 0;
+  margin: -6px 0 0;
+  color: #8b9490;
+  font-size: 12px;
+}
+.cardNote:empty {
+  display: none;
+}
+
+.problem {
+  margin: 0;
+  color: #e4998c;
+  font-size: 12px;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.tones {
+  display: flex;
+  gap: 6px;
+}
+.tone {
+  position: relative;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  color: #c9cfcb;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    color 0.15s ease-out;
+}
+.tone input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.tone:has(input:checked) {
+  background: #eeefea;
+  color: #121513;
+}
+.tone:has(input:focus-visible) {
+  outline: 2px solid #b5e6a1;
+  outline-offset: 2px;
+}
+.count {
+  margin-left: auto;
+  color: #8b9490;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+}
+.count[data-tone="gold"] {
+  color: #e2c892;
+}
+.count[data-tone="bad"] {
+  color: #e4998c;
+}
+.later {
+  display: none;
+}
+.post {
+  flex: 1 1 100%;
+  height: 52px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: #f4f5f1;
+  color: #121513;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease-out,
+    scale 0.12s ease-out;
+}
+.post:disabled:not([data-posting]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.post[data-posting] {
+  cursor: progress;
+}
+.post:not(:disabled):active {
+  scale: 0.97;
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 2px solid rgba(18, 21, 19, 0.2);
+  border-top-color: #121513;
+  border-radius: 50%;
+}
+
+/* ------------------------------------------------------- Desktop dialog */
+@media (min-width: 640px) and (min-height: 560px) {
+  .sheet {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    width: min(580px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    gap: 0;
+    padding: 0;
+    border-radius: 28px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+      0 40px 100px -20px rgba(0, 0, 0, 0.8);
+    translate: -50% -50%;
+  }
+  .grabber {
+    display: none;
+  }
+  .wide {
+    display: inline;
+  }
+  .head {
+    height: 60px;
+    flex: none;
+    gap: 10px;
+    padding: 0 12px 0 24px;
+  }
+  .close {
+    width: 40px;
+    height: 40px;
+  }
+  .body {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    padding: 0 24px 18px;
+  }
+  .avatar {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #26322b;
+    object-fit: cover;
+  }
+  .main {
+    gap: 12px;
+  }
+  .text {
+    padding-top: 4px;
+    font-size: 16px;
+  }
+  .preview {
+    height: 270px;
+    border-radius: 18px;
+  }
+  .card {
+    top: 24px;
+    left: 24px;
+    gap: 8px;
+  }
+  .wordmark {
+    height: 18px;
+  }
+  .cardHandle {
+    max-width: 250px;
+    margin-top: 56px;
+    padding-bottom: 4px;
+    font-size: 40px;
+  }
+  .cardKind {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .cardCta {
+    display: block;
+    margin-top: 14px;
+    color: #b5e6a1;
+    font-size: 12px;
+  }
+  .cardPass {
+    top: 24px;
+    right: 44px;
+    scale: 1;
+  }
+  .cardActions {
+    justify-content: flex-end;
+  }
+  .cardAction {
+    flex: none;
+    height: 34px;
+  }
+  .problem {
+    padding: 0 24px 12px;
+  }
+  .foot {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 14px 16px 14px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .tones {
+    gap: 4px;
+    padding: 3px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  .tone {
+    height: 30px;
+    padding: 0 12px;
+    box-shadow: none;
+    font-size: 12px;
+  }
+  .later {
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #c9cfcb;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease-out;
+  }
+  .later:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .post {
+    flex: none;
+    height: 44px;
+    margin-top: 0;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}
+
+/* --------------------------------------------------------------- Motion */
+@media (prefers-reduced-motion: no-preference) {
+  .overlay[data-state="open"] {
+    animation: share-fade 0.2s ease-out;
+  }
+  .sheet[data-state="open"] {
+    animation: share-sheet 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .spinner {
+    animation: share-spin 0.8s linear infinite;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 640px) and (min-height: 560px) {
+  .sheet[data-state="open"] {
+    animation: share-in 0.25s ease-out both;
+  }
+}
+@keyframes share-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes share-sheet {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes share-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes share-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

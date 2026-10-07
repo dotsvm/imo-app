@@ -1,0 +1,1281 @@
+/*
+ * The founding pass (design/02-Waitlist-Pass): a near-black stage lit by the
+ * pass's own edition, the pass floating at its centre, a dock below — your
+ * name going in, the claim's steps, then your pass and your link. Phones
+ * stack it: title, pass, dock. From 1024 × 720 up the desktop composition
+ * takes over, laid out from the middle of the screen, and tightens on short
+ * laptop windows so the claimed card always fits.
+ */
+
+/* The edition's light changes smoothly when you pick another. */
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+.page {
+  --ink: #eeefea;
+  --muted: #a7afab;
+  --faint: #8b9490;
+  --subtle: #6f7975;
+  --sep: #4f5753;
+  --good: #b5e6a1;
+  --bad: #e4998c;
+  --gold: #e2c892;
+  --panel: rgba(14, 19, 16, 0.86);
+  --mono: var(--font-geist-mono), ui-monospace, monospace;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 40% at 50% 40%, var(--glow), transparent),
+    #090b0a;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  transition: --glow 600ms ease;
+}
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url(/brand/grain.png);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.wide {
+  display: none;
+}
+.narrow {
+  display: inline;
+}
+.br {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ Nav */
+.nav {
+  position: relative;
+  flex: none;
+  height: 60px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand img {
+  display: block;
+  width: auto;
+  height: 20px;
+}
+.counts {
+  margin: 0;
+  display: flex;
+  gap: 18px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.counts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.counts > .wide {
+  display: none;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+
+/* ---------------------------------------------------------------- Title */
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.title {
+  margin: 8px 20px 0;
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+.titleB {
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* ----------------------------------------------------------------- Pass */
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+}
+.stage[data-done] {
+  min-height: 236px;
+}
+.shadow {
+  display: none;
+}
+.passScale {
+  transition: scale 0.4s var(--ease);
+}
+/* Claimed, the pass steps back to make room for your card (190 → 150). */
+.stage[data-done] .passScale {
+  scale: 0.79;
+}
+
+/* ------------------------------------------------------------ Reactions */
+.reactions {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px 0 3px;
+  border-radius: 999px;
+  background: rgba(20, 28, 24, 0.75);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #c9cfcb;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.chip img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+.chip b {
+  color: var(--ink);
+  font-weight: 400;
+}
+/* A long name stays a chip, not a banner. */
+.chip > span:nth-child(2) {
+  min-width: 0;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip [data-tone="good"] {
+  color: var(--good);
+}
+.chip [data-tone="bad"] {
+  color: var(--bad);
+}
+.chip[data-slot="a"] {
+  bottom: 24px;
+  left: 16px;
+}
+.chip[data-slot="c"] {
+  top: 14px;
+  right: 16px;
+}
+.chip[data-slot="b"],
+.chip[data-slot="d"] {
+  display: none;
+}
+
+/* ----------------------------------------------------------------- Dock */
+.dock {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 24px;
+}
+.via {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.via b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 18px;
+  border-radius: 999px;
+  background: rgba(14, 19, 16, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  transition: box-shadow 0.18s ease-out;
+}
+.bar[role="status"] {
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+}
+.bar[data-state="taken"],
+.bar[data-state="invalid"],
+.bar[data-state="error"] {
+  box-shadow:
+    inset 0 0 0 1px rgba(228, 153, 140, 0.5),
+    0 24px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.bar[data-state="available"],
+.bar[data-state="yours"],
+.bar[data-state="done"] {
+  box-shadow:
+    inset 0 0 0 1px rgba(181, 230, 161, 0.45),
+    0 24px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.bar:is([data-state="idle"], [data-state="checking"], [data-state="email"], [data-state="reserved"]):focus-within {
+  box-shadow:
+    inset 0 0 0 1px rgba(238, 239, 234, 0.32),
+    0 24px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.at {
+  display: grid;
+  place-items: center;
+  color: var(--subtle);
+  font-size: 16px;
+}
+.bar input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 2px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.bar input::placeholder {
+  color: var(--subtle);
+}
+.status {
+  width: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+}
+.status[data-tone="good"] {
+  color: var(--good);
+}
+.status[data-tone="bad"] {
+  color: var(--bad);
+}
+.status[data-tone="gold"] {
+  color: var(--gold);
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 2px solid rgba(238, 239, 234, 0.18);
+  border-top-color: var(--good);
+  border-radius: 50%;
+}
+
+/* Editions: their own row above the bar, the pass's colours in reach. */
+.editions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.swatch {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease-out;
+}
+.swatch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.swatch span {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+}
+.swatch:has(input:checked) {
+  box-shadow: inset 0 0 0 2px rgba(238, 239, 234, 0.7);
+}
+.swatch:has(input:focus-visible) {
+  outline: 2px solid var(--good);
+  outline-offset: 2px;
+}
+
+/* The call to action: round on phones, labelled on desktop. */
+.cta {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  grid-auto-flow: column;
+  place-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--good);
+  box-shadow: inset 0 -3px 8px rgba(20, 60, 30, 0.22);
+  color: #0d1f12;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease-out,
+    background 0.2s ease-out,
+    scale 0.12s ease-out;
+}
+.cta[data-kind="google"] {
+  background: #f4f5f1;
+  box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.08);
+  color: #121513;
+}
+.cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cta:not(:disabled):active {
+  scale: 0.96;
+}
+.ctaText {
+  display: none;
+}
+.under {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--faint);
+  font-size: 12px;
+  text-align: center;
+}
+.under i {
+  color: var(--sep);
+  font-style: normal;
+}
+.under b {
+  color: #c9cfcb;
+  font-weight: 500;
+}
+.under [data-tone="muted"] {
+  color: var(--faint);
+}
+.under [data-tone="good"] {
+  color: var(--good);
+}
+.under [data-tone="bad"] {
+  color: var(--bad);
+}
+.under [data-tone="gold"] {
+  color: var(--gold);
+}
+.under .wide {
+  display: none;
+}
+.under .narrow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c9cfcb;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(201, 207, 203, 0.4);
+  cursor: pointer;
+}
+.link:hover {
+  color: var(--good);
+}
+.problem {
+  margin: 0;
+  color: var(--bad);
+  font-size: 12px;
+  text-align: center;
+}
+.barText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.barText b {
+  font-weight: 500;
+}
+.good {
+  flex-shrink: 0;
+  color: var(--good);
+}
+
+/* ------------------------------------------------------------- Claiming */
+/* The bar again, saying what's happening — one line at a time, with three
+   small segments filling as the steps really finish. */
+.claiming {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: rgba(14, 19, 16, 0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  font-size: 15px;
+}
+.claimingText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.claimingText b {
+  font-weight: 500;
+}
+.claimingText svg {
+  margin: 0 1px;
+  vertical-align: -2px;
+}
+.segments {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+.segments i {
+  position: relative;
+  width: 14px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.segments i[data-state="done"] {
+  background: var(--good);
+}
+.segments i[data-state="now"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--good);
+  transform: scaleX(0.5);
+  transform-origin: left center;
+}
+
+/* ---------------------------------------------------------------- Sent */
+/* The link is on its way: where it went, whose name it holds, and what to
+   do if it doesn't arrive. Nothing cut off. */
+.sent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px rgba(181, 230, 161, 0.3);
+}
+.sentIcon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--good);
+  color: #0d1f12;
+}
+.sentText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sentTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.sentSub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.sentSub b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.sentActions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sentAction {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    scale 0.12s ease-out;
+}
+.sentAction:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sentAction:active:not(:disabled) {
+  scale: 0.97;
+}
+.sentAction:disabled {
+  color: var(--faint);
+  cursor: default;
+}
+.sentProblem {
+  margin: 6px 0 0;
+  color: var(--bad);
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------------- Claimed */
+.done {
+  --line: rgba(255, 255, 255, 0.09);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow 0.3s ease-out;
+}
+.done[data-shared] {
+  --line: rgba(181, 230, 161, 0.4);
+}
+.doneHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.doneIcon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--good);
+  color: #0d1f12;
+}
+.doneIcon svg {
+  width: 16px;
+  height: 16px;
+}
+.doneText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.doneTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.doneSub {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.place {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.placeTop {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.placeTop b {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.up {
+  color: var(--good);
+  font-size: 13px;
+}
+.placeNote {
+  color: var(--faint);
+  font-size: 11px;
+}
+.placeNote [data-tone="good"] {
+  color: var(--good);
+}
+.rule {
+  display: none;
+}
+.refer {
+  display: none;
+}
+.doneActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.linkField {
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+.linkIcon {
+  display: none;
+}
+.linkText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: all;
+}
+.copy {
+  height: 36px;
+  flex: none;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease-out;
+}
+.copy:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.shareButton {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-out,
+    filter 0.15s ease-out,
+    scale 0.12s ease-out;
+}
+.shareButton {
+  background: var(--good);
+  box-shadow: inset 0 -3px 8px rgba(20, 60, 30, 0.22);
+  color: #0d1f12;
+}
+.shareButton:hover {
+  color: #0d1f12;
+  filter: brightness(1.06);
+}
+.shareButton[data-quiet] {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  color: var(--ink);
+}
+.shareButton[data-quiet]:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+  filter: none;
+}
+.shareButton:active {
+  scale: 0.97;
+}
+.referShort {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------- Motion */
+@media (prefers-reduced-motion: no-preference) {
+  .chip {
+    animation:
+      wl-rise 0.4s var(--ease) both,
+      wl-bob 6s ease-in-out infinite;
+  }
+  .chip[data-slot="b"] {
+    animation-duration: 0.4s, 7s;
+    animation-delay: 0.06s, -2s;
+  }
+  .chip[data-slot="c"] {
+    animation-duration: 0.4s, 8s;
+    animation-delay: 0.12s, -4s;
+  }
+  .chip[data-slot="d"] {
+    animation-duration: 0.4s, 6.5s;
+    animation-delay: 0.18s, -1s;
+  }
+  .spinner {
+    animation: wl-spin 0.8s linear infinite;
+  }
+  .claiming,
+  .done,
+  .sent,
+  .via {
+    animation: wl-in 0.3s ease-out both;
+  }
+  .claimingText {
+    animation: wl-roll 0.24s var(--ease) both;
+  }
+  .segments i[data-state="now"]::after {
+    animation: wl-fill 1.4s var(--ease) both;
+  }
+  .doneIcon {
+    animation: wl-pop 0.4s ease-out both;
+  }
+  .up {
+    animation: wl-pop 0.4s ease-out both;
+  }
+}
+@keyframes wl-bob {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+@keyframes wl-rise {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@keyframes wl-roll {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes wl-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.85);
+  }
+}
+@keyframes wl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wl-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes wl-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------- The big pass: tablets and desktops */
+@media (min-width: 600px) and (min-height: 820px), (min-width: 1024px) and (min-height: 720px) {
+  .wide {
+    display: inline;
+  }
+  .counts > .wide,
+  .under .wide {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .narrow,
+  .under .narrow {
+    display: none;
+  }
+  .brand img {
+    height: 26px;
+  }
+  /* The line's counts, centred in the nav as the design has them. */
+  .counts {
+    position: absolute;
+    left: 50%;
+    font-size: 12px;
+    translate: -50% 0;
+  }
+  .stage[data-done] .passScale {
+    scale: 0.78;
+  }
+  .stage[data-done] {
+    min-height: 340px;
+  }
+  .chip {
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px 0 4px;
+    font-size: 12px;
+  }
+  .chip img {
+    width: 28px;
+    height: 28px;
+  }
+  .bar {
+    height: 64px;
+    gap: 6px;
+    padding: 0 8px 0 24px;
+    font-size: 15px;
+  }
+  .bar[role="status"] {
+    padding: 0 24px;
+  }
+  .at {
+    font-size: 18px;
+  }
+  .bar input {
+    font-size: 18px;
+  }
+  .status {
+    width: 32px;
+    height: 32px;
+  }
+  .cta {
+    width: auto;
+    height: 48px;
+    margin-left: 8px;
+    padding: 0 22px;
+  }
+  .ctaText {
+    display: inline;
+  }
+
+  .claiming {
+    height: 64px;
+    gap: 14px;
+    padding: 0 24px;
+  }
+  .segments i {
+    width: 18px;
+  }
+
+  /* Claimed: the card, your place, your link. */
+  .done {
+    gap: 14px;
+    padding: 20px;
+    border-radius: 28px;
+    box-shadow:
+      inset 0 0 0 1px var(--line),
+      0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  }
+  .doneHead {
+    gap: 14px;
+  }
+  .sent {
+    gap: 14px;
+    padding: 20px;
+    border-radius: 28px;
+    box-shadow:
+      inset 0 0 0 1px rgba(181, 230, 161, 0.3),
+      0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  }
+  .sentIcon {
+    width: 44px;
+    height: 44px;
+  }
+  .sentTitle {
+    margin-top: 2px;
+    font-size: 18px;
+  }
+  .doneIcon {
+    width: 44px;
+    height: 44px;
+  }
+  .doneIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .doneTitle {
+    font-size: 18px;
+  }
+  .doneSub {
+    font-size: 13px;
+  }
+  .placeTop b {
+    font-size: 30px;
+  }
+  .placeNote {
+    font-size: 12px;
+  }
+  .rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 0;
+    border: 0;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .refer {
+    display: block;
+    margin: 0;
+    color: #b4bbb7;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .doneActions {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .linkField {
+    flex: 1;
+    height: 48px;
+    gap: 8px;
+    padding: 0 6px 0 18px;
+  }
+  .linkIcon {
+    display: block;
+    flex: none;
+    color: var(--faint);
+  }
+  .linkText {
+    font-size: 13px;
+  }
+  .shareButton {
+    height: 48px;
+  }
+  .referShort {
+    display: none;
+  }
+}
+
+/* Tablets: the same column as a phone, at the big pass's size. */
+@media (min-width: 600px) and (min-height: 820px) and (max-width: 1023px) {
+  .nav {
+    height: 72px;
+    padding: 0 32px;
+  }
+  .title {
+    margin: 24px 32px 0;
+    font-size: 64px;
+    line-height: 1;
+  }
+  .titleB {
+    font-size: 72px;
+  }
+  .dock {
+    width: min(100%, 720px);
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .chip[data-slot="a"] {
+    left: 32px;
+  }
+  .chip[data-slot="c"] {
+    right: 32px;
+  }
+}
+
+/* ------------------------------------------------- Desktop composition */
+/* Positions are the design's, from the middle of a 900px-tall window. */
+@media (min-width: 1024px) and (min-height: 720px) {
+  .page {
+    --title-a: calc(50% - 160px);
+    --title-b: 50%;
+    --pass-top: calc(50% - 318px);
+    --pass-scale: 1;
+    --dock-top: calc(50% + 234px);
+    display: block;
+    height: 100dvh;
+    min-height: 720px;
+    background:
+      radial-gradient(42% 46% at 50% 46%, var(--glow), transparent),
+      #090b0a;
+  }
+  /* Claimed: the pass rises a little and the card takes the space below. */
+  .page[data-phase="claimed"] {
+    --pass-top: calc(50% - 332px);
+    --dock-top: calc(50% + 214px);
+  }
+  .nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 3;
+    height: 80px;
+    padding: 0 40px;
+  }
+  .main {
+    display: block;
+  }
+
+  /* "Your name," on the left, "on the record." lower on the right. */
+  .title {
+    margin: 0;
+  }
+  .br {
+    display: inline;
+  }
+  .titleA {
+    position: absolute;
+    top: var(--title-a);
+    left: clamp(40px, 6.7vw, 96px);
+    max-width: calc(50% - 164px - clamp(40px, 6.7vw, 96px));
+    overflow: hidden;
+    font-size: clamp(64px, 5.8vw, 84px);
+    line-height: 0.95;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .titleB {
+    position: absolute;
+    top: var(--title-b);
+    right: clamp(40px, 6.7vw, 96px);
+    font-size: clamp(72px, 6.7vw, 96px);
+    line-height: 0.9;
+    text-align: right;
+  }
+
+  /* The stage is the pass: 280 × 416, the reactions placed around it. */
+  .stage,
+  .stage[data-done] {
+    position: absolute;
+    top: var(--pass-top);
+    left: 50%;
+    z-index: 1;
+    width: 280px;
+    height: 416px;
+    min-height: 0;
+    margin-left: -140px;
+    display: block;
+    scale: var(--pass-scale);
+    transform-origin: 50% 0;
+  }
+  .stage[data-done] .passScale {
+    scale: 1;
+  }
+  .shadow {
+    display: block;
+    position: absolute;
+    top: 430px;
+    left: 50%;
+    width: 230px;
+    height: 26px;
+    margin-left: -115px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+    filter: blur(4px);
+  }
+  .chip[data-slot="a"] {
+    top: 408px;
+    bottom: auto;
+    left: -330px;
+  }
+  .chip[data-slot="b"] {
+    display: flex;
+    top: 468px;
+    left: -260px;
+  }
+  .chip[data-slot="c"] {
+    top: 108px;
+    right: -280px;
+  }
+  .chip[data-slot="d"] {
+    display: flex;
+    top: 188px;
+    right: -330px;
+  }
+
+  /* The dock: one long pill under the pass; claimed, the card. */
+  .dock {
+    position: absolute;
+    top: var(--dock-top);
+    left: 50%;
+    z-index: 2;
+    width: 720px;
+    margin-left: -360px;
+    padding: 0;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .via {
+    position: absolute;
+    bottom: calc(100% + 16px);
+    left: 50%;
+    translate: -50% 0;
+  }
+  .form {
+    gap: 12px;
+  }
+  .bar {
+    background: rgba(14, 19, 16, 0.82);
+  }
+  /* Above the bar, out of the flow: the bar stays where the design puts
+     it, and someone's invite line moves up to make room. */
+  .editions {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    gap: 8px;
+    translate: -50% 0;
+  }
+  .editions .swatch {
+    width: 36px;
+    height: 36px;
+  }
+  .editions .swatch span {
+    width: 22px;
+    height: 22px;
+  }
+  .dock[data-phase="pick"] .via {
+    bottom: calc(100% + 66px);
+  }
+
+  /* Moves between states glide — once the page has settled. */
+  .page[data-settled] :is(.titleA, .titleB, .dock) {
+    transition: top 0.4s var(--ease);
+  }
+  .page[data-settled] .stage {
+    transition:
+      top 0.4s var(--ease),
+      scale 0.4s var(--ease);
+  }
+}
+
+/* Laptop windows: the claimed card needs ~440px under the middle, so the
+   pass steps back and the headline moves up to make room. */
+@media (min-width: 1024px) and (min-height: 720px) and (max-height: 879px) {
+  .page[data-phase="claimed"] {
+    --title-a: calc(50% - 220px);
+    --title-b: calc(50% - 60px);
+    --pass-top: calc(50% - 318px);
+    --pass-scale: 0.84;
+    --dock-top: calc(50% + 120px);
+  }
+}
+@media (min-width: 1024px) and (min-height: 720px) and (max-height: 779px) {
+  .page {
+    --pass-top: calc(50% - 300px);
+    --pass-scale: 0.9;
+    --dock-top: calc(50% + 190px);
+  }
+  .page[data-phase="claimed"] {
+    --title-a: calc(50% - 250px);
+    --title-b: calc(50% - 90px);
+    --pass-top: calc(50% - 300px);
+    --pass-scale: 0.8;
+    --dock-top: calc(50% + 90px);
+  }
+}
