@@ -1,0 +1,41 @@
+{
+  "name": "imo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "imo \u2014 a social network for prediction markets, built on Solana.",
+  "workspaces": [
+    "apps/web",
+    "apps/worker",
+    "apps/waitlist",
+    "packages/*"
+  ],
+  "packageManager": "npm@11.6.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@imo/web",
+    "dev:worker": "npm run dev -w @imo/worker",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:db": "npm run test:db -w @imo/web",
+    "test:e2e": "npm run test:e2e -w @imo/web",
+    "verify": "turbo run typecheck lint test",
+    "format": "prettier --write .",
+    "db:migrate": "npm run db:migrate -w @imo/server",
+    "db:generate": "npm run db:generate -w @imo/server",
+    "worker": "npm start -w @imo/worker",
+    "mobile": "npm --prefix apps/mobile start",
+    "waitlist:dev": "npm run dev -w @imo/waitlist"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.1",
+    "prettier": "3.9.9",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.15"
+  }
+}

@@ -1,0 +1,15 @@
+**/node_modules
+**/.next
+**/.turbo
+.git
+.github
+**/.e2e
+**/.data
+**/test-results
+**/playwright-report
+docs
+apps/mobile
+apps/web
+apps/waitlist
+**/.env*
+!**/.env.example

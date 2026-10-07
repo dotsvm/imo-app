@@ -1,0 +1,29 @@
+# Dependencies and build output
+node_modules/
+.next/
+.turbo/
+dist/
+*.tsbuildinfo
+
+# Env files: the templates are shared, real values never are
+.env*
+!.env.example
+
+# Local data (uploads, dev stacks) and test output
+.data/
+.e2e/
+test-results/
+playwright-report/
+.playwright-mcp/
+
+# Expo (apps/mobile has its own .gitignore too)
+.expo/
+web-build/
+
+# Editor and assistant files, generated locally
+.DS_Store
+.vscode/
+.idea/
+AGENTS.md
+CLAUDE.md
+.claude/
