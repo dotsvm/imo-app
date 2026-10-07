@@ -67,6 +67,8 @@ const boundaries = {
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
+  // App Router only: the Pages Router's link rule has nothing to check.
+  { rules: { "@next/next/no-html-link-for-pages": "off" } },
   {
     files: ["packages/core/src/**/*.ts"],
     rules: {
