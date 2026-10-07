@@ -2,7 +2,7 @@
   "name": "imo",
   "version": "0.1.0",
   "private": true,
-  "description": "imo \u2014 a social network for prediction markets, built on Solana.",
+  "description": "imo — a social network for prediction markets, built on Solana.",
   "workspaces": [
     "apps/web",
     "apps/worker",
@@ -31,11 +31,14 @@
     "waitlist:dev": "npm run dev -w @imo/waitlist"
   },
   "devDependencies": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3",
+    "@emnapi/wasi-threads": "1.2.3",
+    "@types/node": "^22.19.15",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.1",
     "prettier": "3.9.9",
     "turbo": "^2.5.8",
-    "typescript": "^5.9.3",
-    "@types/node": "^22.19.15"
+    "typescript": "^5.9.3"
   }
 }
