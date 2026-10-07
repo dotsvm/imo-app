@@ -1,0 +1,347 @@
+/* 08.1 · the rooms directory: header, interest filters, a grid of rooms. */
+.page {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.flex {
+  flex: 1;
+}
+.head {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.titles {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.titles h1 {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.titles p {
+  color: var(--color-neutral-700);
+}
+.search {
+  width: 320px;
+  max-width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-neutral-700);
+  transition: border-color var(--dur-fast) ease;
+}
+.search:focus-within {
+  border-color: var(--pos);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  outline: none;
+}
+.search input::placeholder {
+  color: var(--color-neutral-700);
+}
+.head :global(.btn) {
+  height: 36px;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.filters button {
+  padding: 6px 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  transition: background-color var(--dur-fast) ease;
+}
+.filters button:hover {
+  background: var(--color-neutral-300);
+}
+.filters button[aria-pressed="true"] {
+  border-color: var(--color-neutral-400);
+  background: var(--color-neutral-400);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 20px 24px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  transition: border-color var(--dur-fast) ease;
+}
+.card:hover {
+  border-color: var(--color-neutral-500);
+}
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cardTitle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text);
+}
+.cardTitle b {
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cardTitle:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cardTitle span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.topic {
+  min-height: 38px;
+  color: var(--color-neutral-800);
+  line-height: 1.45;
+}
+.cardFoot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cardFoot > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+}
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------------------------------------------------------- 08.2 · phone */
+.phone {
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  font-size: 13px;
+}
+.phoneHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px 8px 16px;
+}
+.phoneHead h1 {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 600;
+}
+.phoneHead :global(.btn) {
+  min-height: 40px;
+}
+.phone .search {
+  width: auto;
+  height: 44px;
+  margin: 0 16px 12px;
+  border-color: transparent;
+}
+.label {
+  padding: 6px 16px;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.rowLink {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text);
+}
+.rowLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.rowLink:focus-visible {
+  outline: none;
+}
+.row:has(.rowLink:focus-visible) {
+  outline: 2px solid var(--pos);
+  outline-offset: -2px;
+}
+.rowLink b {
+  font-size: 15px;
+}
+.rowLink span {
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------ 08.3 · create a room */
+.dialog.dialog {
+  max-width: 560px;
+  padding: 0;
+}
+.dialogHead {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.dialogHead h2 {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+}
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+.textarea.textarea {
+  height: auto;
+  min-height: 70px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.fieldset legend,
+.fieldLabel {
+  margin-bottom: 6px;
+  padding: 0;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.radios {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.seed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.seed > :global(.tag) {
+  padding: 5px 6px 5px 10px;
+}
+.seed > :global(.tag) button {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-neutral-700);
+}
+.seed > :global(.tag) button:hover {
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+.addMarket.addMarket {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.addMarket:hover {
+  border-color: var(--color-neutral-500);
+  color: var(--color-text);
+}
+.disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-field);
+  background: var(--color-bg);
+  cursor: pointer;
+}
+.disclosure input {
+  margin: 3px 0 0;
+  accent-color: var(--pos);
+}
+.disclosure > span {
+  display: flex;
+  flex-direction: column;
+}
+.disclosure > span > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.note {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.dialogFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-divider);
+}

@@ -1,0 +1,37 @@
+.media {
+  display: grid;
+  gap: 8px;
+  max-width: 760px;
+}
+.media[data-count="2"],
+.media[data-count="many"] {
+  grid-template-columns: 1fr 1fr;
+}
+.media figure {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--highlight);
+}
+.media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.media figcaption {
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  line-height: 1.45;
+}
+@media (max-width: 600px) {
+  .media[data-count="2"],
+  .media[data-count="many"] {
+    grid-template-columns: 1fr;
+  }
+}

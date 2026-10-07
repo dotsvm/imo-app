@@ -1,0 +1,479 @@
+/* 03.1 search · desktop, 03.2 · phone. Search replaces the topbar. */
+/* The page wrapper only has a min-height, so fill it as a flex item: the
+   column divider then runs to the bottom of the screen. */
+:global(.page-content):has(> .search) {
+  display: flex;
+  flex-direction: column;
+}
+.search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.flex {
+  flex: 1;
+}
+.narrow,
+.narrowIcon {
+  display: none;
+}
+
+/* The query field, where the topbar was. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-bg);
+}
+.field {
+  flex: 0 1 640px;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 12px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-neutral-700);
+  cursor: text;
+  transition:
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.field:focus-within {
+  border-color: var(--pos);
+  box-shadow: 0 0 0 2px rgba(181, 230, 161, 0.25);
+}
+.field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+}
+.field input::placeholder {
+  color: var(--color-neutral-600);
+  font-weight: 400;
+}
+.clear {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--color-neutral-700);
+}
+.clear:hover {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.esc {
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+.cancel.cancel {
+  display: none;
+}
+
+/* All · Markets · Traders · Rooms */
+.tabs {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-divider);
+  font-weight: 500;
+}
+.tabs button {
+  padding: 12px 14px;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+.tabs button:hover {
+  color: var(--color-text);
+}
+.tabs button[aria-selected="true"] {
+  color: var(--color-text);
+  box-shadow: inset 0 -2px 0 var(--color-text);
+}
+.sorted {
+  padding: 12px 0;
+  color: var(--color-neutral-700);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* Results */
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.grid {
+  flex: 1;
+  display: grid;
+  /* 420px at 1440, giving way to the markets on smaller screens. */
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 420px);
+}
+.left {
+  min-width: 0;
+  border-right: 1px solid var(--color-divider);
+}
+.left,
+.single,
+.start {
+  container-type: inline-size;
+}
+.right {
+  min-width: 0;
+}
+.single {
+  flex: 1;
+  max-width: 960px;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+}
+.label {
+  padding: 12px 24px 8px;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.right .label {
+  padding: 12px 16px 8px;
+}
+.right .section + .section .label {
+  padding-top: 20px;
+}
+.marketRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 60px 64px 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) ease;
+}
+.marketRow:hover {
+  background: var(--color-surface);
+}
+.marketText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.marketText b {
+  font-weight: 500;
+  text-wrap: pretty;
+}
+.marketText > span {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.spark {
+  width: 90px;
+  height: 22px;
+}
+.price {
+  font-size: 14px;
+  text-align: right;
+}
+.num {
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+}
+.num:last-child {
+  font-weight: 400;
+}
+/* A narrow results column keeps the title readable over the line. */
+@container (max-width: 720px) {
+  .marketRow {
+    grid-template-columns: minmax(0, 1fr) 60px 64px 76px;
+  }
+  .spark {
+    display: none;
+  }
+}
+.personRow {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-divider);
+}
+.single .personRow {
+  padding: 10px 24px;
+}
+.personText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text);
+}
+.personText b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.personText b:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.personText > span {
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Rooms are rounded squares, people are circles. */
+.roomMark {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--color-neutral-400);
+  font-size: 11px;
+  font-weight: 500;
+}
+.noneHere {
+  padding: 10px 24px 14px;
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.right .noneHere {
+  padding: 10px 16px 14px;
+}
+
+/* Before a query: suggestions, then what is moving. */
+.start {
+  display: flex;
+  flex-direction: column;
+  max-width: 960px;
+}
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 24px 16px;
+}
+
+/* 03.4 · no results at all */
+.none {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding: 40px 24px;
+  color: var(--color-neutral-800);
+}
+.none > svg {
+  color: var(--color-text);
+}
+.none h2 {
+  color: var(--color-text);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.closest {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  border-top: 1px solid var(--color-divider);
+}
+.closest .label {
+  padding: 10px 0 6px;
+}
+.closest a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+.closest a:last-child {
+  border-bottom: 1px solid var(--color-divider);
+}
+.closest a:hover span:first-child {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.suggest.suggest {
+  align-self: flex-start;
+  min-height: 44px;
+  justify-content: flex-start;
+}
+.thanks {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+
+/* 03.5 · one tab is empty */
+.tabEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+  padding: 28px 24px;
+  color: var(--color-neutral-800);
+}
+.tabEmpty > svg {
+  color: var(--color-text);
+}
+.tabEmpty b {
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+  }
+  .left {
+    border-right: 0;
+  }
+  .right .label,
+  .right .noneHere {
+    padding-left: 24px;
+  }
+  .right .personRow {
+    padding: 10px 24px;
+  }
+}
+@media (max-width: 600px) {
+  .wide,
+  .wideIcon {
+    display: none;
+  }
+  .narrow,
+  .narrowIcon {
+    display: inline;
+  }
+  .bar {
+    height: auto;
+    gap: 8px;
+    padding: calc(4px + env(safe-area-inset-top)) 16px 10px;
+    border-bottom: 0;
+  }
+  .bar[data-alone] {
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .field {
+    flex: 1;
+    height: 44px;
+    padding: 0 6px 0 12px;
+  }
+  .esc,
+  .sorted {
+    display: none;
+  }
+  .cancel.cancel {
+    display: inline-flex;
+    min-height: 44px;
+  }
+  .clear {
+    width: 36px;
+    height: 36px;
+  }
+  .tabs {
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  .tabs button {
+    padding: 12px 10px;
+  }
+  .label,
+  .right .label,
+  .right .section + .section .label {
+    padding: 14px 16px 6px;
+  }
+  .label[data-lead] {
+    display: none;
+  }
+  .marketRow {
+    grid-template-columns: minmax(0, 1fr) 50px;
+    gap: 2px 12px;
+    padding: 12px 16px;
+    border-top: 0;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .marketText {
+    display: contents;
+  }
+  .marketText b {
+    grid-column: 1;
+    line-height: 1.3;
+  }
+  .marketText > span {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .price {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 16px;
+  }
+  .spark,
+  .num {
+    display: none;
+  }
+  .personRow,
+  .right .personRow,
+  .single .personRow {
+    padding: 8px 16px;
+  }
+  .personRow :global(.button) {
+    min-height: 44px;
+  }
+  .noneHere,
+  .right .noneHere {
+    padding: 10px 16px 14px;
+  }
+  .suggestions {
+    padding: 0 16px 12px;
+  }
+  .none {
+    padding: 32px 20px;
+  }
+  .tabEmpty {
+    padding: 28px 20px;
+  }
+}

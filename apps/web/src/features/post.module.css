@@ -1,0 +1,531 @@
+/* Screens 07.1–07.2: a two-column thread with the market snapshot pinned beside it. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+.thread {
+  min-width: 0;
+  overflow: auto;
+  border-right: 1px solid var(--color-divider);
+}
+.threadBar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+.threadBar > button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 50%;
+  color: var(--color-neutral-800);
+}
+.threadBar > button:hover:not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.threadBar > button:last-child {
+  margin-right: 0;
+}
+.threadBar .saved {
+  color: var(--accent);
+  border-color: var(--accent-muted);
+  background: var(--accent-dark);
+}
+.back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.back:hover {
+  color: var(--accent);
+}
+.post {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.author > div {
+  flex: 1;
+  min-width: 0;
+}
+.author :global(.button) {
+  border-radius: 9999px;
+  padding-inline: 18px;
+}
+.author h1 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.author span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badges :global(.tag) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: none;
+}
+/* The stance pill states the author's side; it is never a P&L colour. */
+.stance {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--pos-200);
+  color: var(--pos);
+  box-shadow: inset 0 0 0 1px var(--pos-line);
+}
+.yes {
+  background: var(--accent-dark);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent-muted);
+}
+.no {
+  background: var(--negative-bg);
+  color: var(--negative);
+  box-shadow: inset 0 0 0 1px #65413d;
+}
+.neutral {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+}
+.reasoning {
+  font-size: 20px;
+  line-height: 1.45;
+  max-width: 760px;
+  text-wrap: pretty;
+}
+.invalidation {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-neutral-800);
+  max-width: 760px;
+}
+.linked {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 12px;
+}
+.linkedActions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+.linkedMarket {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 240px;
+}
+.linkedMarket > span {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.linkedMarket strong {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.linkedMarket:hover strong {
+  color: var(--accent);
+}
+.backBtn,
+.fade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+/* The author’s side carries its own color: positive Yes, coral No. */
+.backBtn:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+/* Fade wears the other side's color, so the two choices read as a pair. */
+.fade:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.backBtn:disabled,
+.fade:disabled {
+  opacity: 0.45;
+}
+.metrics {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.metrics span,
+.metrics button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: inherit;
+  font-size: 12px;
+}
+.metrics button:hover,
+.metrics .liked {
+  color: var(--accent);
+}
+.replyBox {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.replyBox input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 15px;
+}
+.replyBox input::placeholder {
+  color: var(--color-neutral-700);
+}
+.replyBox input:focus {
+  outline: none;
+}
+.replyBox :global(.button) {
+  border-radius: 9999px;
+  padding-inline: 20px;
+}
+.replyFilters {
+  display: flex;
+  gap: 14px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.replyFilters button {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-neutral-700);
+  padding: 4px 0;
+}
+.replyFilters button:hover {
+  color: var(--color-text);
+}
+.replyFilters button[aria-pressed="true"] {
+  color: var(--color-accent);
+}
+.reply {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.reply[data-nested] {
+  padding-left: 68px;
+  background: var(--surface);
+}
+.reply > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.replyMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.replyMeta strong {
+  font-size: 13px;
+}
+.replyMeta > span {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 550;
+}
+.replyTime {
+  color: var(--text-muted);
+  padding: 0;
+  font-weight: 400;
+}
+.reply p {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.replyActions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.replyActions button {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.replyActions button:hover {
+  color: var(--accent);
+}
+.replyActions span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.noReplies {
+  padding: 28px 24px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.aside {
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+.asideHeading {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.snapshot :global(.button),
+.snapshot :global(.btn) {
+  justify-content: space-between;
+}
+.snapshot {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.snapshot p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.snapshot :global(.sparkline) {
+  width: 100%;
+  height: 90px;
+}
+.prices {
+  display: flex;
+  gap: 28px;
+}
+.prices span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.prices b {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.record {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.record > div {
+  padding: 12px 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.record > div:nth-child(2n) {
+  border-right: 0;
+}
+.record > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+.record span,
+.record small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.record b {
+  font-size: 18px;
+  font-weight: 600;
+}
+.sides {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sideBar {
+  display: flex;
+  height: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sideBar > span:first-child {
+  background: var(--color-text);
+}
+.sideBar > span:last-child {
+  background: var(--color-accent);
+}
+.sideLegend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.sides p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-neutral-700);
+  line-height: 1.55;
+}
+.profileLink {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.profileLink:hover {
+  color: var(--accent);
+}
+.mobileActions {
+  display: none;
+}
+@media (max-width: 1050px) {
+  /* One column that scrolls as a whole: the thread, then the market. (Two
+     scroll boxes stacked in a fixed height left the thread none at all.) */
+  .page {
+    display: block;
+    overflow-y: auto;
+  }
+  .thread {
+    overflow: visible;
+    border-right: 0;
+  }
+  .aside {
+    position: static;
+    border-top: 1px solid var(--border);
+  }
+}
+@media (max-width: 700px) {
+  .page {
+    padding-bottom: 148px;
+  }
+  .reasoning {
+    font-size: 16px;
+  }
+  .post {
+    padding: 14px 16px;
+  }
+  .linked {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .linkedMarket {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .linked .backBtn,
+  .linked .fade {
+    display: none;
+  }
+  .reply,
+  .replyBox,
+  .replyFilters {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .reply[data-nested] {
+    padding-left: 44px;
+  }
+  .metrics {
+    gap: 14px;
+  }
+  .mobileActions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(62px + env(safe-area-inset-bottom));
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  .mobileActions .backBtn,
+  .mobileActions .fade {
+    min-height: 48px;
+    gap: 6px;
+    border-radius: var(--radius-button);
+    justify-content: center;
+    border-left: 0;
+  }
+  .mobileActions span {
+    opacity: 0.75;
+  }
+}

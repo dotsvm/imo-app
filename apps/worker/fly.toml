@@ -1,0 +1,20 @@
+# The worker on Fly.io: fly deploy --config apps/worker/fly.toml (from the repo root)
+# Secrets: fly secrets set --config apps/worker/fly.toml DATABASE_URL=… (see docs/deploy.md)
+app = "imo-worker"
+# Beside the database (Supabase, ap-northeast-2 · Seoul).
+primary_region = "nrt"
+kill_signal = "SIGTERM"
+kill_timeout = 30
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_PROFILE = "production"
+  LOG_LEVEL = "info"
+  # Polymarket only until Kalshi's written consent (add kalshi-direct then).
+  DATA_SOURCES = "polymarket-public"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

@@ -1,0 +1,434 @@
+/* 06.1 prediction post: a 36px avatar column beside one 8px rhythm of
+   identity, reasoning, the linked market, actions and the thread. */
+.post {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.post > :not(.avatar) {
+  grid-column: 2;
+  min-width: 0;
+}
+.avatar {
+  grid-column: 1;
+  grid-row: 1 / span 5;
+  align-self: start;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+/* ------------------------------------------------------------ Identity */
+.head {
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+}
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.name:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-neutral-600);
+  text-underline-offset: 3px;
+}
+.handle {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record.record {
+  flex-shrink: 0;
+  padding: 1px 6px;
+}
+.metaLine {
+  display: none;
+}
+.follow.follow {
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+.postMenu {
+  display: none;
+}
+
+/* ----------------------------------------------------------- Reasoning */
+.text {
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.text:focus-visible {
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------ Linked market */
+.market {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  box-shadow: var(--highlight);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) ease;
+}
+.market:hover {
+  background: var(--color-neutral-200);
+}
+.marketIcon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-neutral-300);
+}
+.marketTitle {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.marketFull {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.marketShort,
+.marketMetaPhone {
+  display: none;
+}
+.marketMeta {
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.marketPosition,
+.marketPnl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+}
+.marketPnl {
+  min-width: 70px;
+}
+.marketLabel {
+  color: var(--color-neutral-700);
+  font-size: 10px;
+}
+.marketPosition b :global(.side) {
+  margin-right: 4px;
+}
+.noStake {
+  color: var(--color-neutral-700);
+  font-weight: 400;
+}
+
+/* ------------------------------------------------------------- Actions */
+.actions {
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+a.stat:hover,
+button.stat:hover {
+  color: var(--color-text);
+}
+.like {
+  color: var(--color-neutral-600);
+}
+.like[aria-pressed="true"],
+.save[aria-pressed="true"] {
+  color: var(--color-text);
+}
+.spacer {
+  flex: 1;
+}
+/* Fade wears the other side's color, so the two choices read as a pair. */
+.fade.fade {
+  padding: 0 14px;
+}
+.back {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 0 14px;
+  border-radius: var(--radius-button);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.back:global(.side-yes):hover:not(:disabled) {
+  background: rgba(181, 230, 161, 0.18);
+}
+.back:global(.side-no):hover:not(:disabled) {
+  background: rgba(228, 153, 140, 0.18);
+}
+.back:global(.side-yes):active:not(:disabled) {
+  background: rgba(181, 230, 161, 0.24);
+}
+.back:global(.side-no):active:not(:disabled) {
+  background: rgba(228, 153, 140, 0.24);
+}
+.back:disabled {
+  background: var(--color-neutral-300);
+  box-shadow: none;
+  color: var(--color-neutral-700);
+  opacity: 1;
+}
+.backArrow {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.back:hover:not(:disabled) .backArrow {
+  transform: translateX(2px);
+}
+
+/* -------------------------------------------------------------- Thread */
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.reply {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 0 0 12px;
+  border-left: 2px solid var(--color-neutral-300);
+}
+.reply > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.replyMeta {
+  font-size: 12px;
+}
+.replyMeta a {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.replyMeta a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.replyMeta > span {
+  color: var(--color-neutral-700);
+}
+.reply p {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.moreReplies {
+  align-self: flex-start;
+  padding-left: 14px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  font-weight: 500;
+}
+.moreReplies:hover {
+  color: var(--color-text);
+}
+
+/* A long name keeps its line: the handle goes first, then the record. */
+@container (max-width: 440px) {
+  .handle {
+    display: none;
+  }
+}
+@container (max-width: 340px) {
+  .record.record {
+    display: none;
+  }
+}
+
+/* Narrow feeds shed the quiet counts before the trade buttons squeeze. */
+@container (max-width: 500px) {
+  .backersWord {
+    display: none;
+  }
+}
+@container (max-width: 450px) {
+  .reposts {
+    display: none;
+  }
+}
+@container (max-width: 400px) {
+  .backers {
+    display: none;
+  }
+}
+
+/* ------------------------------------------ 06.2 phone: a stacked card */
+@media (max-width: 600px) {
+  .post {
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+  .post > :not(.avatar):not(.head) {
+    grid-column: 1 / -1;
+  }
+  .avatar {
+    grid-row: 1;
+    align-self: center;
+    width: 32px;
+    height: 32px;
+  }
+  .avatar :global(.avatar) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name menu"
+      "meta menu";
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 0;
+  }
+  .who {
+    display: contents;
+  }
+  .name {
+    grid-area: name;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .handle,
+  .record.record,
+  .follow.follow,
+  .thread,
+  .reposts,
+  .backers,
+  .fade.fade,
+  .backArrow {
+    display: none;
+  }
+  .metaLine {
+    grid-area: meta;
+    display: block;
+    overflow: hidden;
+    color: var(--color-neutral-700);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .postMenu {
+    grid-area: menu;
+    display: inline-flex;
+  }
+  .postMenuButton.postMenuButton {
+    width: 36px;
+    height: 36px;
+    margin-right: -8px;
+    color: var(--color-neutral-700);
+  }
+  .text {
+    line-height: 1.45;
+  }
+  .market {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 10px;
+  }
+  .marketIcon,
+  .marketPosition,
+  .marketFull,
+  .marketMeta {
+    display: none;
+  }
+  .marketTitle,
+  .marketPnl {
+    display: contents;
+  }
+  .marketShort {
+    display: block;
+    grid-row: 1;
+    grid-column: 1;
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .marketMetaPhone {
+    display: block;
+    grid-row: 2;
+    grid-column: 1;
+    overflow: hidden;
+    color: var(--color-neutral-700);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .marketPnl b {
+    grid-row: 1;
+    grid-column: 2;
+    text-align: right;
+  }
+  .marketPnl .marketLabel {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: 11px;
+    text-align: right;
+    text-transform: lowercase;
+  }
+  .actions {
+    gap: 14px;
+  }
+  .stat {
+    min-height: 44px;
+  }
+  .back {
+    height: 44px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+  }
+}

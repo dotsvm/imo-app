@@ -1,0 +1,883 @@
+/* 04.1 ticket and 05.1 – 05.10 trading flow. */
+.ticket {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.group[hidden] {
+  display: none;
+}
+.label {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.muted {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.sub {
+  color: var(--color-neutral-800);
+  font-size: 13px;
+}
+.flex {
+  flex: 1;
+}
+.start.start {
+  justify-content: flex-start;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------ Buy / Sell */
+.sideWrap {
+  padding: 16px 16px 0;
+}
+.sideToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+.sideToggle button {
+  height: 32px;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-700);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.sideToggle button:hover {
+  color: var(--color-text);
+}
+.sideToggle button[aria-pressed="true"] {
+  background: var(--color-neutral-400);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+/* ---------------------------------------------------------------- Outcome */
+.outcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.outcomes button {
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 0 22px;
+  border: 1px solid var(--pos-line);
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-800);
+  text-align: left;
+  transition: background-color var(--dur-fast) ease;
+}
+.outcomes button[data-side="No"] {
+  border-color: var(--neg-line);
+}
+.outcomes button:hover {
+  background: var(--color-neutral-200);
+}
+.outcomes button[data-side="Yes"][aria-pressed="true"] {
+  background: var(--pos-200);
+  color: var(--pos);
+}
+.outcomes button[data-side="No"][aria-pressed="true"] {
+  background: var(--neg-200);
+  color: var(--color-accent-700);
+}
+.outcomes b {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.outcomes span {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 11px;
+  opacity: 0.8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Market / Limit, with the balance beside it. */
+.typeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.typeRow > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.typeSeg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+.typeSeg button {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  font-weight: 500;
+}
+.typeSeg button:hover {
+  color: var(--color-text);
+}
+.typeSeg button[aria-pressed="true"] {
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+
+/* ----------------------------------------------------------------- Amount */
+.fieldLabel {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.amount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 0 12px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  transition:
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.amount[data-size="sm"] {
+  height: 44px;
+}
+.amount:focus-within {
+  border-color: var(--pos);
+  box-shadow: 0 0 0 2px rgba(181, 230, 161, 0.2);
+}
+.amount[data-invalid] {
+  border-color: var(--neg);
+}
+.amount[data-invalid]:focus-within {
+  box-shadow: 0 0 0 2px var(--neg-200);
+}
+.prefix {
+  color: var(--color-neutral-600);
+  font-size: 22px;
+}
+.amount input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 24px;
+  outline: none;
+}
+.amount[data-size="sm"] input {
+  font-size: 17px;
+}
+.amount > span:last-child {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-accent-700);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.error:empty {
+  display: none;
+}
+.error > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.useMax.useMax {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+}
+.chips :global(.btn) {
+  flex: 1;
+  min-height: 34px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- Ledgers */
+.rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-top: 1px solid var(--color-divider);
+}
+.rows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+.rows > div[data-strong] {
+  font-weight: 600;
+}
+.rows dt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rows dt > span {
+  color: var(--color-neutral-700);
+  font-size: 10px;
+  font-weight: 400;
+}
+.rows dd {
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+.rows dd[data-tone="neg"] {
+  color: var(--color-accent-700);
+}
+/* Payout, profit and loss: a quieter box of their own. */
+.box {
+  padding: 4px 12px;
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+}
+.box .rows {
+  border-top: 0;
+}
+.box .rows > div:last-child {
+  border-bottom: 0;
+}
+.box .rows dt {
+  font-size: 13px;
+  font-weight: 600;
+}
+.box .rows dd {
+  font-size: 15px;
+  font-weight: 600;
+}
+/* The ticket's slider, held at the bottom of the scrolling column. */
+.stickyCta {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  margin: -6px -16px;
+  padding: 14px 16px 16px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) 16px);
+}
+.fine {
+  margin: 0;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.sim {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.sim summary {
+  width: fit-content;
+  cursor: pointer;
+}
+.sim summary:hover {
+  color: var(--color-text);
+}
+.sim label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.sim select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.sim p {
+  margin: 8px 0 0;
+  font-size: 11px;
+}
+
+/* ----------------------------------------------------------------- Review */
+.summary {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  outline: none;
+}
+.review .rows + .rows {
+  border-top: 0;
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.check input {
+  margin: 2px 0 0;
+  accent-color: var(--pos);
+}
+.place.place {
+  height: 48px;
+  font-size: 15px;
+}
+/* 05.6 · the price moved past the limit. */
+.moved {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-top: 2px solid var(--color-accent);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+.moved b {
+  font-size: 15px;
+}
+.moved p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------- Sending */
+.sending {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sending b {
+  font-size: 16px;
+}
+.spin {
+  animation: spin 900ms linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.meter {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-300);
+}
+.meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-text);
+}
+.meter[data-running] > span {
+  width: 60%;
+  animation: send 1200ms var(--ease-out) both;
+}
+@keyframes send {
+  from {
+    width: 8%;
+  }
+}
+
+/* ------------------------------------------------------------- Results */
+.doneHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.doneIcon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pos-200);
+  box-shadow: inset 0 0 0 1px var(--pos-line);
+  color: var(--pos);
+}
+.doneTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+}
+.doneText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.cta44.cta44 {
+  height: 44px;
+}
+/* 05.7 – 05.10 status */
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.statusHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.statusHead h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+}
+.status > p {
+  margin: 0;
+  line-height: 1.5;
+}
+.status[data-status="failed"] .statusHead > svg,
+.status[data-status="cancelled"] .statusHead > svg {
+  color: var(--color-accent-700);
+}
+.status[data-status="partial"] .statusHead > svg {
+  color: var(--gold);
+}
+.statusMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+
+/* ----------------------------------------------- 04.4 – 04.6 lifecycle */
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stateTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stateTags :global(.tag)[data-strong] {
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+.stateTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+.stateSides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  opacity: 0.45;
+}
+.stateSides button {
+  padding: 10px 14px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-weight: 500;
+  text-align: left;
+  cursor: not-allowed;
+}
+.stateSides button[data-side="No"] {
+  border-color: var(--neg);
+}
+.stateNote {
+  margin: 0;
+  font-size: 12px;
+}
+.stateBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stateGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+.stateGrid dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+.stateGrid dd[data-tone="neg"] {
+  color: var(--color-accent-700);
+}
+.state p {
+  margin: 0;
+}
+
+/* ================================================== 05.1 – 05.3 · phone */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 5, 6, 0.72);
+  animation: fade var(--dur-base) ease both;
+}
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--color-bg);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  animation: rise var(--dur-slow) var(--ease-out) both;
+}
+/* 05.3: the filled order takes the whole screen. */
+.sheet:has(> .sheetInner[data-step="done"]) {
+  top: 0;
+  max-height: none;
+  border-radius: 0;
+}
+.sheet:focus {
+  outline: none;
+}
+@keyframes rise {
+  from {
+    translate: 0 24px;
+    opacity: 0;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.sheetInner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
+}
+.grabber {
+  width: 40px;
+  height: 4px;
+  flex-shrink: 0;
+  margin: 8px auto;
+  border-radius: 2px;
+  background: var(--color-neutral-400);
+}
+.sheetHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.sheetHead[data-back] {
+  gap: 4px;
+  padding: 0 8px 12px;
+}
+.sheetTitle {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text);
+}
+.iconBtn:hover {
+  background: var(--color-neutral-300);
+}
+.sheetBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+.bigOutcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.bigOutcomes button {
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 16px;
+  border: 1px solid var(--pos);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  text-align: left;
+}
+.bigOutcomes button[data-side="No"] {
+  border-color: var(--neg);
+}
+.bigOutcomes button[aria-pressed="true"] {
+  border-color: transparent;
+}
+.bigOutcomes button[data-side="Yes"][aria-pressed="true"] {
+  background: var(--pos-200);
+  box-shadow: inset 0 0 0 1px var(--pos-line);
+  color: var(--pos);
+}
+.bigOutcomes button[data-side="No"][aria-pressed="true"] {
+  background: var(--neg-200);
+  box-shadow: inset 0 0 0 1px var(--neg-line);
+  color: var(--color-accent-700);
+}
+.bigOutcomes b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.bigOutcomes span {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.bigOutcomes button[aria-pressed="true"] span {
+  color: inherit;
+  opacity: 0.8;
+}
+/* The amount, as big as the decision. */
+.big {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 2px solid var(--color-text);
+}
+.big[data-invalid] {
+  border-bottom-color: var(--neg);
+}
+.big > span:first-child {
+  color: var(--color-neutral-600);
+  font-size: 36px;
+}
+.big input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  caret-color: var(--color-accent);
+  color: var(--color-text);
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1;
+  outline: none;
+}
+.avail {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.bigChips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.bigChips :global(.btn) {
+  min-height: 44px;
+  padding: 0 6px;
+}
+.compact {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 13px;
+}
+.compact > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+.compact > div:last-child {
+  border-bottom: 0;
+}
+.compact[data-roomy] {
+  border-top: 1px solid var(--color-divider);
+}
+.compact[data-roomy] > div {
+  padding: 8px 0;
+}
+.compact > div[data-strong] {
+  font-weight: 500;
+}
+.compact > div[data-rule] {
+  border-bottom-color: var(--color-divider);
+}
+.compact dt span {
+  color: var(--color-neutral-700);
+}
+.compact dd {
+  margin: 0;
+  white-space: nowrap;
+}
+.compact dd b {
+  font-weight: 600;
+}
+.compact dd[data-tone="neg"] {
+  color: var(--color-accent-700);
+}
+/* Payout · profit · max loss, side by side. */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: 11px;
+}
+.strip dt {
+  color: var(--color-neutral-700);
+}
+.strip dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.strip dd[data-tone="neg"] {
+  color: var(--color-accent-700);
+}
+.sheetSummary {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  outline: none;
+}
+.note {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+/* 05.3 */
+.done {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(32px + env(safe-area-inset-top)) 20px 0;
+}
+.done .doneIcon {
+  width: 48px;
+  height: 48px;
+}
+.done .doneHead {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.done .doneTitle {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.done .doneText {
+  font-size: 15px;
+}
+.done .rows > div {
+  padding: 10px 0;
+}
+.doneClose {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 8px;
+}
+.cta52.cta52 {
+  height: 52px;
+  font-size: 15px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .scrim {
+    animation: none;
+  }
+}
+
+/* Signed out: the review control is the way in. */
+.logIn {
+  width: 100%;
+  min-height: 48px;
+}

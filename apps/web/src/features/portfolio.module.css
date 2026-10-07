@@ -1,0 +1,706 @@
+/* 11.1 Portfolio desktop. The shell draws the rail and topbar; this is the
+   pane beneath them: a stat strip, the claim banner, tabbed tables, and a
+   340px activity rail. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.portfolio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: auto;
+  border-right: 1px solid var(--color-divider);
+}
+.spacer {
+  flex: 1;
+}
+.up {
+  color: var(--pos);
+}
+.down {
+  color: var(--color-accent-700);
+}
+.flat {
+  color: var(--color-neutral-700);
+}
+
+/* Stat strip */
+.stats {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(5, 1fr);
+  border-bottom: 1px solid var(--color-divider);
+}
+.headline,
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px 16px 20px;
+  border-right: 1px solid var(--color-divider);
+}
+.headline {
+  padding-inline: 24px;
+}
+.headline > b {
+  margin-top: 2px;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.headline > .allTime {
+  margin-top: 4px;
+}
+.allTime {
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.stat > b {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-size: 20px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.statKey {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+.statNote {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--color-neutral-700);
+}
+
+/* Claim banner */
+.claim {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  background: var(--pos-100);
+  border-bottom: 1px solid var(--color-divider);
+}
+.claim > svg {
+  flex-shrink: 0;
+  color: var(--pos);
+}
+.claim > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.claim > div > b {
+  font-weight: 500;
+}
+.claim > div > span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-neutral-800);
+}
+.claimButton {
+  height: 46px;
+  min-width: 190px;
+  padding-inline: 18px;
+  font-size: 14px;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--pos-100);
+  color: var(--pos);
+}
+.notice p {
+  flex: 1;
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--color-divider);
+  font-weight: 500;
+}
+.tabs > button {
+  padding: 16px 14px;
+  border-radius: 0;
+  color: var(--color-neutral-700);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tabs > button:hover {
+  color: var(--color-text);
+}
+.tabOn {
+  box-shadow: inset 0 -2px 0 var(--color-text);
+  color: var(--color-text) !important;
+}
+
+/* Position table */
+.tableHead,
+.row {
+  display: grid;
+  /* Narrower than the 1512-wide export so the question keeps its room. */
+  grid-template-columns:
+    minmax(0, 1fr) 52px 56px 48px 48px 84px 84px 104px
+    72px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 14px;
+}
+.tableHead[data-variant="claim"],
+.row[data-variant="claim"] {
+  grid-template-columns: minmax(0, 1fr) 52px 56px 84px 84px 112px 130px;
+}
+.tableHead[data-variant="closed"],
+.row[data-variant="closed"] {
+  grid-template-columns: minmax(0, 1fr) 52px 56px 110px 84px 112px 64px;
+}
+.tableHead {
+  padding-block: 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+.tableHead > span:nth-child(n + 3) {
+  text-align: right;
+}
+.row:hover {
+  background: var(--color-surface);
+}
+.rowTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--color-text);
+}
+.rowTitle > b {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rowTitle > span {
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+.side {
+  justify-self: start;
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.yes {
+  background: var(--pos-200);
+  color: var(--pos);
+  box-shadow: inset 0 0 0 1px var(--pos-line);
+}
+.no {
+  background: var(--neg-200);
+  color: var(--color-accent-700);
+  box-shadow: inset 0 0 0 1px var(--neg-line);
+}
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pnl {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pnl > span {
+  margin-top: 3px;
+  font-size: 12px;
+}
+.row :global(.btn),
+.row :global(.button) {
+  justify-self: stretch;
+  justify-content: center;
+  padding: 7px 10px;
+  min-height: 34px;
+  font-size: 13px;
+}
+.closedAt {
+  text-align: right;
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.total > span:last-child {
+  display: flex;
+  gap: 40px;
+  align-items: baseline;
+}
+.unrealizedWord {
+  margin-left: -32px;
+  color: inherit;
+}
+
+/* Pending orders */
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px 10px;
+}
+.sectionHead b {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sectionHead span {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+  font-variant-numeric: tabular-nums;
+}
+.orderRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px 96px 88px 150px 130px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-divider);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.orderRow > :global(.tag) {
+  justify-self: start;
+  padding: 5px 11px;
+  font-size: 12px;
+}
+.fill {
+  font-variant-numeric: tabular-nums;
+}
+.orderActions {
+  display: flex;
+  gap: 14px;
+  justify-self: end;
+}
+.ghost {
+  color: var(--pos);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ghost:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Activity rail */
+.aside {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+.aside:focus-visible {
+  outline: 2px solid var(--pos);
+  outline-offset: -2px;
+}
+.asideHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-neutral-800);
+}
+.asideHead b {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.export {
+  font-size: 12px;
+  color: var(--color-neutral-700);
+}
+.activity {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.activityIcon {
+  margin-top: 2px;
+  color: var(--color-neutral-800);
+}
+.activityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.activityBody b {
+  font-weight: 500;
+  line-height: 1.35;
+}
+.activityBody > span {
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+.activityAmount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.activityAmount > span {
+  font-size: 11px;
+  color: var(--color-neutral-700);
+}
+.noActivity {
+  margin: 0;
+  padding: 16px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+  .portfolio {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .aside {
+    display: none;
+  }
+  .stats {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .headline {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 900px) {
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tabs {
+    overflow-x: auto;
+    padding-inline: 16px;
+  }
+  .tabs > button {
+    min-height: 44px;
+  }
+  /* The table folds to two lines: market + value, meta + unrealized. */
+  .tableHead {
+    display: none;
+  }
+  .row,
+  .row[data-variant="claim"],
+  .row[data-variant="closed"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    padding: 12px 16px;
+  }
+  .row .num:nth-of-type(n),
+  .closedAt {
+    display: none;
+  }
+  .row > b.num {
+    display: block;
+  }
+  .rowTitle > b {
+    white-space: normal;
+  }
+  .side {
+    display: none;
+  }
+  .total {
+    flex-direction: column;
+    gap: 6px;
+    padding-inline: 16px;
+  }
+  .total > span:last-child {
+    gap: 16px;
+  }
+  .unrealizedWord {
+    margin-left: 0;
+  }
+  .orderRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    padding-inline: 16px;
+  }
+  .orderActions {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .claim {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+  .sectionHead {
+    padding-inline: 16px;
+  }
+}
+
+/* 11.3 · 11.5 · no positions yet, and loading. */
+.stateWrap {
+  padding: 32px 24px;
+}
+.empty {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.empty > svg {
+  color: var(--color-neutral-700);
+}
+.empty b {
+  font-size: 18px;
+  font-weight: 600;
+}
+.empty p {
+  color: var(--color-neutral-800);
+  line-height: 1.5;
+}
+
+/* ----------------------------------------------------------- 11.2 phone */
+.phone {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.phoneValue {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.phoneValueHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.demoTag.demoTag {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.phoneTotal {
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.phoneAllTime {
+  font-size: 13px;
+  font-weight: 500;
+}
+.phoneTrio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-divider);
+}
+.phoneTrio dt {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.phoneTrio dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.phoneClaim {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--pos-100);
+  color: var(--color-text);
+}
+.phoneClaim > svg:first-child {
+  flex-shrink: 0;
+  color: var(--pos);
+}
+.phoneClaim > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.phoneClaim > span > span {
+  color: var(--color-neutral-800);
+  font-size: 11.5px;
+}
+.phoneClaim > svg:last-child {
+  color: var(--color-neutral-700);
+}
+.phoneTabs {
+  flex-shrink: 0;
+  display: flex;
+  padding: 0 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-divider);
+  scrollbar-width: none;
+}
+.phoneTabs button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  color: var(--color-neutral-700);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.phoneTabs button[aria-pressed="true"] {
+  box-shadow: inset 0 -2px 0 var(--color-text);
+  color: var(--color-text);
+}
+.phoneCount {
+  color: inherit;
+  font-weight: 500;
+}
+.phoneList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.phoneRow,
+.phoneOrder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+.phoneRow:active {
+  background: var(--color-surface);
+}
+.phoneTitle {
+  font-weight: 500;
+  line-height: 1.3;
+}
+.phoneValueCell {
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.phoneMeta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--color-neutral-700);
+  font-size: 11.5px;
+}
+.phoneMeta > .side {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+.phonePnl {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+}
+.phoneRealized {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  text-align: right;
+}
+.phoneOrder > :global(.tag) {
+  justify-self: end;
+}
+.phoneOrder .ghost {
+  justify-self: end;
+  font-size: 13px;
+}
+.phoneSection {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.phoneTotal2 {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-weight: 500;
+}
+.phoneEmpty {
+  padding: 24px 16px;
+  color: var(--color-neutral-700);
+  line-height: 1.5;
+}
+.phone .notice {
+  padding-inline: 16px;
+}

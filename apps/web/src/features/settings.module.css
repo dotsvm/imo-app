@@ -1,0 +1,561 @@
+/* 16.1 · a 240px nav beside one readable column with every section, the
+   nav following your place as you scroll. */
+.page {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 760px);
+  align-items: start;
+  min-height: 100%;
+}
+.nav {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: calc(100dvh - 128px);
+  padding: 20px 12px;
+  border-right: 1px solid var(--color-divider);
+}
+.nav h1 {
+  padding: 0 10px 12px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navList a {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-800);
+  font-weight: 500;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.navList a:hover {
+  background: var(--color-neutral-200);
+  color: var(--color-text);
+}
+.navList a[aria-current] {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.navList a > svg {
+  flex-shrink: 0;
+  color: var(--color-neutral-700);
+}
+.navList a[aria-current] > svg {
+  color: var(--pos);
+}
+.panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 32px 64px;
+}
+.saved {
+  position: sticky;
+  top: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--pos-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--pos);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.saved:empty {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Sections: a rule between each, as the design separates them. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 0 28px;
+  border-top: 1px solid var(--color-divider);
+  scroll-margin-top: 12px;
+}
+.panel > .section:first-of-type {
+  padding-top: 4px;
+  border-top: 0;
+}
+.section h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.field textarea:global(.input) {
+  height: auto;
+  min-height: 72px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.count {
+  align-self: flex-end;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.help {
+  max-width: 62ch;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.interests {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.themes button {
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  text-align: left;
+  transition: border-color var(--dur-fast) ease;
+}
+.themes button:hover {
+  border-color: var(--color-neutral-500);
+}
+.themes button[aria-pressed="true"] {
+  border-color: var(--pos);
+}
+.themes button > span {
+  height: 56px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-control);
+}
+.themes strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--pos);
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+.toggleRow,
+.prefRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.toggleRow > span:first-child,
+.prefRow > span:first-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.toggleRow strong,
+.prefRow strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.toggleRow > span:first-child > span,
+.prefRow > span:first-child > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.prefHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 8px;
+  color: var(--color-neutral-700);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.prefRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 8px;
+}
+/* 40 × 22 with an 18px knob; green when on. */
+.toggle {
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-start;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-400);
+  transition: background-color var(--dur-fast) ease;
+}
+.toggle[aria-checked="true"] {
+  justify-content: flex-end;
+  background: var(--pos);
+}
+.toggle > span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.textLink {
+  align-self: flex-start;
+  color: var(--pos);
+  font-size: 13px;
+  font-weight: 500;
+}
+.textLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.venue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+.venue > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.venue strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.venue > span:nth-child(2) > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.venueMark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--color-neutral-400);
+  font-weight: 600;
+}
+/* The one irreversible thing, on a coral tint. */
+.danger {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--color-accent-300);
+  border-radius: var(--radius-card);
+  background: var(--color-accent-100);
+}
+.danger > span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.danger strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.danger > span > span {
+  color: var(--color-neutral-800);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.resetButton.resetButton {
+  border-color: var(--color-accent-300);
+  color: var(--color-accent-700);
+}
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .panel {
+    padding-inline: 20px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ----------------------------------------------------------- 16.2 phone */
+.phone {
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  font-size: 14px;
+}
+.phoneHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 8px;
+}
+.back.back {
+  width: 44px;
+  height: 44px;
+  color: var(--color-text);
+}
+.phoneHead h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.phoneBody {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px 24px;
+}
+.phoneBody .section {
+  padding-top: 8px;
+  border-top: 0;
+}
+.phoneBody .grid {
+  grid-template-columns: 1fr;
+}
+.phoneBody .danger {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.phoneBody .themes button {
+  flex: 1;
+  width: auto;
+  min-width: 96px;
+}
+.group {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  list-style: none;
+}
+.groupRow {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+.group li:last-child .groupRow {
+  border-bottom: 0;
+}
+.groupRow:active {
+  background: var(--color-neutral-200);
+}
+.groupRow > svg:first-child {
+  flex-shrink: 0;
+  color: var(--color-neutral-700);
+}
+.groupRow > span:nth-child(2) {
+  flex: 1;
+}
+.groupValue {
+  max-width: 40%;
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.groupRow > svg:last-child {
+  color: var(--color-neutral-600);
+}
+.phoneReset {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid var(--color-accent-300);
+  border-radius: var(--radius-card);
+  background: var(--color-accent-100);
+}
+.phoneReset > span {
+  color: var(--color-neutral-800);
+  font-size: 12px;
+}
+.phoneReset :global(.btn) {
+  min-height: 44px;
+}
+.version {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+
+/* Account: how you signed in, and the way out. */
+.signedIn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.signedIn > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.signedIn strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.signedIn > span > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.fieldError {
+  color: var(--neg);
+  font-size: 12px;
+  font-weight: 550;
+}
+.fieldHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .signedIn {
+    flex-wrap: wrap;
+  }
+}
+
+/* While your settings load: the nav as it will be, the profile's shape. */
+.navLoading {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-800);
+  font-weight: 500;
+}
+.navLoading > svg {
+  flex-shrink: 0;
+  color: var(--color-neutral-700);
+}
+.navLoading[data-first] {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.navLoading[data-first] > svg {
+  color: var(--pos);
+}
+.avatarLoading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.illustrationsLoading {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 48px);
+  gap: 10px;
+}
+
+/* The section you're in: a highlight that slides down the nav. */
+.navList {
+  --ind-bg: var(--color-neutral-300);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .saved {
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out);
+  }
+  @starting-style {
+    .saved {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+}

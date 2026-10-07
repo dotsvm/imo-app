@@ -1,0 +1,48 @@
+{
+  "name": "@imo/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "tsx --test test/*.test.ts",
+    "test:db": "APP_PROFILE=test DATABASE_URL=${DATABASE_URL:-postgres://localhost:5432/hunch_test} tsx --test --test-concurrency=1 test/db/*.test.ts",
+    "test:e2e": "playwright test",
+    "brand-assets": "node scripts/brand-assets.mjs",
+    "avatars": "tsx scripts/avatars.ts"
+  },
+  "dependencies": {
+    "@imo/core": "*",
+    "@imo/domain": "*",
+    "@imo/server": "*",
+    "@imo/venues": "*",
+    "@phosphor-icons/react": "2.1.10",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.2",
+    "drizzle-orm": "0.45.3",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@dicebear/core": "9.4.3",
+    "@dicebear/lorelei": "9.4.3",
+    "@playwright/test": "^1.58.2",
+    "@solana/kit": "8.4.0",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint-config-next": "^16.2.1",
+    "sharp": "^0.34.4",
+    "tailwindcss": "^4.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

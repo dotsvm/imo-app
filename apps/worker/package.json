@@ -1,0 +1,20 @@
+{
+  "name": "@imo/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@imo/server": "*",
+    "@next/env": "^16.2.1",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.15"
+  }
+}

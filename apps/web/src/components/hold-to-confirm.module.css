@@ -1,0 +1,62 @@
+/* Hold to confirm · a primary pill whose fill runs while it is held. */
+.hold {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 52px;
+  padding: 0 20px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--pos);
+  color: var(--on-pos);
+  font-size: 15px;
+  font-weight: 600;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: background-color var(--dur-fast) ease;
+}
+.hold:hover {
+  background: #ccf5e1;
+}
+.hold:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.hold > :not(.progress) {
+  position: relative;
+}
+.progress {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #a7d993;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 160ms var(--ease-out);
+}
+.hold[data-holding] .progress {
+  transform: scaleX(1);
+  transition: transform var(--hold) linear;
+}
+.hold:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hold[data-nudge] {
+    animation: hold-nudge 0.35s var(--ease-out);
+  }
+}
+@keyframes hold-nudge {
+  25% {
+    translate: -3px 0;
+  }
+  60% {
+    translate: 3px 0;
+  }
+}

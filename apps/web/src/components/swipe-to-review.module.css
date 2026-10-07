@@ -1,0 +1,79 @@
+/* Slide to review · 52px track, 44px knob, the fill following the knob. */
+.swipe {
+  position: relative;
+  flex-shrink: 0;
+  height: 52px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--pos-200);
+  box-shadow: inset 0 0 0 1px var(--pos-line);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: grab;
+}
+.swipe[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.swipe[data-dragging] {
+  cursor: grabbing;
+}
+.fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(181, 230, 161, 0.18);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pos);
+  font-size: 14px;
+  pointer-events: none;
+}
+.knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--pos);
+  box-shadow:
+    inset 0 -3px 6px rgba(20, 60, 30, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  color: var(--on-pos);
+  cursor: grab;
+  touch-action: none;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.knob:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+.knob:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+.swipe[data-dragging] .knob {
+  cursor: grabbing;
+  transition: none;
+}
+.swipe[data-dragging] .fill {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .knob {
+    transition: none;
+  }
+}

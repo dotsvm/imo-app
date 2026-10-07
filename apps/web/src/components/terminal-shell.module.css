@@ -1,0 +1,581 @@
+/* The terminal frame: a 36px demo strip, then the 56px rail beside the
+   92px topbar (search row + ticker) and the panels. */
+.shell {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* Keep wheel, touch, and keyboard scrolling without visible scrollbar chrome. */
+.shell * {
+  scrollbar-width: none;
+}
+.shell *::-webkit-scrollbar {
+  display: none;
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* ---------------------------------------------------------------- Banner */
+.demoBanner {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(226, 200, 146, 0.08),
+    rgba(226, 200, 146, 0.02) 60%,
+    transparent
+  );
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-neutral-800);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.demoMark {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: rgba(226, 200, 146, 0.14);
+  color: var(--gold);
+}
+.demoBanner strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+.demoDot {
+  width: 3px;
+  height: 3px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-neutral-600);
+}
+.demoCopy {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.demoLink {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.demoLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.demoSpacer {
+  flex: 1;
+}
+.demoNote {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.dismiss.dismiss {
+  width: 26px;
+  height: 26px;
+  color: var(--color-neutral-700);
+}
+.dismiss:hover {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------------ Rail */
+.rail {
+  position: relative;
+  z-index: 40;
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 12px;
+  border-right: 1px solid var(--color-divider);
+  background: var(--color-bg);
+}
+.railBrand {
+  height: 56px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+/* The header row's corner: its line runs on under the logo and search. */
+.railBrand {
+  border-bottom: 1px solid var(--color-divider);
+}
+.topbarBrand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+.topbarBrand img {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+.railNav,
+.railBottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.railNav {
+  padding-top: 8px;
+  /* The sliding highlight (data-indicator) wears the active item's colour. */
+  --ind-bg: var(--accent-muted);
+  --ind-radius: 50%;
+}
+.railBottom {
+  margin-top: auto;
+}
+.railItem,
+.railMe {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-neutral-700);
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.railItem:hover {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.railItem[aria-current="page"] {
+  background: var(--accent-muted);
+  color: var(--accent);
+}
+.railMe {
+  margin-top: 4px;
+}
+.railMe[aria-current="page"] {
+  box-shadow: 0 0 0 2px var(--color-neutral-400);
+}
+.badge {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+/* Labels appear beside the rail on hover and keyboard focus. */
+.railItem[data-tip]::after,
+.railMe[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  z-index: 60;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--color-neutral-400);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+}
+.railItem[data-tip]:hover::after,
+.railItem[data-tip]:focus-visible::after,
+.railMe[data-tip]:hover::after,
+.railMe[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+  transition-delay: 250ms;
+}
+
+/* ----------------------------------------------------------------- Frame */
+.frame {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.main > :global(.page-content) {
+  min-height: 100%;
+}
+.homeMain > :global(.page-content) {
+  max-width: none;
+  padding: 0;
+}
+.panelMain {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.panelMain > :global(.page-content) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- Topbar */
+.topbar {
+  flex-shrink: 0;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-divider);
+}
+.topbarRow {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.search {
+  flex: 0 1 440px;
+  min-width: 160px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 12px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-neutral-700);
+  transition:
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.search:hover {
+  border-color: var(--color-neutral-400);
+}
+.search:focus-within {
+  border-color: var(--pos);
+  box-shadow: 0 0 0 2px rgba(181, 230, 161, 0.25);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+}
+.search input::placeholder {
+  color: var(--color-neutral-600);
+}
+.searchShortcut {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 6px;
+  color: var(--color-neutral-700);
+}
+.searchShortcut kbd {
+  min-width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border: 1px solid var(--color-neutral-400);
+  border-radius: 5px;
+  background: var(--color-neutral-200);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+}
+.search:focus-within .searchShortcut {
+  opacity: 0;
+}
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+/* Signed out: Log in and Sign up sit together, close to the tag. */
+.headerActions[data-signed-out] {
+  gap: 12px;
+}
+.authActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.demoTag.demoTag,
+.mobileDemo.mobileDemo {
+  border-radius: var(--radius-button);
+  padding: 3px 10px;
+}
+.demoTag {
+  cursor: pointer;
+}
+.demoTag:hover {
+  background: rgba(226, 200, 146, 0.22);
+}
+.balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.balance > span {
+  color: var(--color-neutral-700);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.balance strong {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+}
+.balance:hover strong {
+  text-decoration: underline;
+  text-decoration-color: var(--color-neutral-600);
+  text-underline-offset: 3px;
+}
+/* The one global create action: a green circle carrying only a plus. */
+.newPrediction.newPrediction {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, white);
+  background: linear-gradient(
+    var(--accent),
+    color-mix(in srgb, var(--accent) 90%, white)
+  );
+  box-shadow: inset 0 -3px 5px #0002;
+  color: var(--bg);
+}
+.newPrediction.newPrediction:hover {
+  background: linear-gradient(
+    var(--accent),
+    color-mix(in srgb, var(--accent) 90%, white)
+  );
+  filter: brightness(1.06);
+}
+.newPrediction[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--color-neutral-400);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+}
+.newPrediction[data-tip]:hover::after,
+.newPrediction[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: none;
+  transition-delay: 300ms;
+}
+
+/* 03.1 / 03.2 · search replaces the topbar and the phone header. */
+/* 04.2 · on phones a market brings its own header and trade bar. */
+@media (max-width: 600px) {
+  .shell[data-detail] .mobileHeader,
+  .shell[data-detail] .tabBar,
+  .shell[data-own-header] .mobileHeader {
+    display: none;
+  }
+  .shell[data-detail] .panelMain > :global(.page-content) {
+    padding-bottom: 0;
+  }
+}
+.shell[data-searching] .topbar,
+.shell[data-searching] .mobileHeader {
+  display: none;
+}
+
+/* --------------------------------------------------------- Phone header */
+.mobileHeader,
+.tabBar {
+  display: none;
+}
+/* The logo as the phone header's title. */
+.mobileLogo {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+.mobileWordmark {
+  font-size: 20px;
+  font-weight: 600;
+}
+.mobileDemo {
+  margin-left: auto;
+  cursor: pointer;
+}
+/* Without the demo tag, the actions still sit at the far end. */
+.mobileHeader > :global(.brand) + :not(.mobileDemo) {
+  margin-left: auto;
+}
+.mobileAction.mobileAction {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  color: var(--color-text);
+}
+.mobileAction:hover {
+  background: var(--color-neutral-300);
+}
+/* Signed out, the bell's place holds the way in. */
+.mobileLogin.mobileLogin {
+  margin-left: 4px;
+  min-height: 36px;
+  padding: 0 16px;
+}
+.mobileBadge {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+@media (max-width: 1200px) {
+  .demoNote {
+    display: none;
+  }
+  .headerActions {
+    gap: 16px;
+  }
+}
+@media (max-width: 900px) {
+  .searchShortcut {
+    display: none;
+  }
+  .balance:first-of-type {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .demoBanner,
+  .rail,
+  .topbar {
+    display: none;
+  }
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-height: 52px;
+    padding: env(safe-area-inset-top) 4px 0 16px;
+  }
+  .main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+  .panelMain {
+    padding-bottom: 0;
+  }
+  .panelMain > :global(.page-content) {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+  /* TabBar · five tabs, blurred ink, clear of the home indicator. */
+  .tabBar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 45;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: calc(60px + env(safe-area-inset-bottom));
+    padding: 0 4px env(safe-area-inset-bottom);
+    border-top: 1px solid var(--color-divider);
+    background: rgba(9, 13, 11, 0.92);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  .tabBar > a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 44px;
+    color: var(--color-neutral-700);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .tabBar > a[aria-current="page"] {
+    color: var(--color-text);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A new unread dot pops in; tabs give a little when tapped. */
+  .badge {
+    transition: scale 320ms var(--ease-spring);
+  }
+  @starting-style {
+    .badge {
+      scale: 0;
+    }
+  }
+  .tabBar a:active {
+    scale: 0.94;
+  }
+}

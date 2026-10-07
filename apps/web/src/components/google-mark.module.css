@@ -1,0 +1,9 @@
+.googleMark {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #fff;
+  flex-shrink: 0;
+}

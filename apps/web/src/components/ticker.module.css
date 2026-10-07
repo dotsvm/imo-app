@@ -1,0 +1,171 @@
+.ticker {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+/* 56px search row + 35px strip + the 1px rule = the 92px topbar. */
+.ticker[data-variant="topbar"] {
+  height: 35px;
+}
+.ticker[data-variant="feed"] {
+  display: none;
+  height: 34px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* The live dot and label double as the pause control. */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 100%;
+  padding: 0 14px 0 16px;
+  border-right: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.toggle:hover {
+  color: var(--color-text);
+}
+.toggle:focus-visible {
+  outline-offset: -2px;
+}
+.ticker[data-variant="feed"] .toggle {
+  padding: 0 6px 0 16px;
+  border-right: 0;
+}
+.live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 3px rgba(181, 230, 161, 0.2);
+  transition:
+    background-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease;
+}
+.ticker[data-paused] .live {
+  background: var(--color-neutral-600);
+  box-shadow: 0 0 0 3px rgba(123, 128, 139, 0.2);
+}
+
+.track {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  /* Traders drift in from the right and out to the left, softly. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 48px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 48px),
+    transparent
+  );
+}
+/* Two identical groups: sliding by exactly one of them loops seamlessly. */
+.marquee {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  animation: ticker-scroll var(--ticker-duration, 80s) linear infinite;
+  will-change: transform;
+}
+.group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 20px;
+  padding: 0 20px 0 16px;
+}
+.ticker[data-variant="feed"] .group {
+  gap: 16px;
+  padding: 0 16px 0 10px;
+}
+.group a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.loadingItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.group a b {
+  font-weight: 600;
+}
+.group a:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.group a:focus-visible {
+  outline-offset: -2px;
+}
+/* Hold still to be read or clicked, while focused, or when paused. */
+.track:hover .marquee,
+.track:focus-within .marquee,
+.ticker[data-paused] .marquee {
+  animation-play-state: paused;
+}
+/* Too few to loop: the names just sit there, no fade at the far end. */
+.track[data-still] .marquee {
+  animation: none;
+}
+.track[data-still] {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+@keyframes ticker-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+/* Reduced motion: a still strip that scrolls by hand, without the copy. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    animation: none;
+  }
+  .group[aria-hidden] {
+    display: none;
+  }
+  .track {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+}
+@media (max-width: 600px) {
+  .ticker[data-variant="feed"] {
+    display: flex;
+  }
+}
+/* Before anyone has traded: a word in the strip's place. */
+.empty {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 12px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

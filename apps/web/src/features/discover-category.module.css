@@ -1,0 +1,176 @@
+/* 03.3 category: a page, not panels — 28px/32px gutters, 20px rhythm. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px 32px 40px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.flex {
+  flex: 1;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.crumb {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.crumb a:hover {
+  color: var(--color-text);
+}
+/* The display face: Instrument Serif, as the design system reserves it. */
+.title.title {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.stats {
+  color: var(--color-neutral-700);
+  font-size: 13px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.subsets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+/* Topic pills: the chosen one inverts to the text color. */
+.subsets button {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  color: var(--color-neutral-800);
+  font-size: 12px;
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.subsets button:hover {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.subsets button[aria-pressed="true"] {
+  background: var(--color-text);
+  box-shadow: none;
+  color: var(--color-bg);
+}
+.sort {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 4px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.sort > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sort svg {
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+.sort:has(select:open) {
+  color: var(--color-text);
+}
+.sort:has(select:open) svg {
+  rotate: 180deg;
+}
+.sort:hover {
+  color: var(--color-text);
+}
+.sort:has(select:focus-visible) {
+  border-radius: 6px;
+  outline: 2px solid var(--pos);
+  outline-offset: 2px;
+}
+.sort select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
+  appearance: none;
+}
+.views {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+.views button {
+  width: 28px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-700);
+}
+.views button:hover {
+  color: var(--color-text);
+}
+.views button[aria-pressed="true"] {
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.list {
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .page {
+    gap: 16px;
+    padding: 20px 16px 32px;
+  }
+  .title.title {
+    font-size: 36px;
+  }
+  .controls {
+    align-items: flex-start;
+  }
+  .subsets {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .subsets button {
+    flex-shrink: 0;
+    height: 36px;
+  }
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

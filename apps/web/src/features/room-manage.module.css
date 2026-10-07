@@ -1,0 +1,196 @@
+/* 09.3 · room management: 560px, the owner's tag, tabs, rows, danger zone. */
+.dialog.dialog {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  font-size: 13px;
+}
+.head {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.head h2 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+  padding: 10px 20px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-divider);
+}
+.tabs button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-700);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tabs button:hover {
+  color: var(--color-text);
+}
+.tabs button[aria-selected="true"] {
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+.panel {
+  min-height: 120px;
+}
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.person > :global(.avatar) {
+  flex-shrink: 0;
+}
+.personText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.personText b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.personText span {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.role.role {
+  gap: 6px;
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.spacer {
+  width: 36px;
+  flex-shrink: 0;
+}
+.note {
+  padding: 16px 20px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.actions .note,
+.danger .note {
+  padding: 0;
+}
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+}
+.rules .note {
+  padding: 0;
+}
+.rulesText {
+  line-height: 1.55;
+}
+.textarea.textarea {
+  height: auto;
+  min-height: 90px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.disclosure {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-field);
+  background: var(--color-bg);
+  cursor: pointer;
+}
+.disclosure input {
+  margin: 3px 0 0;
+  accent-color: var(--pos);
+}
+.disclosure > span {
+  display: flex;
+  flex-direction: column;
+}
+.disclosure > span > span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.watchlist {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+}
+.watchlist > :global(*):last-child {
+  align-self: flex-start;
+  margin: 12px 20px 0;
+}
+.watchlist > .note:last-child {
+  margin: 0;
+}
+.market {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 20px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.market > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.market > span > span {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+.error {
+  padding: 0 20px 12px;
+}
+.danger {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.archive.archive {
+  color: var(--color-accent-700);
+}
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 2px solid var(--color-accent);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+}
+.confirm > span {
+  color: var(--color-neutral-800);
+}

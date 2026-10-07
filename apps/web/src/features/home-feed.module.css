@@ -1,0 +1,697 @@
+/* 06.1 Home terminal: traders | predictions | markets, each panel a 48px
+   header (grip, dropdown title, tools) over its own scrolling body. */
+.home {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.columns {
+  /* 380 | feed | 400 at the 1440 artboard, scaling down with the window.
+     A width saved by dragging arrives inline and wins. */
+  --left: clamp(300px, 26.4vw, 380px);
+  --right: clamp(320px, 27.8vw, 400px);
+  /* Neither side may squeeze the feed under 440px. */
+  --left-drawn: min(var(--left), calc(50% - 220px));
+  --right-drawn: min(var(--right), calc(50% - 220px));
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--left-drawn) minmax(0, 1fr) var(--right-drawn);
+  overflow: hidden;
+}
+.panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+.panel[data-panel="traders"],
+.panel[data-panel="feed"] {
+  border-right: 1px solid var(--color-divider);
+}
+.panelHeader {
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.grip {
+  flex-shrink: 0;
+  color: var(--color-neutral-600);
+}
+.flex {
+  flex: 1;
+}
+.panelBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------------------------------------------------- Header tools */
+.tool.tool {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  color: var(--color-neutral-700);
+}
+.tool:hover,
+.tool[aria-expanded="true"],
+.tool[aria-pressed="true"] {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+/* A filter is applied even while its row is folded away. */
+.tool[data-active]::before,
+.viewFilter[data-active]::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.tool[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-neutral-400);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -2px);
+  transition:
+    opacity var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+}
+.tool[data-tip]:hover::after,
+.tool[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 350ms;
+}
+
+/* A native select dressed as the design system's secondary chip. */
+.chipSelect {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+.chipSelect:hover {
+  border-color: var(--color-neutral-400);
+  background: var(--color-neutral-300);
+}
+/* The ring follows the keyboard only; a pointer pick leaves the select
+   focused, and a ring then would read as a state. */
+.chipSelect:has(select:focus-visible) {
+  outline: 2px solid var(--pos);
+  outline-offset: 2px;
+}
+.chipSelect select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
+  appearance: none;
+}
+.chipIcon {
+  display: grid;
+  place-items: center;
+}
+.caret {
+  color: var(--color-neutral-800);
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+/* While its list is open the chip holds its hover look, caret turned over. */
+.chipSelect:has(select:open) {
+  border-color: var(--color-neutral-400);
+  background: var(--color-neutral-300);
+}
+.chipSelect:has(select:open) .caret {
+  rotate: 180deg;
+}
+.titleSelect.titleSelect {
+  height: 32px;
+  font-size: 13px;
+}
+.titleSelect .chipIcon {
+  color: var(--color-text);
+}
+
+/* ---------------------------------------------------------- Traders */
+.filters {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-divider);
+  overflow-x: auto;
+}
+.traderRow {
+  display: grid;
+  grid-template-columns: 22px 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-divider);
+  transition: background-color var(--dur-fast) ease;
+}
+.traderRow:hover {
+  background: var(--color-surface);
+}
+.rank {
+  color: var(--color-neutral-600);
+  font-weight: 600;
+}
+.rank[data-top] {
+  color: var(--color-text);
+}
+.traderAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+/* Green = following, as the design system's avatar legend has it. */
+.traderRow[data-following] .traderAvatar :global(.avatar) {
+  box-shadow: 0 0 0 1.5px var(--pos-line);
+}
+.traderIdentity {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.traderNameRow {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.traderName {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.traderName:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-neutral-600);
+  text-underline-offset: 3px;
+}
+.followPill {
+  flex-shrink: 0;
+}
+/* One line keeps rows dense: the focus gives way before the record does,
+   and nothing can run under the figures beside it. */
+.traderMeta {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, max-content) max-content;
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.traderFocus {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.traderRecord {
+  flex-shrink: 0;
+}
+.tradersBody {
+  container-type: inline-size;
+}
+/* A narrow panel keeps name, record and money; focus and badge step aside. */
+@container (max-width: 350px) {
+  .traderFocus,
+  .traderSep {
+    display: none;
+  }
+}
+.traderMeta [data-low] {
+  color: var(--gold);
+}
+.panelBody[data-compact] .traderMeta {
+  display: none;
+}
+.panelBody[data-compact] .traderRow {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.traderReturn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+}
+.traderReturn b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.traderReturn span {
+  font-size: 11px;
+}
+.note {
+  padding: 10px 12px 16px;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------- Feed */
+.feedSeg {
+  flex-shrink: 0;
+}
+.segTrending.segTrending {
+  display: none;
+}
+.compose {
+  flex-shrink: 0;
+}
+.chipRow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-divider);
+  overflow-x: auto;
+}
+.chipRow :global(.chip) {
+  flex-shrink: 0;
+}
+.chipDivider {
+  width: 1px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0 2px;
+  background: var(--color-neutral-400);
+}
+.posts {
+  display: flex;
+  flex-direction: column;
+}
+.feedEnd {
+  padding: 22px 16px 28px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+  text-align: center;
+}
+.feedEnd button {
+  color: var(--color-text);
+  font-weight: 500;
+}
+.feedEnd button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* 06.6 · what failed, and what's still safe to read. */
+.feedError {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+  border-top: 2px solid var(--color-accent);
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-neutral-800);
+}
+.feedError > svg {
+  color: var(--color-text);
+}
+.feedError b {
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 600;
+}
+.narrowOnly.narrowOnly {
+  display: none;
+}
+
+/* --------------------------------------------------------- Trending */
+.live {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--pos-200);
+  color: var(--pos);
+  font-size: 11px;
+  font-weight: 500;
+}
+.live > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 3px rgba(181, 230, 161, 0.2);
+}
+.marketRow {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 40px 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) ease;
+}
+.marketRow:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+.tile {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-neutral-800);
+}
+.venue {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.marketText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.marketName {
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.marketMeta {
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spark {
+  width: 40px;
+  height: 18px;
+  opacity: 0.85;
+}
+.quote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.quote > span:first-child {
+  font-size: 14px;
+  font-weight: 500;
+}
+.quote > span:last-child {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.panelFooter {
+  display: flex;
+  justify-content: center;
+  padding: 14px 16px 20px;
+}
+.complete {
+  color: var(--color-neutral-700);
+  font-size: 11px;
+}
+
+/* Behind the Back / Fade drawer the panels soften and recede. The blur is
+   on the panels themselves: a backdrop-filter skips scrolled layers. */
+.columns > .panel {
+  transition: filter var(--dur-slow) var(--ease-out);
+}
+.columns[data-drawer] > .panel {
+  filter: blur(8px);
+}
+
+/* ------------------------------------------------ Resizable columns */
+.resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 9px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+.resizer[data-side="left"] {
+  left: calc(var(--left-drawn) - 5px);
+}
+.resizer[data-side="right"] {
+  right: calc(var(--right-drawn) - 4px);
+}
+.resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+  background: transparent;
+  transition:
+    background-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+.resizer:hover::after,
+.resizer[data-active]::after {
+  background: var(--color-neutral-600);
+  box-shadow: 0 0 0 1px rgba(123, 128, 139, 0.25);
+}
+.resizer:focus-visible::after {
+  background: var(--pos);
+  box-shadow: 0 0 0 1px rgba(181, 230, 161, 0.3);
+}
+
+/* ------------------------------------------------ Phone & tablet */
+.viewTabs,
+.fab {
+  display: none;
+}
+.viewCompose.viewCompose {
+  flex-shrink: 0;
+  margin: 0 8px 0 4px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .live > span {
+    animation: live 2.4s var(--ease-in-out) infinite;
+  }
+  @keyframes live {
+    50% {
+      box-shadow: 0 0 0 5px rgba(181, 230, 161, 0.06);
+    }
+  }
+}
+
+/* Between 900 and 1200 the markets panel folds into the feed's tabs. */
+@media (max-width: 1200px) {
+  .columns,
+  .columns[data-view="trending"] {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+  .resizer,
+  .panel[data-panel="trending"] {
+    display: none;
+  }
+  .segTrending.segTrending {
+    display: inline-flex;
+  }
+  .columns[data-view="trending"] .panel[data-panel="trending"] {
+    display: flex;
+  }
+  .columns[data-view="trending"] .panel[data-panel="feed"] {
+    display: none;
+  }
+}
+/* 900 and below: one panel at a time, switched by the 06.2 tabs. */
+@media (max-width: 900px) {
+  .viewTabs {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 4px 0 8px;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .viewTabList {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    overflow-x: auto;
+  }
+  .viewTabList button {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 12px 10px;
+    color: var(--color-neutral-700);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .viewTabList button:hover {
+    color: var(--color-text);
+  }
+  .viewTabList button[aria-pressed="true"] {
+    color: var(--color-text);
+    box-shadow: inset 0 -2px 0 var(--color-text);
+  }
+  .viewFilter.viewFilter {
+    position: relative;
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    color: var(--color-neutral-700);
+  }
+  .viewFilter:hover,
+  .viewFilter[aria-expanded="true"] {
+    color: var(--color-text);
+  }
+  .panel[data-panel="feed"] > .panelHeader {
+    display: none;
+  }
+  .columns,
+  .columns[data-view="trending"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel[data-panel="traders"],
+  .panel[data-panel="feed"] {
+    border-right: 0;
+  }
+  .panel[data-panel="traders"] {
+    display: none;
+  }
+  .columns[data-view="traders"] .panel[data-panel="traders"] {
+    display: flex;
+  }
+  .columns[data-view="traders"] .panel[data-panel="feed"] {
+    display: none;
+  }
+  .feedSeg,
+  .grip {
+    display: none;
+  }
+  .wideOnly.wideOnly {
+    display: none;
+  }
+  .narrowOnly.narrowOnly {
+    display: flex;
+  }
+}
+@media (max-width: 600px) {
+  .viewTabList {
+    padding: 0;
+  }
+  .viewFilter.viewFilter {
+    width: 44px;
+    height: 44px;
+  }
+  .viewCompose.viewCompose {
+    display: none;
+  }
+  .traderRow {
+    padding: 12px 16px;
+  }
+  .filters,
+  .chipRow {
+    padding: 10px 16px;
+  }
+  .panelHeader {
+    padding: 0 12px 0 16px;
+  }
+  .chipSelect {
+    height: 36px;
+  }
+  .marketRow {
+    padding: 12px 16px;
+  }
+  /* 06.2 · the compose button floats 16px above the tab bar. */
+  .fab {
+    position: fixed;
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 35;
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 4px 20px var(--bg);
+    color: var(--bg);
+  }
+  .fab:active {
+    transform: scale(0.97);
+  }
+}
+@media (max-width: 600px) {
+  .columns[data-drawer] > .panel {
+    filter: none;
+  }
+}
+@media (pointer: coarse) {
+  .tool.tool {
+    width: 40px;
+    height: 40px;
+  }
+}

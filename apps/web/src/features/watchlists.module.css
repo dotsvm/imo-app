@@ -1,0 +1,700 @@
+/* 10.1 · your lists | the chosen list. Each column scrolls on its own, and
+   both headers share one height so their rules meet. */
+.page {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.flex {
+  flex: 1;
+}
+.rail {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--color-divider);
+}
+.railHead,
+.detailHead {
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-divider);
+}
+.railHead {
+  gap: 8px;
+  padding: 0 14px 0 16px;
+}
+.railHead h1 {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.new.new {
+  padding: 6px 14px 6px 11px;
+}
+.lists {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.listLink {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) ease;
+}
+.listLink:hover {
+  background: var(--color-neutral-200);
+}
+.listLink[aria-current] {
+  background: var(--color-surface);
+  box-shadow: inset 2px 0 0 var(--pos);
+}
+.listLink:focus-visible {
+  outline: 2px solid var(--pos);
+  outline-offset: -2px;
+}
+.listLink b {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.listLink span {
+  color: var(--color-neutral-700);
+  font-size: 11.5px;
+}
+.railLabel {
+  padding: 18px 16px 6px;
+  color: var(--color-neutral-700);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sharedLists .listLink {
+  padding-block: 10px;
+  border-bottom: 0;
+}
+
+/* The chosen list. */
+.detail {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.detailHead {
+  gap: 10px;
+  padding: 0 20px 0 24px;
+}
+.detailHead h2 {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.deleteList.deleteList {
+  color: var(--color-accent-700);
+}
+.deleteList.deleteList:hover:not(:disabled) {
+  background: var(--neg-200);
+  color: var(--neg);
+}
+.rename {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nameInput.nameInput {
+  max-width: 320px;
+  height: 40px;
+  font-size: 17px;
+  font-weight: 500;
+}
+.rename :global(.field-error) {
+  white-space: nowrap;
+}
+.confirm {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.confirm p {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.confirm p b {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.confirm p span {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The design's grid, as a table: 28 · market · 110 · 60 · 60 · 70 · 80 · 40,
+   12px apart, 24px in from the edges. */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.colLead {
+  width: 58px;
+}
+.colSpark {
+  width: 122px;
+}
+.colYes,
+.colNo {
+  width: 72px;
+}
+.colChange {
+  width: 82px;
+}
+.colCloses {
+  width: 92px;
+}
+.colTail {
+  width: 64px;
+}
+.table th,
+.table td {
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--color-divider);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: middle;
+}
+.table th:first-child,
+.table td:first-child {
+  padding-left: 24px;
+}
+.table th:last-child,
+.table td:last-child {
+  padding-right: 18px;
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-block: 9px;
+  background: var(--color-bg);
+  color: var(--color-neutral-700);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.table tbody tr {
+  position: relative;
+  transition: background-color var(--dur-fast) ease;
+}
+.table tbody tr:hover {
+  background: var(--color-surface);
+}
+.table tbody tr:has(.market:focus-visible) {
+  outline: 2px solid var(--pos);
+  outline-offset: -2px;
+}
+.lead {
+  color: var(--color-neutral-600);
+}
+.lead > svg {
+  display: block;
+}
+.market {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--color-text);
+}
+/* The whole row opens the market, except in edit mode. */
+.market::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.market:focus-visible {
+  outline: none;
+}
+.table[data-editing] .market::after {
+  display: none;
+}
+.market b {
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.market span {
+  overflow: hidden;
+  color: var(--color-neutral-700);
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sparkCell {
+  line-height: 0;
+}
+.spark.spark {
+  width: 110px;
+  height: 24px;
+}
+.table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+.table .yes {
+  font-size: 14px;
+  font-weight: 600;
+}
+.no {
+  color: var(--color-accent-700);
+}
+.table .change {
+  font-weight: 500;
+}
+.closes {
+  color: var(--color-neutral-700);
+}
+.table .tail {
+  text-align: right;
+}
+.remove,
+.handle {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-neutral-700);
+  transition:
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.remove:hover {
+  background: var(--neg-200);
+  color: var(--neg);
+}
+.handle {
+  margin-left: -8px;
+  cursor: grab;
+  touch-action: none;
+}
+.handle:hover {
+  background: var(--color-neutral-300);
+  color: var(--color-text);
+}
+.handle:active {
+  cursor: grabbing;
+}
+/* A drag shows where the market will land. */
+.table tbody tr[data-dragging],
+.editRow[data-dragging] {
+  opacity: 0.5;
+}
+.table tbody tr[data-drop="before"] > * {
+  box-shadow: inset 0 2px 0 var(--pos);
+}
+.table tbody tr[data-drop="after"] > * {
+  box-shadow: inset 0 -2px 0 var(--pos);
+}
+
+.empty {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 40px 24px;
+}
+.empty > svg {
+  color: var(--color-neutral-700);
+}
+.empty b {
+  font-size: 17px;
+  font-weight: 600;
+}
+.empty p {
+  color: var(--color-neutral-800);
+  line-height: 1.5;
+}
+
+/* What just happened, with Undo: a pill at the bottom of the list. */
+.toastRegion {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  z-index: 5;
+  max-width: calc(100% - 32px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 18px;
+  border: 1px solid var(--color-neutral-500);
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-300);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-size: 13px;
+  pointer-events: auto;
+}
+.toast > span {
+  min-width: 0;
+  overflow: hidden;
+  padding-right: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toast:not(:has(button, a)) {
+  padding-block: 10px;
+  padding-right: 10px;
+}
+.toast button,
+.toast a {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  color: var(--pos);
+  font-weight: 600;
+  transition: background-color var(--dur-fast) ease;
+}
+.toast button:hover,
+.toast a:hover {
+  background: var(--pos-100);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    animation: toast-in var(--dur-base) var(--ease-out);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Narrower windows keep the essentials: market, Yes, 24h. */
+@media (max-width: 1180px) {
+  .page {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+  .table .colSpark {
+    display: none;
+  }
+  /* Two lines rather than an early ellipsis. */
+  .market b {
+    display: -webkit-box;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+@media (max-width: 960px) {
+  .table .colNo,
+  .table .colCloses {
+    display: none;
+  }
+  .detailHead h2 {
+    font-size: 20px;
+  }
+  .actions :global(.btn) {
+    padding-inline: 12px;
+  }
+}
+
+/* ----------------------------------------------------------- 10.2 phone */
+.phone {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.phoneHead {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 8px 8px 16px;
+}
+.phoneHead h1 {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.phoneNew.phoneNew {
+  width: 44px;
+  height: 44px;
+  color: var(--color-text);
+}
+.chips {
+  flex-shrink: 0;
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-divider);
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-pill);
+  color: var(--color-neutral-800);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+.chip[aria-current] {
+  border-color: var(--color-neutral-400);
+  background: var(--color-neutral-400);
+  color: var(--color-text);
+}
+.chip > svg {
+  color: var(--color-neutral-700);
+}
+.phoneMeta {
+  flex-shrink: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 4px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.more.more {
+  width: 40px;
+  height: 40px;
+}
+.phoneBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.swipe {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-divider);
+}
+.swipeAction {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-right: 22px;
+  background: var(--neg);
+  color: #2b120e;
+  font-size: 13px;
+  font-weight: 600;
+}
+.phoneRow {
+  position: relative;
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 12px 16px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  touch-action: pan-y;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.phoneRow[data-moving] {
+  transition: none;
+}
+.phoneRow:focus-visible {
+  outline: 2px solid var(--pos);
+  outline-offset: -2px;
+}
+.phoneTitle {
+  font-weight: 500;
+  line-height: 1.3;
+}
+.phonePrice {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+}
+.phoneStatus {
+  color: var(--color-neutral-700);
+  font-size: 11.5px;
+}
+.phoneMove {
+  font-size: 11.5px;
+  font-weight: 500;
+  text-align: right;
+}
+.editRow {
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-bg);
+}
+.editRow[data-drop="before"] {
+  box-shadow: inset 0 2px 0 var(--pos);
+}
+.editRow[data-drop="after"] {
+  box-shadow: inset 0 -2px 0 var(--pos);
+}
+.editRemove {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--neg-200);
+  color: var(--neg);
+}
+.editTitle {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.editTitle b {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.editTitle span {
+  color: var(--color-neutral-700);
+  font-size: 11.5px;
+}
+.editRow .handle {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.phone .toastRegion {
+  bottom: 16px;
+}
+.phone .empty {
+  padding: 32px 16px;
+}
+.nameSheet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nameSheet label {
+  color: var(--color-neutral-700);
+  font-size: 12px;
+}
+.nameSheet :global(.btn) {
+  margin-top: 8px;
+}
+.sheetActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .phoneRow {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out);
+  }
+  @starting-style {
+    .toast {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+}
