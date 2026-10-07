@@ -1,0 +1,17 @@
+{
+  "name": "@imo/core",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "fast-check": "4.10.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.15"
+  }
+}
