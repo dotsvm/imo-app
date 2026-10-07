@@ -1,0 +1,21 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["node"],
+    "paths": {
+      "~/*": ["./src/*"],
+      "~/assets/*": ["./assets/*"],
+      // The API's response types, read straight from the server package (types
+      // only), and the workspace packages those types are built from.
+      "@imo/core/*": ["../../packages/core/src/*"],
+      "@imo/venues/*": ["../../packages/venues/src/*"],
+      "@imo/domain/*": ["../../packages/domain/src/*"],
+      "@imo/server/*": ["../../packages/server/src/*"],
+      // Icons are imported one by one (the index pulls in all 1,500); typecheck
+      // them against the package's declarations, not its .tsx source.
+      "phosphor-react-native/src/icons/*": ["./node_modules/phosphor-react-native/lib/typescript/icons/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}

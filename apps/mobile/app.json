@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "imo",
+    "slug": "imo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "imo",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#090d0b",
+    "ios": {
+      "bundleIdentifier": "xyz.tryimo.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "xyz.tryimo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#090d0b",
+        "foregroundImage": "./assets/images/icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#090d0b",
+          "image": "./assets/images/splash-mark.png",
+          "imageWidth": 88
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cbc90b5d-9858-40c6-bd99-e487302aeb63"
+      }
+    },
+    "owner": "pawanxy"
+  }
+}
