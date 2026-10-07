@@ -60,7 +60,14 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: apps/mobile/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            apps/mobile/package-lock.json
+      # The app reads the API's types from packages/server, whose own
+      # dependencies (drizzle, zod) come from the root workspace.
+      - name: Install the workspace (for shared types)
+        run: npm ci
+        working-directory: .
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint src

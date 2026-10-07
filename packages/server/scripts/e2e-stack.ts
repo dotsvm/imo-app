@@ -10,6 +10,7 @@
  * (hunch_e2e_<name>) run more than one side by side. Refuses other databases.
  */
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { join } from "node:path";
 import { mkdirSync, openSync } from "node:fs";
 import postgres from "postgres";
 
@@ -71,8 +72,12 @@ const env: NodeJS.ProcessEnv = {
   NODE_ENV: "production",
 };
 
-function run(command: string, args: string[]) {
-  const result = spawnSync(command, args, { env, stdio: "inherit" });
+/** Every process runs from its own folder in the monorepo. */
+const ROOT = join(__dirname, "../../..");
+const at = (dir: string) => join(ROOT, dir);
+
+function run(command: string, args: string[], cwd = ROOT) {
+  const result = spawnSync(command, args, { env, stdio: "inherit", cwd });
   if (result.status !== 0) throw new Error(`${command} ${args.join(" ")} failed (${result.status})`);
 }
 
@@ -109,18 +114,18 @@ process.on("SIGTERM", () => stop(0));
 async function main() {
   console.log(`[e2e] fresh database ${DATABASE_URL}`);
   await freshDatabase();
-  run("npx", ["drizzle-kit", "migrate"]);
-  run("npx", ["tsx", "packages/server/scripts/seed.ts"]);
+  run("npx", ["drizzle-kit", "migrate"], at("packages/server"));
+  run("npx", ["tsx", "scripts/seed.ts"], at("packages/server"));
   if (!process.env.E2E_SKIP_BUILD) {
-    run("npx", ["next", "build"]);
-    run("npx", ["next", "build", "apps/waitlist"]);
+    run("npx", ["next", "build"], at("apps/web"));
+    run("npx", ["next", "build"], at("apps/waitlist"));
   }
 
   // Not test-results/: Playwright empties that when a run starts.
-  mkdirSync(".e2e", { recursive: true });
-  const logPath = `.e2e/worker-${PORT}.log`;
+  mkdirSync(at(".e2e"), { recursive: true });
+  const logPath = at(`.e2e/worker-${PORT}.log`);
   const log = openSync(logPath, "w");
-  const worker = spawn("npx", ["tsx", "apps/worker/src/main.ts"], { env, stdio: ["ignore", log, log] });
+  const worker = spawn("npx", ["tsx", "src/main.ts"], { env, stdio: ["ignore", log, log], cwd: at("apps/worker") });
   children.push(worker);
   worker.on("exit", (code) => {
     console.error(`[e2e] worker exited (${code}); see ${logPath}`);
@@ -129,15 +134,16 @@ async function main() {
 
   // The waitlist app answers before the web app does, so Playwright (which
   // waits on the web app) never starts with half the stack.
-  const waitlist = spawn("npx", ["next", "start", "apps/waitlist", "-p", WAITLIST_PORT], {
+  const waitlist = spawn("npx", ["next", "start", "-p", WAITLIST_PORT], {
     env: { ...env, APP_URL: `http://localhost:${WAITLIST_PORT}`, PORT: WAITLIST_PORT },
     stdio: "inherit",
+    cwd: at("apps/waitlist"),
   });
   children.push(waitlist);
   waitlist.on("exit", (code) => stop(code ?? 1));
   await until(`http://localhost:${WAITLIST_PORT}/api/v1/waitlist/config`);
 
-  const web = spawn("npx", ["next", "start", "-p", PORT], { env, stdio: "inherit" });
+  const web = spawn("npx", ["next", "start", "-p", PORT], { env, stdio: "inherit", cwd: at("apps/web") });
   children.push(web);
   web.on("exit", (code) => stop(code ?? 0));
 }

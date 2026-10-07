@@ -36,7 +36,7 @@ test("a cookie-only write from another site is refused; our own pages and bearer
 });
 
 test("every admin route refuses people who aren't admins", async () => {
-  const root = join(process.cwd(), "apps/web/src/app/api/v1/admin");
+  const root = join(process.cwd(), "src/app/api/v1/admin");
   const files: string[] = [];
   const walk = (dir: string) => {
     for (const name of readdirSync(dir)) {
