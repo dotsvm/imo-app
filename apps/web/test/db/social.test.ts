@@ -347,3 +347,18 @@ test("search finds markets, traders and predictions", async () => {
   const markets = await call<{ markets: { id: string }[] }>(search, "/api/v1/search?q=Fed cuts");
   assert.equal(markets.body.markets[0].id, "fed-dec");
 });
+
+test("a call shows the people who backed it, not those who faded it", async () => {
+  const made = await call<PostView>(post, "/api/v1/posts", {
+    auth: auth.ada,
+    body: { market: "cpi-oct", outcome: "Yes", text: "Used cars are doing the work this month.", confidence: "Low", disclosePosition: false, clientId: cid() },
+  });
+  assert.equal(made.status, 201, JSON.stringify(made.body));
+  const id = made.body.id;
+  // Backing it is a filled buy on its side from the post; fading is the other side.
+  await call(place_order, "/api/v1/orders", { auth: auth.bo, body: { market: "cpi-oct", side: "Buy", outcome: "Yes", amountCents: 2_000, postId: id, clientOrderId: cid() } });
+  await call(place_order, "/api/v1/orders", { auth: auth.cy, body: { market: "cpi-oct", side: "Buy", outcome: "No", amountCents: 2_000, postId: id, clientOrderId: cid() } });
+  const view = (await call<PostView & { backed: number; faded: number; backers: { handle: string }[] }>(getPost, `/api/v1/posts/${id}`, { auth: auth.bo, params: { id } })).body;
+  assert.deepEqual([view.backed, view.faded], [1, 1]);
+  assert.deepEqual(view.backers.map((b) => b.handle), [handle.bo]);
+});

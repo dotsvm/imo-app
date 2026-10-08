@@ -138,6 +138,19 @@ export async function hydratePosts(deps: PostDeps, db: Db, viewer: Viewer | null
     viewer,
     previews.map((c) => ({ marketId: marketIdOf.get(c.postId)!, userId: c.authorId })),
   );
+  // Who backed each call: the latest three people whose filled buy on the
+  // post's side came from its Back button.
+  const backerRows = await db.execute<{ post_id: string; handle: string; avatar_url: string | null }>(sql`
+    select b.post_id, u.handle, u.avatar_url from (
+      select o.post_id, o.user_id, row_number() over (partition by o.post_id order by max(o.created_at) desc) as n
+      from orders o join posts p on p.id = o.post_id
+      where o.post_id in ${ids} and o.side = 'buy' and o.filled_quantity > 0 and o.outcome = p.outcome
+      group by o.post_id, o.user_id
+    ) b join users u on u.id = b.user_id
+    where b.n <= 3 and u.deleted_at is null
+    order by b.post_id, b.n`);
+  const backersOf = new Map<string, { handle: string; avatarUrl: string | null }[]>();
+  for (const r of backerRows) backersOf.set(r.post_id, [...(backersOf.get(r.post_id) ?? []), { handle: r.handle, avatarUrl: r.avatar_url }]);
   const marketOf = new Map(markets.map((m) => [m.id, m]));
   const roomOf = new Map(rooms.map((r) => [r.id, r.slug]));
   const now = deps.clock.now().getTime();
@@ -164,6 +177,8 @@ export async function hydratePosts(deps: PostDeps, db: Db, viewer: Viewer | null
       reposts: p.reposts,
       views: p.views,
       backed: p.backed,
+      /** A few of the people who backed it (newest first), for the avatars beside the count. */
+      backers: backersOf.get(p.id) ?? [],
       faded: p.faded,
       commentCount: p.comments,
       evidenceShares: p.disclosePosition ? p.evidenceShares : 0,

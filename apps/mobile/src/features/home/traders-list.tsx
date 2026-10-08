@@ -1,7 +1,9 @@
 /** Home → Traders: the 30-day leaderboard by P&L, with each trader's record. */
 import { router } from "expo-router";
+import type { ReactElement } from "react";
 import {
   FlatList,
+  ScrollView,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -16,16 +18,18 @@ import { openTrader } from "~/lib/nav";
 import { color, font, space, text } from "~/theme/tokens";
 import { Notice } from "./notice";
 
-export function TradersList({ bottomInset }: { bottomInset: number }) {
+export function TradersList({ bottomInset, header }: { bottomInset: number; header?: ReactElement }) {
   const board = useLeaderboard("30D", "pnl", 50);
-  if (board.isPending) return <RowsSkeleton />;
-  if (board.isError)
+  if (board.isPending || board.isError)
     return (
-      <Notice
-        title="Traders didn't load"
-        body={board.error.message}
-        action={{ label: "Try again", onPress: () => board.refetch() }}
-      />
+      <ScrollView contentContainerStyle={{ paddingBottom: bottomInset }}>
+        {header}
+        {board.isPending ? (
+          <RowsSkeleton />
+        ) : (
+          <Notice title="Traders didn't load" body={board.error.message} action={{ label: "Try again", onPress: () => board.refetch() }} />
+        )}
+      </ScrollView>
     );
   const minSample = board.data.minSample;
   return (
@@ -41,14 +45,13 @@ export function TradersList({ bottomInset }: { bottomInset: number }) {
         />
       }
       ListHeaderComponent={
-        <Pressable
-          onPress={() => router.push("/leaderboard")}
-          style={styles.full}
-          accessibilityRole="link"
-        >
-          <Text style={styles.fullText}>30-day P&L · by all traders</Text>
-          <Text style={styles.fullLink}>Full board ›</Text>
-        </Pressable>
+        <>
+          {header}
+          <Pressable onPress={() => router.push("/leaderboard")} style={styles.full} accessibilityRole="link">
+            <Text style={styles.fullText}>30-day P&L · by all traders</Text>
+            <Text style={styles.fullLink}>Full board ›</Text>
+          </Pressable>
+        </>
       }
       ListEmptyComponent={
         <Notice

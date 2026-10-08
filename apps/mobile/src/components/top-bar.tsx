@@ -1,6 +1,7 @@
 /**
- * The Home header: the imo mark and name, a DEMO tag on demo servers, then
- * search and notifications.
+ * The page header: on Home the imo wordmark, elsewhere the mark and the
+ * page's name; a DEMO tag on demo servers; then notifications and search in
+ * round buttons.
  */
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -39,19 +40,20 @@ export function TopBar({ title = "imo", showSearch = true, extra, onSearch, onNo
   return (
     <View style={[styles.bar, { paddingTop: insets.top + space[2] }]}>
       <View style={styles.brand} accessible accessibilityRole="header" accessibilityLabel={title}>
-        <Image source={require("~/assets/brand/mark.png")} style={styles.mark} contentFit="contain" />
-        <Text style={styles.name}>{title}</Text>
+        {title === "imo" ? (
+          <Image source={require("~/assets/brand/wordmark.png")} style={styles.wordmark} contentFit="contain" />
+        ) : (
+          <>
+            <Image source={require("~/assets/brand/mark.png")} style={styles.mark} contentFit="contain" />
+            <Text style={styles.name}>{title}</Text>
+          </>
+        )}
       </View>
       <View style={styles.tools}>
         {demo ? (
           <View style={styles.demo} accessible accessibilityLabel="Demo server">
             <Text style={styles.demoText}>DEMO</Text>
           </View>
-        ) : null}
-        {showSearch ? (
-          <IconButton label="Search" onPress={onSearch}>
-            <MagnifyingGlassIcon size={23} weight="bold" color={color.text} />
-          </IconButton>
         ) : null}
         {extra ? (
           <IconButton label={extra.label} onPress={extra.onPress}>
@@ -62,9 +64,14 @@ export function TopBar({ title = "imo", showSearch = true, extra, onSearch, onNo
           label={unread ? `Notifications, ${unread} unread` : "Notifications"}
           onPress={onNotifications ?? (() => router.push("/notifications"))}
         >
-          <BellIcon size={23} weight="fill" color={color.text} />
+          <BellIcon size={22} weight="regular" color={color.text} />
           {unread ? <View style={styles.unread} /> : null}
         </IconButton>
+        {showSearch ? (
+          <IconButton label="Search" onPress={onSearch}>
+            <MagnifyingGlassIcon size={22} weight="bold" color={color.text} />
+          </IconButton>
+        ) : null}
       </View>
     </View>
   );
@@ -95,6 +102,8 @@ const styles = StyleSheet.create({
   },
   brand: { flexDirection: "row", alignItems: "center", gap: 10 },
   mark: { width: 26, height: 26 },
+  // The wordmark's own proportions (397 × 192).
+  wordmark: { width: 62, height: 30 },
   name: { fontFamily: font.medium, fontSize: 24, letterSpacing: -0.5, color: color.text },
   tools: { flexDirection: "row", alignItems: "center", gap: space[2] },
   demo: {
@@ -108,14 +117,14 @@ const styles = StyleSheet.create({
   demoText: { fontFamily: font.medium, fontSize: 12, letterSpacing: 0.6, color: color.gold },
   unread: {
     position: "absolute",
-    top: 8,
-    right: 9,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#7fd47a",
-    borderWidth: 1.5,
-    borderColor: color.bg,
+    top: 9,
+    right: 10,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#b5e6a1",
+    borderWidth: 2,
+    borderColor: "#14181a",
   },
-  icon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  icon: { width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: "#14181a" },
 });

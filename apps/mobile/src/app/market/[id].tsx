@@ -20,7 +20,6 @@ import { VenueBadge } from "~/components/venue-badge";
 import { useConfig } from "~/features/auth/auth";
 import { compactUsd } from "~/features/discover/market-row";
 import { PostCard } from "~/features/feed/post-card";
-import { recordLine, useRecords } from "~/features/feed/use-records";
 import { Notice } from "~/features/home/notice";
 import { PriceChart } from "~/features/market/price-chart";
 import { TradeSheet } from "~/features/trade/trade-sheet";
@@ -44,7 +43,6 @@ export default function MarketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const records = useRecords();
   const snapshot = useConfig().data?.dataSnapshot;
   // The clock, read once: the demo dataset's fixed moment, else when the page opened.
   const [opened] = useState(() => Date.now());
@@ -288,7 +286,6 @@ export default function MarketScreen() {
                   key={p.id}
                   post={p}
                   market={m}
-                  record={recordLine(records.byId.get(p.authorId), records.minSample)}
                   now={snapshot ? now : undefined}
                   onTrade={(_e, o) => setTrade(o)}
                 />

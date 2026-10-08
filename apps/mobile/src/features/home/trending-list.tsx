@@ -1,7 +1,8 @@
 /** Home → Trending: open markets in the server's trending order, with price and day's move. */
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import type { ReactElement } from "react";
+import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import type { MarketPage } from "@imo/server/dto/api-types";
 import { Skeleton } from "~/components/skeleton";
 import { MarketRow } from "~/features/discover/market-row";
@@ -10,22 +11,31 @@ import { useVenues } from "~/lib/venues";
 import { color, font, space, text } from "~/theme/tokens";
 import { Notice } from "./notice";
 
-export function TrendingList({ bottomInset }: { bottomInset: number }) {
+export function TrendingList({ bottomInset, header }: { bottomInset: number; header?: ReactElement }) {
   const venues = useVenues();
   const markets = useQuery({
     queryKey: ["markets", "trending"],
     queryFn: ({ signal }) => api<MarketPage>("/markets", { query: { sort: "trending", status: "open", limit: 40 }, signal }),
     staleTime: 30_000,
   });
-  if (markets.isPending) return <RowsSkeleton />;
-  if (markets.isError)
-    return <Notice title="Markets didn't load" body={markets.error.message} action={{ label: "Try again", onPress: () => markets.refetch() }} />;
+  if (markets.isPending || markets.isError)
+    return (
+      <ScrollView contentContainerStyle={{ paddingBottom: bottomInset }}>
+        {header}
+        {markets.isPending ? (
+          <RowsSkeleton />
+        ) : (
+          <Notice title="Markets didn't load" body={markets.error.message} action={{ label: "Try again", onPress: () => markets.refetch() }} />
+        )}
+      </ScrollView>
+    );
   return (
     <FlatList
       data={markets.data.items}
       keyExtractor={(m) => m.id}
       contentContainerStyle={{ paddingBottom: bottomInset }}
       refreshControl={<RefreshControl refreshing={markets.isRefetching} onRefresh={() => markets.refetch()} tintColor={color.neutral600} />}
+      ListHeaderComponent={header}
       ListEmptyComponent={<Notice title="No open markets" body="Markets show up here as venues list them." />}
       renderItem={({ item: m }) => (
         <MarketRow market={m} venue={venues.get(m.venueId)?.name ?? m.venueId} onPress={() => router.push(`/market/${m.id}`)} />

@@ -1,21 +1,25 @@
 /**
- * The floating tab bar from the design: a rounded panel over the content,
- * filled icons, the current tab in positive green, a light tick on change.
+ * The floating tab bar: a rounded panel over the content. The current tab
+ * opens into a light pill with its name; the others are icons; Profile is
+ * your own picture. A light tick on change.
  */
 import * as Haptics from "expo-haptics";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { Platform, StyleSheet, Text, View } from "react-native";
+import Animated, { LinearTransition, useReducedMotion } from "react-native-reanimated";
 import type { Icon } from "phosphor-react-native";
 import { ChartPieSliceIcon } from "phosphor-react-native/src/icons/ChartPieSlice";
 import { CompassIcon } from "phosphor-react-native/src/icons/Compass";
 import { HouseIcon } from "phosphor-react-native/src/icons/House";
 import { UserCircleIcon } from "phosphor-react-native/src/icons/UserCircle";
 import { UsersThreeIcon } from "phosphor-react-native/src/icons/UsersThree";
+import { useMe } from "~/features/auth/use-account";
 import { color, font, radius, space } from "~/theme/tokens";
+import { Avatar } from "./avatar";
 import { PressableScale } from "./pressable-scale";
 
 const TABS: Record<string, { label: string; Icon: Icon }> = {
-  index: { label: "Home", Icon: HouseIcon },
+  index: { label: "Feed", Icon: HouseIcon },
   discover: { label: "Discover", Icon: CompassIcon },
   rooms: { label: "Rooms", Icon: UsersThreeIcon },
   portfolio: { label: "Portfolio", Icon: ChartPieSliceIcon },
@@ -23,9 +27,13 @@ const TABS: Record<string, { label: string; Icon: Icon }> = {
 };
 
 /** Height of the bar itself; screens pad their scroll content by this plus the inset. */
-export const TAB_BAR_HEIGHT = 64;
+export const TAB_BAR_HEIGHT = 72;
+const PILL_INK = "#101412";
 
 export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
+  const me = useMe().data;
+  const reduced = useReducedMotion();
+  const layout = reduced ? undefined : LinearTransition.springify().damping(22).stiffness(260);
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, space[3]) }]}>
       <View style={styles.bar}>
@@ -33,25 +41,32 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
           const tab = TABS[route.name];
           if (!tab) return null;
           const focused = state.index === index;
-          const tint = focused ? color.pos : color.neutral600;
+          const profile = route.name === "me" && !!me?.user.avatarUrl;
           return (
-            <PressableScale
-              key={route.key}
-              style={styles.item}
-              pressedScale={0.92}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: focused }}
-              accessibilityLabel={tab.label}
-              onPress={() => {
-                const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-                if (focused || event.defaultPrevented) return;
-                if (Platform.OS !== "web") Haptics.selectionAsync();
-                navigation.navigate(route.name, route.params);
-              }}
-            >
-              <tab.Icon size={22} weight="fill" color={tint} />
-              <Text style={[styles.label, { color: tint }]}>{tab.label}</Text>
-            </PressableScale>
+            <Animated.View key={route.key} layout={layout} style={focused ? styles.slotOn : styles.slot}>
+              <PressableScale
+                style={[styles.item, focused && styles.itemOn]}
+                pressedScale={0.94}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: focused }}
+                accessibilityLabel={tab.label}
+                onPress={() => {
+                  const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+                  if (focused || event.defaultPrevented) return;
+                  if (Platform.OS !== "web") Haptics.selectionAsync();
+                  navigation.navigate(route.name, route.params);
+                }}
+              >
+                {profile ? (
+                  <View style={[styles.avatarRing, focused && styles.avatarRingOn]}>
+                    <Avatar url={me!.user.avatarUrl} size={focused ? 30 : 40} />
+                  </View>
+                ) : (
+                  <tab.Icon size={24} weight={focused ? "fill" : "regular"} color={focused ? PILL_INK : color.neutral700} />
+                )}
+                {focused ? <Text style={styles.label}>{tab.label}</Text> : null}
+              </PressableScale>
+            </Animated.View>
           );
         })}
       </View>
@@ -63,13 +78,20 @@ const styles = StyleSheet.create({
   wrap: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: space[4], pointerEvents: "box-none" },
   bar: {
     flexDirection: "row",
+    alignItems: "center",
     height: TAB_BAR_HEIGHT,
-    borderRadius: radius.drawer + 8,
-    backgroundColor: "rgba(14, 17, 20, 0.96)",
+    paddingHorizontal: 8,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(21, 25, 23, 0.97)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: color.neutral400,
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.45)",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
   },
-  item: { flex: 1, alignItems: "center", justifyContent: "center", gap: 4 },
-  label: { fontFamily: font.medium, fontSize: 11 },
+  slot: { flex: 1, alignItems: "center" },
+  slotOn: { flexGrow: 1.9, flexShrink: 0, flexBasis: 0, alignItems: "stretch" },
+  item: { height: 56, minWidth: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: radius.pill },
+  itemOn: { backgroundColor: "#eceadf", paddingHorizontal: 18 },
+  label: { fontFamily: font.semibold, fontSize: 15, color: PILL_INK },
+  avatarRing: { borderRadius: 24, borderWidth: 2, borderColor: color.neutral500 },
+  avatarRingOn: { borderColor: "transparent" },
 });
