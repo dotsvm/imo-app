@@ -5,8 +5,11 @@
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { type LayoutRectangle, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useReducedMotion, withSpring } from "react-native-reanimated";
+import Animated, { Easing, useAnimatedStyle, useReducedMotion, withTiming } from "react-native-reanimated";
 import { color, font, radius } from "~/theme/tokens";
+
+/** Quick out, soft landing — the bar glides, never bounces. */
+const SLIDE = { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) };
 
 interface Props<T extends string> {
   options: readonly { id: T; label: string }[];
@@ -27,8 +30,8 @@ export function UnderlineTabs<T extends string>({ options, value, onChange }: Pr
     if (reduced) return to;
     return {
       opacity: 1,
-      width: withSpring(width, { damping: 22, stiffness: 260 }),
-      transform: [{ translateX: withSpring(x, { damping: 22, stiffness: 260 }) }],
+      width: withTiming(width, SLIDE),
+      transform: [{ translateX: withTiming(x, SLIDE) }],
     };
   });
 

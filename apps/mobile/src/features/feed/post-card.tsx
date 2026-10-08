@@ -168,8 +168,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.06)",
   },
-  // A white backing for logos with transparency, under a faint ring.
-  tile: { width: 32, height: 32, borderRadius: 10, overflow: "hidden", backgroundColor: "#fff" },
+  // Logos sit on the box's own color, so round ones (Jupiter) read as clean circles.
+  tile: { width: 32, height: 32, borderRadius: 10, overflow: "hidden", backgroundColor: "#121815" },
   tileRing: { ...StyleSheet.absoluteFill, borderRadius: 10, borderWidth: 1, borderColor: HAIRLINE },
   marketText: { flex: 1, gap: 2 },
   marketTitle: { fontFamily: font.medium, fontSize: 13, lineHeight: 17, color: color.text },

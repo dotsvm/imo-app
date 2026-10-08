@@ -12,6 +12,11 @@ export const VENUE_LOGOS: Record<string, ImageSourcePropType> = {
   kalshi: require("../../assets/logos/kalshi.png"),
 };
 
+/** Round logos' own ground color, to fill the corners when drawn as a square tile. */
+export const VENUE_LOGO_GROUND: Record<string, string> = {
+  jupiter: "#0f1524",
+};
+
 export const TOKEN_LOGOS = {
   USDC: require("../../assets/logos/usdc.png") as ImageSourcePropType,
   SOL: require("../../assets/logos/sol.png") as ImageSourcePropType,
