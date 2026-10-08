@@ -4,7 +4,7 @@ import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { color } from "~/theme/tokens";
 
-export function Sparkline({ points, height = 64 }: { points: number[]; height?: number }) {
+export function Sparkline({ points, height = 64, strokeWidth = 1.75 }: { points: number[]; height?: number; strokeWidth?: number }) {
   const [width, setWidth] = useState(0);
   const pad = 3;
   let d = "";
@@ -24,7 +24,7 @@ export function Sparkline({ points, height = 64 }: { points: number[]; height?: 
     <View style={{ height }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityElementsHidden>
       {d ? (
         <Svg width={width} height={height}>
-          <Path d={d} stroke={color.pos} strokeWidth={1.75} fill="none" strokeLinejoin="round" strokeLinecap="round" opacity={0.9} />
+          <Path d={d} stroke={color.pos} strokeWidth={strokeWidth} fill="none" strokeLinejoin="round" strokeLinecap="round" />
         </Svg>
       ) : null}
     </View>

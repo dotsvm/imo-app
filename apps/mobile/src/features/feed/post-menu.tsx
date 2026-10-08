@@ -14,6 +14,7 @@ import { setFollowing } from "~/features/auth/onboarding";
 import { price } from "~/lib/format";
 import { bestAsk, opposite, type Outcome } from "~/lib/market";
 import { color, font, radius, space, text } from "~/theme/tokens";
+import { useCanTrade } from "~/features/trade/use-tradable";
 
 interface Props {
   post: PostDTO;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function PostMenu({ post, market, open, onClose, onTrade }: Props) {
+  const canTrade = useCanTrade();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const first = post.author.name.split(" ")[0];
@@ -54,7 +56,7 @@ export function PostMenu({ post, market, open, onClose, onTrade }: Props) {
             onPress={toggleFollow}
           />
         ) : null}
-        {market.status === "open" ? (
+        {canTrade(market) ? (
           <Row
             icon={<ArrowRightIcon size={20} color={color.text} />}
             label={`Fade · ${other} ${price(bestAsk(market, other))}`}

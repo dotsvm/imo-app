@@ -9,7 +9,6 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { XIcon } from "phosphor-react-native/src/icons/X";
 import type { QuoteDTO } from "@imo/server/dto/api-types";
-import { PRIMARY_INK } from "~/components/button";
 import { HoldButton } from "~/components/hold-button";
 import { placeWalletOrder, STEP_LABEL, type OrderStep } from "~/features/wallet/orders";
 import { useTrading } from "~/features/wallet/use-trading";
@@ -44,6 +43,15 @@ export function SellSheet({ open, marketId, title, outcome, shares, costCents, o
   const [problem, setProblem] = useState<string | null>(null);
   const [step, setStep] = useState<OrderStep | null>(null);
   const trading = useTrading();
+  // A fresh sheet each time it opens: the whole position, no leftover message.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setPart(1);
+      setProblem(null);
+    }
+  }
   // Wallet venues hold fractions of a share (16.66); "All" sells every one.
   const count = trading.live
     ? part === 1 ? shares : Math.max(0.01, Math.floor(shares * part * 100) / 100)
@@ -66,7 +74,7 @@ export function SellSheet({ open, marketId, title, outcome, shares, costCents, o
   async function sell() {
     if (!q) return;
     if (trading.live && trading.wallet.status !== "ready") {
-      setProblem(trading.wallet.status === "loading" ? "Your wallet is still connecting. Try again in a moment." : trading.wallet.reason);
+      setProblem(trading.wallet.status === "loading" ? "Your wallet is still loading. Try again in a moment." : trading.wallet.reason);
       return;
     }
     setSelling(true);
@@ -85,8 +93,9 @@ export function SellSheet({ open, marketId, title, outcome, shares, costCents, o
           : await api<{ status: string; filledShares: number; reason: string | null }>("/orders", {
               body: { ...body, expectedPriceCents: q.priceCents },
             });
-      if (order.status === "pending") throw new Error("Your sale is on its way at Jupiter. It'll show in your portfolio when it fills.");
-      if (order.status === "rejected" || order.status === "failed" || order.filledShares === 0)
+      // Still filling after we stopped following: it's placed, not failed. The
+      // portfolio's Orders list shows it until it fills; never sell twice.
+      if (order.status !== "pending" && (order.status === "rejected" || order.status === "failed" || order.filledShares === 0))
         throw new Error(order.reason ?? "The sale didn't fill. Nothing changed.");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["portfolio"] }),
@@ -106,14 +115,14 @@ export function SellSheet({ open, marketId, title, outcome, shares, costCents, o
   return (
     <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close" />
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + space[2], 28) }]}>
         <View style={styles.grip} />
         <View style={styles.head}>
           <Text style={styles.headText} numberOfLines={1}>
             Sell {outcome} · {title}
           </Text>
-          <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Close">
-            <XIcon size={20} color={color.neutral700} />
+          <Pressable onPress={onClose} style={styles.close} accessibilityRole="button" accessibilityLabel="Close">
+            <XIcon size={16} weight="bold" color={color.neutral700} />
           </Pressable>
         </View>
         <Text style={styles.big}>
@@ -140,12 +149,12 @@ export function SellSheet({ open, marketId, title, outcome, shares, costCents, o
           <Line
             label="Profit on these shares"
             value={q ? signedUsd(Math.round(getCents - basis)) : "—"}
-            tint={q ? (getCents - basis < 0 ? color.neg : color.pos) : undefined}
+            tint={q ? (getCents - basis < 0 ? color.neg : getCents - basis > 0 ? color.gain : undefined) : undefined}
           />
         </View>
         {problem || quote.error ? <Text style={styles.problem}>{problem ?? (quote.error as Error).message}</Text> : null}
         <HoldButton
-          label={trading.live ? "Hold to sign and sell" : "Hold to sell"}
+          label="Hold to sell"
           onComplete={sell}
           loading={selling}
           disabled={!q || quote.isFetching}
@@ -179,27 +188,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     gap: space[4],
     paddingHorizontal: space[5],
-    paddingTop: space[2],
-    borderTopLeftRadius: radius.drawer + 4,
-    borderTopRightRadius: radius.drawer + 4,
-    backgroundColor: "#0d1210",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
+    paddingTop: 10,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    backgroundColor: "#0c100e",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 -20px 60px rgba(0, 0, 0, 0.6)",
   },
-  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: color.neutral500 },
+  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: radius.pill, backgroundColor: "rgba(255, 255, 255, 0.14)", marginBottom: -2 },
   head: { flexDirection: "row", alignItems: "center", gap: space[3] },
-  headText: { flex: 1, fontFamily: font.medium, fontSize: text.body, color: color.neutral800 },
+  headText: { flex: 1, fontFamily: font.regular, fontSize: text.ui, color: color.text },
+  close: { width: 44, height: 44, marginVertical: -14, marginRight: -14, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   big: { fontFamily: font.medium, fontSize: 32, letterSpacing: -1, color: color.text, fontVariant: ["tabular-nums"] },
   at: { color: color.neutral600 },
   parts: { flexDirection: "row", gap: space[2] },
   part: { height: 36, paddingHorizontal: 16, borderRadius: radius.pill, justifyContent: "center", backgroundColor: color.neutral200 },
   partOn: { backgroundColor: "#eceadf" },
   partText: { fontFamily: font.medium, fontSize: text.body, color: color.neutral800 },
-  partTextOn: { color: PRIMARY_INK },
-  lines: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.neutral400, paddingTop: space[2] },
+  partTextOn: { color: "#0b0d0c" },
+  lines: { borderTopWidth: 1, borderTopColor: "rgba(255, 255, 255, 0.08)", paddingTop: space[2] },
   line: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8 },
-  lineLabel: { fontFamily: font.regular, fontSize: text.body, color: color.neutral800 },
-  lineValue: { fontFamily: font.regular, fontSize: text.body, color: color.text, fontVariant: ["tabular-nums"] },
+  lineLabel: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
+  lineValue: { fontFamily: font.regular, fontSize: text.ui, color: color.text, fontVariant: ["tabular-nums"] },
   lineStrong: { fontFamily: font.medium, fontSize: text.post },
   problem: { fontFamily: font.regular, fontSize: text.ui, color: color.neg },
   fine: { fontFamily: font.regular, fontSize: 11, color: color.neutral700, textAlign: "center" },

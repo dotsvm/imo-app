@@ -92,9 +92,9 @@ function Bridge({ children }: { children: ReactNode }) {
       case "not-created":
         return { status: "error", reason: "No wallet is linked to this account yet." };
       case "disconnected":
-        return { status: "error", reason: "Your wallet is disconnected. Sign in again to reconnect it." };
+        return { status: "error", reason: "Your wallet isn’t available right now. Sign in again to load it." };
       default:
-        return { status: "error", reason: "Your wallet couldn't connect. Try again in a moment." };
+        return { status: "error", reason: "Your wallet couldn't load. Try again in a moment." };
     }
   }, [isReady, solana.status, wallet, sign]);
 

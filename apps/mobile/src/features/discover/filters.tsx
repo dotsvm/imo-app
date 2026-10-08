@@ -99,11 +99,17 @@ export function FilterSheet({ open, value, category, onApply, onClose }: Props) 
   return (
     <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close filters" />
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + space[2], 28) }]}>
         <View style={styles.grip} />
         <View style={styles.head}>
           <Text style={styles.title}>Filter markets</Text>
-          <Pressable onPress={() => setDraft(DEFAULT_FILTERS)} hitSlop={10} accessibilityRole="button">
+          <Pressable
+            onPress={() => setDraft(DEFAULT_FILTERS)}
+            hitSlop={6}
+            style={({ pressed }) => [styles.resetPill, pressed && styles.chipPressed]}
+            accessibilityRole="button"
+            accessibilityLabel="Reset filters"
+          >
             <Text style={styles.reset}>Reset</Text>
           </Pressable>
         </View>
@@ -121,9 +127,7 @@ export function FilterSheet({ open, value, category, onApply, onClose }: Props) 
                 label={o.label}
                 on={draft.venue === o.id}
                 onPress={() => set({ venue: o.id })}
-                lead={
-                  o.mark ? <VenueMark venueId={o.id} size={16} /> : null
-                }
+                lead={o.mark ? <VenueMark venueId={o.id} size={14} /> : null}
               />
             ))}
           </Group>
@@ -176,9 +180,10 @@ function Chip({ label, on, onPress, lead }: { label: string; on: boolean; onPres
       onPress={onPress}
       style={({ pressed }) => [styles.chip, on && styles.chipOn, pressed && styles.chipPressed]}
       accessibilityRole="radio"
+      accessibilityLabel={label}
       accessibilityState={{ checked: on }}
     >
-      {on ? <CheckIcon size={14} weight="bold" color="#0b0d0c" /> : lead}
+      {on ? <CheckIcon size={12} weight="bold" color="#0b0d0c" /> : lead}
       <Text style={[styles.chipText, on && styles.chipTextOn]}>{label}</Text>
     </Pressable>
   );
@@ -192,37 +197,37 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     maxHeight: "88%",
-    paddingHorizontal: space[5],
-    paddingTop: space[2],
-    borderTopLeftRadius: radius.drawer + 4,
-    borderTopRightRadius: radius.drawer + 4,
-    backgroundColor: "#0d1210",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    backgroundColor: "#0c100e",
+    boxShadow: "0 -20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
   },
-  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: color.neutral500, marginBottom: space[4] },
+  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: radius.pill, backgroundColor: "rgba(255, 255, 255, 0.14)", marginBottom: space[3] },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  title: { fontFamily: font.medium, fontSize: 19, color: color.text },
-  reset: { fontFamily: font.regular, fontSize: text.body, color: color.neutral700 },
-  body: { paddingTop: space[4], paddingBottom: space[5], gap: space[5] },
-  group: { gap: space[3] },
-  groupLabel: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: space[2] },
+  title: { flex: 1, fontFamily: font.medium, fontSize: 18, color: color.text },
+  resetPill: { height: 32, paddingHorizontal: space[3], marginRight: -space[3], borderRadius: radius.pill, justifyContent: "center" },
+  reset: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
+  body: { paddingTop: 22, paddingBottom: 22, gap: 22 },
+  group: { gap: 10 },
+  groupLabel: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
-    height: 38,
+    gap: 6,
+    height: 36,
     paddingHorizontal: 14,
     borderRadius: radius.pill,
     backgroundColor: color.neutral200,
   },
   chipOn: { backgroundColor: "#eceadf" },
   chipPressed: { transform: [{ scale: 0.97 }] },
-  chipText: { fontFamily: font.medium, fontSize: text.body, color: color.neutral800 },
-  chipTextOn: { color: "#0b0d0c" },
-  rangeHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: -space[3] },
-  rangeValue: { fontFamily: font.medium, fontSize: text.body, color: color.text, fontVariant: ["tabular-nums"] },
-  rangeLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: -space[3] },
-  rangeLabel: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  chipText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral800 },
+  chipTextOn: { fontFamily: font.medium, color: "#0b0d0c" },
+  rangeHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: -8 },
+  rangeValue: { fontFamily: font.regular, fontSize: text.ui, color: color.text, fontVariant: ["tabular-nums"] },
+  rangeLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: -8 },
+  rangeLabel: { fontFamily: font.regular, fontSize: 11, color: color.neutral700 },
 });

@@ -10,13 +10,15 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { DotsThreeIcon } from "phosphor-react-native/src/icons/DotsThree";
 import { Avatar } from "~/components/avatar";
 import { BackButton } from "~/components/back-button";
+import { VenueMark } from "~/components/venue-mark";
 import { openTrader } from "~/lib/nav";
 import { ago, arrowUsd, count, price } from "~/lib/format";
 import { bestAsk, bestBid, type Outcome } from "~/lib/market";
-import { color, font, radius, space, text } from "~/theme/tokens";
+import { color, font, space } from "~/theme/tokens";
 import { PostMenu } from "./post-menu";
 import { Reactions } from "./reactions";
 import type { FeedEntry } from "./use-feed";
+import { useCanTrade } from "~/features/trade/use-tradable";
 
 interface Props extends FeedEntry {
   /** "Now" for relative times: the demo dataset's fixed moment, else the clock. */
@@ -25,19 +27,20 @@ interface Props extends FeedEntry {
 }
 
 export const PostCard = memo(function PostCard({ post, market, now, onTrade }: Props) {
+  const canTrade = useCanTrade();
   const [menu, setMenu] = useState(false);
   const ask = bestAsk(market, post.outcome);
   const bid = bestBid(market, post.outcome);
   const disclosed = post.disclosePosition && post.evidenceShares > 0;
   // Open positions mark to the executable bid, as the portfolio does.
   const unrealized = disclosed ? (bid - post.entryPrice) * post.evidenceShares : 0;
-  const pnlColor = unrealized > 0 ? color.pos : unrealized < 0 ? color.neg : color.neutral700;
+  const pnlColor = unrealized > 0 ? color.gain : unrealized < 0 ? color.neg : color.neutral700;
   const open = () => openTrader(post.author.handle, post.author.isYou);
 
   return (
     <View style={styles.card}>
       <Pressable onPress={open} accessibilityRole="link" accessibilityLabel={`${post.author.name}'s profile`}>
-        <Avatar url={post.author.avatarUrl} size={44} />
+        <Avatar url={post.author.avatarUrl} size={40} />
       </Pressable>
 
       <View style={styles.main}>
@@ -57,7 +60,7 @@ export const PostCard = memo(function PostCard({ post, market, now, onTrade }: P
             accessibilityRole="button"
             accessibilityLabel={`More actions for ${post.author.name.split(" ")[0]}’s call`}
           >
-            <DotsThreeIcon size={20} weight="bold" color={color.neutral600} />
+            <DotsThreeIcon size={16} weight="bold" color={color.neutral700} />
           </Pressable>
         </View>
 
@@ -74,8 +77,8 @@ export const PostCard = memo(function PostCard({ post, market, now, onTrade }: P
               {post.backers.length ? (
                 <View style={styles.stack} accessibilityElementsHidden>
                   {post.backers.map((b, i) => (
-                    <View key={b.handle} style={[styles.stackItem, i > 0 && { marginLeft: -8 }]}>
-                      <Avatar url={b.avatarUrl ?? ""} size={22} />
+                    <View key={b.handle} style={[styles.stackItem, i > 0 && { marginLeft: -5 }]}>
+                      <Avatar url={b.avatarUrl ?? ""} size={18} />
                     </View>
                   ))}
                 </View>
@@ -85,6 +88,10 @@ export const PostCard = memo(function PostCard({ post, market, now, onTrade }: P
           ) : null}
 
           <View style={styles.market}>
+            <View style={styles.tile}>
+              <VenueMark venueId={market.venueId} tile size={32} />
+              <View style={styles.tileRing} />
+            </View>
             <View style={styles.marketText}>
               <Text style={styles.marketTitle} numberOfLines={2}>
                 {market.shortTitle || market.title}
@@ -107,8 +114,8 @@ export const PostCard = memo(function PostCard({ post, market, now, onTrade }: P
         <View style={styles.actions}>
           <Reactions post={post} showSave={false} />
           <View style={styles.spacer} />
-          {market.status === "open" ? (
-            <BackButton outcome={post.outcome} price={price(ask)} onPress={() => onTrade({ post, market }, post.outcome)} />
+          {canTrade(market) ? (
+            <BackButton size="sm" outcome={post.outcome} price={price(ask)} onPress={() => onTrade({ post, market }, post.outcome)} />
           ) : null}
         </View>
       </View>
@@ -124,45 +131,51 @@ export const PostCard = memo(function PostCard({ post, market, now, onTrade }: P
   );
 });
 
+const HAIRLINE = "rgba(255, 255, 255, 0.08)";
+
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    gap: space[3],
+    gap: 10,
     paddingHorizontal: space[4],
-    paddingTop: space[4],
-    paddingBottom: space[3],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
+    paddingTop: 14,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: HAIRLINE,
   },
-  main: { flex: 1, gap: 10 },
-  head: { flexDirection: "row", alignItems: "center", gap: space[2], marginTop: 2 },
-  who: { flex: 1, flexDirection: "row", alignItems: "baseline", gap: 6, minWidth: 0 },
-  name: { fontFamily: font.semibold, fontSize: 16, color: color.text, flexShrink: 1 },
-  handle: { fontFamily: font.regular, fontSize: 15, color: color.neutral700, flexShrink: 2, fontVariant: ["tabular-nums"] },
-  more: { width: 28, height: 24, alignItems: "flex-end", justifyContent: "center" },
-  open: { gap: 12 },
+  main: { flex: 1, gap: 6 },
+  head: { flexDirection: "row", alignItems: "center", gap: 5 },
+  who: { flex: 1, flexDirection: "row", alignItems: "baseline", gap: 5, minWidth: 0 },
+  name: { fontFamily: font.semibold, fontSize: 14, color: color.text, flexShrink: 1 },
+  handle: { fontFamily: font.regular, fontSize: 14, color: color.neutral700, flexShrink: 2, fontVariant: ["tabular-nums"] },
+  more: { width: 28, height: 20, alignItems: "flex-end", justifyContent: "center" },
+  open: { gap: 6 },
   openPressed: { opacity: 0.7 },
-  body: { fontFamily: font.regular, fontSize: 17, lineHeight: 25, color: color.text },
-  backers: { flexDirection: "row", alignItems: "center", gap: 8 },
+  body: { fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: color.text },
+  backers: { flexDirection: "row", alignItems: "center", gap: 6 },
   stack: { flexDirection: "row" },
-  stackItem: { borderRadius: 13, borderWidth: 2, borderColor: color.bg },
-  backedText: { fontFamily: font.regular, fontSize: 14, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  stackItem: { borderRadius: 11, borderWidth: 2, borderColor: color.bg },
+  backedText: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
   market: {
     flexDirection: "row",
     alignItems: "center",
-    gap: space[3],
-    paddingHorizontal: space[4],
-    paddingVertical: 13,
-    borderRadius: radius.panel,
-    backgroundColor: "#111513",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
+    gap: 10,
+    marginTop: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    backgroundColor: "#121815",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
   },
-  marketText: { flex: 1, gap: 4 },
-  marketTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
-  marketMeta: { fontFamily: font.regular, fontSize: 13, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  marketFigure: { alignItems: "flex-end", gap: 4 },
-  pnl: { fontFamily: font.semibold, fontSize: text.post, fontVariant: ["tabular-nums"] },
-  actions: { flexDirection: "row", alignItems: "center", gap: space[4], minHeight: 48 },
+  // A white backing for logos with transparency, under a faint ring.
+  tile: { width: 32, height: 32, borderRadius: 10, overflow: "hidden", backgroundColor: "#fff" },
+  tileRing: { ...StyleSheet.absoluteFill, borderRadius: 10, borderWidth: 1, borderColor: HAIRLINE },
+  marketText: { flex: 1, gap: 2 },
+  marketTitle: { fontFamily: font.medium, fontSize: 13, lineHeight: 17, color: color.text },
+  marketMeta: { fontFamily: font.regular, fontSize: 11, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  marketFigure: { alignItems: "flex-end", gap: 2 },
+  pnl: { fontFamily: font.semibold, fontSize: 13, fontVariant: ["tabular-nums"] },
+  actions: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44, marginTop: 2 },
   spacer: { flex: 1 },
 });

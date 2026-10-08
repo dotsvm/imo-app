@@ -329,7 +329,7 @@ function useTrade(market: Market, initialOutcome: Outcome, initialSide: Side) {
           },
           {
             k: "App fee",
-            note: "imo · 0.5%",
+            note: "imo fee · 0.5%",
             v: dash(usd(shown?.appFeeCents ?? 0)),
           },
           {
@@ -352,7 +352,7 @@ function useTrade(market: Market, initialOutcome: Outcome, initialSide: Side) {
           },
           {
             k: "App fee",
-            note: "imo · 0.5%",
+            note: "imo fee · 0.5%",
             v: dash(`−${usd(shown?.appFeeCents ?? 0)}`),
           },
           {

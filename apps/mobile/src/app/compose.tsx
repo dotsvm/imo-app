@@ -24,6 +24,9 @@ import { color, font, radius, space, text } from "~/theme/tokens";
 
 const LEVELS: Confidence[] = ["Low", "Medium", "High"];
 const MAX = 600;
+const BAR_HEIGHTS = [8, 14, 22];
+/** Quiet hints and disabled steppers. */
+const MUTED = "#94a197";
 
 export default function Compose() {
   const insets = useSafeAreaInsets();
@@ -77,11 +80,18 @@ export default function Compose() {
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={[styles.header, { paddingTop: Platform.OS === "ios" ? space[3] : insets.top + space[2] }]}>
-        <Pressable onPress={close} hitSlop={10} accessibilityRole="button">
+        <Text style={styles.title} accessibilityRole="header">
+          New prediction
+        </Text>
+        <Pressable
+          onPress={close}
+          hitSlop={4}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.cancelHit, pressed && styles.cancelPressed]}
+        >
           <Text style={styles.cancel}>Cancel</Text>
         </Pressable>
-        <Text style={styles.title}>New prediction</Text>
-        <Button size="sm" label="Publish" onPress={publish} disabled={!ready} loading={publishing} />
+        <Button size="sm" style={styles.publish} label="Publish" onPress={publish} disabled={!ready} loading={publishing} />
       </View>
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
@@ -125,7 +135,7 @@ export default function Compose() {
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
               >
-                {on ? <CheckIcon size={15} weight="bold" color={side === "Yes" ? color.pos : color.neg} /> : null}
+                {on ? <CheckIcon size={13} weight="bold" color={side === "Yes" ? color.pos : color.neg} /> : null}
                 <Text style={[styles.sideText, on && { color: side === "Yes" ? color.pos : color.neg }]}>
                   {side}
                   {m ? ` · ${price(bestAsk(m, side))}` : ""}
@@ -140,6 +150,8 @@ export default function Compose() {
           onChangeText={(t) => updateDraft({ text: t })}
           placeholder="What’s your read, and why? Say what would change your mind."
           placeholderTextColor={color.neutral600}
+          selectionColor={color.pos}
+          cursorColor={color.pos}
           multiline
           maxLength={MAX}
           autoFocus
@@ -149,25 +161,30 @@ export default function Compose() {
       </ScrollView>
 
       <View style={[styles.foot, { paddingBottom: Math.max(insets.bottom, space[3]) }]}>
-        <View style={styles.conviction}>
+        <Pressable
+          onPress={() => updateDraft({ confidence: LEVELS[(level + 1) % LEVELS.length]! })}
+          style={({ pressed }) => [styles.conviction, pressed && styles.convictionPressed]}
+          accessibilityRole="button"
+          accessibilityLabel={`${draft.confidence} conviction. Tap to change`}
+        >
           <Bars level={level} />
           <View style={styles.convictionText}>
             <Text style={styles.convictionTitle}>{draft.confidence} conviction</Text>
-            <Text style={styles.convictionHint}>Shown on your post</Text>
+            <Text style={styles.convictionHint}>Tap to change · shown on your post</Text>
           </View>
           <Stepper
             label="Less sure"
             disabled={level === 0}
             onPress={() => updateDraft({ confidence: LEVELS[level - 1]! })}
-            icon={<MinusIcon size={14} weight="bold" color={color.text} />}
+            icon={<MinusIcon size={13} weight="bold" color={level === 0 ? MUTED : color.text} />}
           />
           <Stepper
             label="More sure"
             disabled={level === LEVELS.length - 1}
             onPress={() => updateDraft({ confidence: LEVELS[level + 1]! })}
-            icon={<PlusIcon size={14} weight="bold" color={color.text} />}
+            icon={<PlusIcon size={13} weight="bold" color={level === LEVELS.length - 1 ? MUTED : color.text} />}
           />
-        </View>
+        </Pressable>
         {problem ? <Text style={styles.problem}>{problem}</Text> : null}
         <View style={styles.status}>
           <Text style={styles.statusText} numberOfLines={1}>
@@ -190,7 +207,7 @@ function Bars({ level }: { level: number }) {
   return (
     <View style={styles.bars} accessibilityElementsHidden>
       {[0, 1, 2].map((i) => (
-        <View key={i} style={[styles.bar, { height: 7 + i * 5 }, i <= level && styles.barOn]} />
+        <View key={i} style={[styles.bar, { height: BAR_HEIGHTS[i] }, i <= level && styles.barOn]} />
       ))}
     </View>
   );
@@ -217,46 +234,102 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: space[4],
-    paddingBottom: space[3],
+    gap: space[2],
+    minHeight: 52,
+    paddingLeft: space[2],
+    paddingRight: space[3],
   },
-  cancel: { fontFamily: font.regular, fontSize: text.post, color: color.neutral800 },
-  title: { fontFamily: font.medium, fontSize: 16, color: color.text },
-  body: { paddingHorizontal: space[4], gap: space[3], paddingBottom: space[5] },
+  // Centered on the screen, whatever the widths of Cancel and Publish.
+  title: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    lineHeight: 52,
+    textAlign: "center",
+    fontFamily: font.medium,
+    fontSize: 15,
+    color: color.text,
+    pointerEvents: "none",
+  },
+  cancelHit: { minHeight: 44, paddingHorizontal: 10, justifyContent: "center", borderRadius: radius.pill },
+  cancelPressed: { backgroundColor: color.neutral200 },
+  cancel: { fontFamily: font.regular, fontSize: 14, color: color.neutral800 },
+  publish: { height: 38, paddingHorizontal: 18 },
+  body: { flexGrow: 1, paddingHorizontal: space[4], paddingTop: space[2], gap: 14, paddingBottom: 14 },
   market: {
     flexDirection: "row",
     alignItems: "center",
     gap: space[3],
-    padding: space[3],
-    borderRadius: radius.panel,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 14,
+    borderRadius: 16,
     backgroundColor: color.surface,
   },
   marketPressed: { backgroundColor: color.neutral200 },
   mark: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   markEmpty: { backgroundColor: color.neutral300 },
-  marketText: { flex: 1, gap: 4 },
-  marketTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
-  marketMeta: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  change: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
-  sides: { flexDirection: "row", padding: 4, borderRadius: radius.pill, backgroundColor: color.neutral100 },
-  side: { flex: 1, height: 42, flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", borderRadius: radius.pill },
-  sideYes: { backgroundColor: "#1c2a20", borderWidth: 1, borderColor: "#4d6b4f" },
-  sideNo: { backgroundColor: "#2a1d1a", borderWidth: 1, borderColor: color.negLine },
-  sideText: { fontFamily: font.medium, fontSize: text.post, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  input: { minHeight: 160, fontFamily: font.regular, fontSize: 18, lineHeight: 27, color: color.text, textAlignVertical: "top", paddingTop: space[2] },
-  foot: { paddingHorizontal: space[4], paddingTop: space[2], gap: space[2], borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.divider },
-  conviction: { flexDirection: "row", alignItems: "center", gap: space[3], padding: space[3], borderRadius: radius.panel, backgroundColor: color.surface },
-  bars: { flexDirection: "row", alignItems: "flex-end", gap: 3, height: 17, paddingLeft: 2 },
-  bar: { width: 5, borderRadius: 2, backgroundColor: color.neutral500 },
+  marketText: { flex: 1, gap: 3 },
+  marketTitle: { fontFamily: font.medium, fontSize: 14, color: color.text },
+  marketMeta: { fontFamily: font.regular, fontSize: 11, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  change: { fontFamily: font.regular, fontSize: 12, color: MUTED },
+  sides: { flexDirection: "row", gap: 4, padding: 4, borderRadius: radius.pill, backgroundColor: color.surface },
+  side: {
+    flex: 1,
+    height: 42,
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  sideYes: { backgroundColor: color.pos200, borderColor: color.posLine },
+  sideNo: { backgroundColor: color.neg200, borderColor: color.negLine },
+  sideText: { fontFamily: font.medium, fontSize: 14, color: MUTED, fontVariant: ["tabular-nums"] },
+  input: {
+    flex: 1,
+    minHeight: 160,
+    fontFamily: font.regular,
+    fontSize: 17,
+    lineHeight: 25.5,
+    color: color.text,
+    textAlignVertical: "top",
+    paddingTop: space[1],
+  },
+  foot: { paddingHorizontal: space[4], gap: space[3] },
+  conviction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space[3],
+    paddingVertical: space[3],
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    backgroundColor: color.surface,
+  },
+  convictionPressed: { backgroundColor: color.neutral200 },
+  bars: { flexDirection: "row", alignItems: "flex-end", gap: 3, height: 22, paddingLeft: 2 },
+  bar: { width: 6, borderRadius: radius.pill, backgroundColor: "rgba(255, 255, 255, 0.14)" },
   barOn: { backgroundColor: color.pos },
-  convictionText: { flex: 1, gap: 2 },
+  convictionText: { flex: 1, gap: 3 },
   convictionTitle: { fontFamily: font.medium, fontSize: text.body, color: color.text },
-  convictionHint: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
-  step: { width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: color.neutral500, alignItems: "center", justifyContent: "center" },
+  convictionHint: { fontFamily: font.regular, fontSize: 11, color: color.neutral700 },
+  step: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: color.neutral400,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   stepPressed: { backgroundColor: color.neutral300 },
-  stepOff: { opacity: 0.35 },
+  stepOff: { opacity: 0.6 },
   status: { flexDirection: "row", justifyContent: "space-between", gap: space[3] },
-  statusText: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  short: { color: color.gold },
+  statusText: { fontFamily: font.regular, fontSize: 11, color: MUTED, fontVariant: ["tabular-nums"] },
+  short: { color: color.neg },
   problem: { fontFamily: font.regular, fontSize: text.ui, color: color.neg },
 });

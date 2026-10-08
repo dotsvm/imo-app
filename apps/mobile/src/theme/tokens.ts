@@ -24,6 +24,14 @@ export const color = {
   posLine: "rgba(181, 230, 161, 0.35)",
   onPos: "#183127",
   neg: "#e4998c",
+  /** Profit figures (▲ +$420, "today"): brighter than the Yes green, which stays on buttons. */
+  gain: "#6fd38f",
+  /** Secondary text in the new screens (meta, labels). */
+  muted: "#8b9490",
+  /** Card and chip surfaces in the new screens. */
+  card: "#101613",
+  /** The faintest text: cents, footnotes. */
+  faint: "#5b6460",
   neg200: "rgba(228, 153, 140, 0.14)",
   negLine: "rgba(228, 153, 140, 0.35)",
   gold: "#e2c892",

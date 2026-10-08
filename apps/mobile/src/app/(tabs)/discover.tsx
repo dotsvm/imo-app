@@ -8,17 +8,18 @@ import { useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BookmarksSimpleIcon } from "phosphor-react-native/src/icons/BookmarksSimple";
-import { FadersHorizontalIcon } from "phosphor-react-native/src/icons/FadersHorizontal";
+import { SlidersHorizontalIcon } from "phosphor-react-native/src/icons/SlidersHorizontal";
 import { MagnifyingGlassIcon } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import type { MarketDTO, MarketPage } from "@imo/server/dto/api-types";
 import { Skeleton } from "~/components/skeleton";
-import { TAB_BAR_HEIGHT } from "~/components/tab-bar";
+import { tabBarSpace } from "~/components/tab-bar";
 import { TopBar } from "~/components/top-bar";
 import { DEFAULT_FILTERS, FilterSheet, type Filters, isDefault, marketQuery } from "~/features/discover/filters";
-import { compactUsd, MarketRow } from "~/features/discover/market-row";
+import { compactUsd, hasHistory, MarketRow } from "~/features/discover/market-row";
 import { Sparkline } from "~/features/discover/sparkline";
 import { Notice } from "~/features/home/notice";
 import { TradeSheet } from "~/features/trade/trade-sheet";
+import { useTradable } from "~/features/trade/use-tradable";
 import { api } from "~/lib/api";
 import { price } from "~/lib/format";
 import { bestAsk, type Outcome } from "~/lib/market";
@@ -32,11 +33,12 @@ const PAGE = 30;
 export default function Discover() {
   const insets = useSafeAreaInsets();
   const venues = useVenues();
+  const tradable = useTradable();
   const [category, setCategory] = useState<string>("All");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filtering, setFiltering] = useState(false);
   const [trade, setTrade] = useState<{ market: MarketDTO; outcome: Outcome } | null>(null);
-  const bottom = TAB_BAR_HEIGHT + Math.max(insets.bottom, space[3]) + space[5];
+  const bottom = tabBarSpace(insets.bottom) + space[5];
 
   const featured = useQuery({
     queryKey: ["markets", "featured", category],
@@ -59,10 +61,10 @@ export default function Discover() {
   const header = (
     <View>
       <Pressable onPress={() => router.push("/search")} style={styles.search} accessibilityRole="search" accessibilityLabel="Search markets, traders, rooms">
-        <MagnifyingGlassIcon size={17} color={color.neutral600} />
+        <MagnifyingGlassIcon size={16} weight="fill" color={color.neutral700} />
         <Text style={styles.searchText}>Search markets, traders, rooms</Text>
       </Pressable>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cats}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cats} style={styles.catRow}>
         {CATEGORIES.map((c) => {
           const on = c === category;
           return (
@@ -85,13 +87,17 @@ export default function Discover() {
           <Skeleton width={120} height={10} />
           <Skeleton height={20} />
           <Skeleton width="70%" height={20} />
-          <Skeleton height={64} style={{ borderRadius: radius.card }} />
-          <Skeleton height={48} round />
+          <Skeleton height={56} style={{ borderRadius: radius.card }} />
+          <View style={styles.yesNo}>
+            <Skeleton height={46} round style={{ flex: 1 }} />
+            <Skeleton height={46} round style={{ flex: 1 }} />
+          </View>
         </View>
       ) : featured.data ? (
         <Featured
           market={featured.data}
           venue={venueName(featured.data.venueId)}
+          tradable={tradable(featured.data.venueId)}
           onTrade={(outcome) => setTrade({ market: featured.data!, outcome })}
         />
       ) : null}
@@ -104,7 +110,7 @@ export default function Discover() {
           accessibilityRole="button"
           accessibilityLabel={isDefault(filters) ? "Filter markets" : "Filter markets, filters on"}
         >
-          <FadersHorizontalIcon size={15} color={color.text} />
+          <SlidersHorizontalIcon size={14} weight="bold" color={color.text} />
           <Text style={styles.filterText}>Filter</Text>
           {!isDefault(filters) ? <View style={styles.filterDot} /> : null}
         </Pressable>
@@ -158,9 +164,9 @@ export default function Discover() {
                   <View key={i} style={styles.rowSkeleton}>
                     <View style={{ flex: 1, gap: 6 }}>
                       <Skeleton width="85%" height={14} />
-                      <Skeleton width={150} height={11} />
+                      <Skeleton width={150} height={10} />
                     </View>
-                    <Skeleton width={40} height={18} />
+                    <Skeleton width={36} height={16} />
                   </View>
                 ))}
               </View>
@@ -182,11 +188,12 @@ export default function Discover() {
   );
 }
 
-function Featured({ market: m, venue, onTrade }: { market: MarketDTO; venue: string; onTrade: (o: Outcome) => void }) {
+function Featured({ market: m, venue, tradable, onTrade }: { market: MarketDTO; venue: string; tradable: boolean; onTrade: (o: Outcome) => void }) {
   const up = m.change > 0;
   const down = m.change < 0;
   const closes = new Date(m.closesAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const open = m.status === "open";
+  // Yes/No only where an order can actually be placed.
+  const open = m.status === "open" && !m.paused && tradable;
   return (
     <View style={styles.featured}>
       <Text style={styles.featuredLabel}>
@@ -196,22 +203,29 @@ function Featured({ market: m, venue, onTrade }: { market: MarketDTO; venue: str
       <Pressable onPress={() => router.push(`/market/${m.id}`)} accessibilityRole="link">
         <Text style={styles.featuredTitle}>{m.title}</Text>
       </Pressable>
-      {m.series.length > 1 ? <Sparkline points={m.series} /> : null}
+      {hasHistory(m) ? <Sparkline points={m.series} height={56} strokeWidth={2} /> : null}
       <View style={styles.featuredMeta}>
-        <Text style={[styles.metaText, { color: up ? color.pos : down ? color.neg : color.neutral700 }]}>
-          {up ? "▲ " : down ? "▼ " : ""}
-          {Math.abs(m.change).toFixed(1).replace(/\.0$/, "")}¢ today
-        </Text>
+        {hasHistory(m) ? (
+          <Text style={styles.metaText}>
+            <Text style={{ color: up ? color.pos : down ? color.neg : color.neutral700 }}>
+              {up ? "▲ " : down ? "▼ " : ""}
+              {Math.abs(m.change).toFixed(1).replace(/\.0$/, "")}¢
+            </Text>{" "}
+            today
+          </Text>
+        ) : (
+          <View />
+        )}
         <Text style={styles.metaText}>
-          {compactUsd(m.volumeCents)} vol · closes {closes}
+          {m.volumeCents > 0 ? `${compactUsd(m.volumeCents)} vol · ` : ""}closes {closes}
         </Text>
       </View>
       {open ? (
         <View style={styles.yesNo}>
-          <Pressable onPress={() => onTrade("Yes")} style={({ pressed }) => [styles.side, styles.yes, pressed && styles.sidePressed]} accessibilityRole="button">
+          <Pressable onPress={() => onTrade("Yes")} style={({ pressed }) => [styles.side, styles.yes, pressed && styles.sidePressed]} accessibilityRole="button" accessibilityLabel={`Buy Yes at ${price(bestAsk(m, "Yes"))}`}>
             <Text style={[styles.sideText, { color: color.pos }]}>Yes {price(bestAsk(m, "Yes"))}</Text>
           </Pressable>
-          <Pressable onPress={() => onTrade("No")} style={({ pressed }) => [styles.side, styles.no, pressed && styles.sidePressed]} accessibilityRole="button">
+          <Pressable onPress={() => onTrade("No")} style={({ pressed }) => [styles.side, styles.no, pressed && styles.sidePressed]} accessibilityRole="button" accessibilityLabel={`Buy No at ${price(bestAsk(m, "No"))}`}>
             <Text style={[styles.sideText, { color: color.neg }]}>No {price(bestAsk(m, "No"))}</Text>
           </Pressable>
         </View>
@@ -226,70 +240,69 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: space[2],
-    height: 46,
+    height: 44,
     marginHorizontal: space[4],
-    marginTop: space[1],
-    paddingHorizontal: space[4],
+    marginBottom: 10,
+    paddingHorizontal: space[3],
     borderRadius: radius.pill,
-    backgroundColor: color.neutral100,
+    backgroundColor: color.neutral200,
     borderWidth: 1,
-    borderColor: color.neutral300,
-  },
-  searchText: { fontFamily: font.regular, fontSize: text.body + 1, color: color.neutral600 },
-  cats: { gap: space[2], paddingHorizontal: space[4], paddingVertical: space[3] },
-  cat: { height: 38, paddingHorizontal: 16, borderRadius: radius.pill, justifyContent: "center", backgroundColor: color.neutral200 },
-  catOn: { backgroundColor: "#eceadf" },
-  catText: { fontFamily: font.medium, fontSize: text.body, color: color.neutral800 },
-  catTextOn: { color: "#0b0d0c" },
-  featured: {
-    gap: space[3],
-    paddingHorizontal: space[4],
-    paddingVertical: space[5],
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: color.divider,
   },
-  featuredLabel: { fontFamily: font.medium, fontSize: 11, letterSpacing: 1.2, color: color.gold },
-  featuredTitle: { fontFamily: font.medium, fontSize: 22, lineHeight: 28, letterSpacing: -0.4, color: color.text },
+  searchText: { fontFamily: font.regular, fontSize: text.body, color: color.neutral700 },
+  catRow: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.divider },
+  cats: { gap: 6, paddingHorizontal: space[4], paddingBottom: space[3] },
+  cat: { height: 34, paddingHorizontal: 14, borderRadius: radius.pill, justifyContent: "center", backgroundColor: color.neutral200 },
+  catOn: { backgroundColor: "#eceadf" },
+  catText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral800 },
+  catTextOn: { fontFamily: font.medium, color: "#0b0d0c" },
+  featured: {
+    gap: 10,
+    padding: space[4],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: color.divider,
+  },
+  featuredLabel: { fontFamily: font.semibold, fontSize: 11, letterSpacing: 1.3, color: color.gold },
+  featuredTitle: { fontFamily: font.medium, fontSize: 20, lineHeight: 24, letterSpacing: -0.2, color: color.text },
   featuredMeta: { flexDirection: "row", justifyContent: "space-between" },
   metaText: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  yesNo: { flexDirection: "row", gap: space[2], marginTop: space[1] },
-  side: { flex: 1, height: 50, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", borderWidth: 1 },
-  yes: { backgroundColor: "#16231a", borderColor: "#3f5a41" },
-  no: { backgroundColor: "#24171a", borderColor: "#5a3a34" },
+  yesNo: { flexDirection: "row", gap: space[2] },
+  side: { flex: 1, height: 46, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", borderWidth: 1 },
+  yes: { backgroundColor: color.pos200, borderColor: color.posLine },
+  no: { backgroundColor: color.neg200, borderColor: color.negLine },
   sidePressed: { transform: [{ translateY: 1 }], opacity: 0.85 },
-  sideText: { fontFamily: font.semibold, fontSize: 16, fontVariant: ["tabular-nums"] },
+  sideText: { fontFamily: font.medium, fontSize: text.body, fontVariant: ["tabular-nums"] },
   listHead: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: space[4],
-    paddingVertical: space[3],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
+    paddingTop: space[3],
+    paddingBottom: space[2],
   },
-  listLabel: { fontFamily: font.medium, fontSize: 12, letterSpacing: 1.2, color: color.neutral800 },
+  listLabel: { fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, color: color.text },
   filter: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    height: 34,
-    paddingHorizontal: 14,
+    height: 32,
+    paddingHorizontal: space[3],
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: color.neutral400,
   },
   filterOn: { borderColor: color.posLine },
   filterPressed: { backgroundColor: color.neutral300 },
-  filterText: { fontFamily: font.medium, fontSize: text.ui, color: color.text },
+  filterText: { fontFamily: font.regular, fontSize: 12, color: color.text },
   filterDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.pos },
   rowSkeleton: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: space[4],
+    alignItems: "flex-start",
+    gap: space[3],
+    minHeight: 56,
     paddingHorizontal: space[4],
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.divider,
   },
 });

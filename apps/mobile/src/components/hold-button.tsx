@@ -69,7 +69,7 @@ export function HoldButton({ label, icon, onComplete, disabled, loading }: Props
 
 const styles = StyleSheet.create({
   key: {
-    height: 54,
+    height: 56,
     borderRadius: radius.pill,
     overflow: "hidden",
     justifyContent: "center",
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
       { offsetX: 0, offsetY: 6, blurRadius: 14, spreadDistance: -4, color: "rgba(0, 0, 0, 0.6)" },
     ],
   },
-  fill: { position: "absolute", left: 0, top: 0, bottom: 0, backgroundColor: "rgba(60, 120, 60, 0.35)" },
+  fill: { position: "absolute", left: 0, top: 0, bottom: 0, backgroundColor: "rgba(255, 255, 255, 0.28)" },
   content: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  label: { fontFamily: font.semibold, fontSize: 16, color: PRIMARY_INK },
+  label: { fontFamily: font.semibold, fontSize: 15, color: PRIMARY_INK },
   inactive: { opacity: 0.45 },
 });

@@ -65,7 +65,7 @@ async function feeSchedule(db: Db | Tx, market: MarketRow, routeId = PAPER_ROUTE
   return [
     { source: "venue", label: venue?.display.feeLabel ?? "Venue fee", model: market.venueFee },
     // No line at all when imo takes nothing (wallet trading).
-    ...(appFee.kind === "none" ? [] : [{ source: "app" as const, label: "imo · 0.5%", model: appFee }]),
+    ...(appFee.kind === "none" ? [] : [{ source: "app" as const, label: "imo fee · 0.5%", model: appFee }]),
   ];
 }
 

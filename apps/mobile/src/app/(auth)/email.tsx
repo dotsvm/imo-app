@@ -11,7 +11,7 @@ import { Rise } from "~/components/rise";
 import { devSignIn, sendEmailCode, useConfig, verifyEmailCode } from "~/features/auth/auth";
 import { CodeInput } from "~/features/auth/code-input";
 import { BackChevron, Lede, Problem, Screen, Title } from "~/features/auth/parts";
-import { color, font, space, text } from "~/theme/tokens";
+import { color, font } from "~/theme/tokens";
 
 type Mode = "signup" | "signin";
 const RESEND_AFTER = 60;
@@ -78,10 +78,10 @@ export default function EmailSignIn() {
             loading={busy}
           />
           {!dev ? (
-            <Pressable onPress={switchMode} hitSlop={8} style={styles.switch} accessibilityRole="button">
+            <Pressable onPress={switchMode} style={styles.switch} accessibilityRole="button">
               <Text style={styles.switchText}>
                 {mode === "signup" ? "Have an account? " : "New to imo? "}
-                <Text style={styles.switchAction}>{mode === "signup" ? "Sign in" : "Sign up"}</Text>
+                <Text style={styles.switchAction}>{mode === "signup" ? "Sign in" : "Create one"}</Text>
               </Text>
             </Pressable>
           ) : null}
@@ -90,13 +90,21 @@ export default function EmailSignIn() {
     >
       <BackChevron />
       <Title>{mode === "signup" ? "What’s your email?" : "Welcome back"}</Title>
-      <Lede>{dev ? "Local server: any email signs straight in. No code needed." : "We’ll send a code. No password needed."}</Lede>
+      <Lede>
+        {dev
+          ? "Local server: any email signs straight in. No code needed."
+          : mode === "signin"
+            ? "Sign in with the code we email you."
+            : "We’ll send a code. No password needed."}
+      </Lede>
 
       <TextInput
         value={email}
         onChangeText={setEmail}
-        placeholder="you@example.com"
+        placeholder="you@email.com"
         placeholderTextColor={color.neutral500}
+        selectionColor={color.pos}
+        cursorColor={color.pos}
         keyboardType="email-address"
         textContentType="emailAddress"
         autoComplete="email"
@@ -112,13 +120,15 @@ export default function EmailSignIn() {
       {codeSent ? (
         <Rise duration={180}>
           <View style={styles.sent}>
-            <CheckCircleIcon size={18} weight="fill" color={color.pos} />
+            <CheckCircleIcon size={14} weight="fill" color={color.pos} />
             <Text style={styles.sentText}>Code sent</Text>
           </View>
           <Text style={styles.label}>Enter the 6-digit code</Text>
           <CodeInput value={code} onChange={setCode} onComplete={verify} disabled={busy} />
           {wait > 0 ? (
-            <Text style={styles.hint}>Didn’t get it? Resend in 0:{String(wait).padStart(2, "0")}</Text>
+            <Text style={styles.hint}>
+              Didn’t get it? <Text style={styles.wait}>Resend in 0:{String(wait).padStart(2, "0")}</Text>
+            </Text>
           ) : (
             <Pressable onPress={send} hitSlop={8} accessibilityRole="button" disabled={busy}>
               <Text style={styles.hint}>
@@ -148,19 +158,20 @@ function useCountdown(sentAt: number | null) {
 
 const styles = StyleSheet.create({
   email: {
-    marginTop: space[6],
-    paddingVertical: space[2],
-    fontFamily: font.regular,
-    fontSize: 28,
-    letterSpacing: -0.4,
+    marginTop: 36,
+    paddingVertical: 4,
+    fontFamily: font.medium,
+    fontSize: 24,
+    letterSpacing: -0.48,
     color: color.text,
   },
-  sent: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: space[2] },
-  sentText: { fontFamily: font.medium, fontSize: text.post, color: color.pos },
-  label: { fontFamily: font.regular, fontSize: text.post, color: color.neutral700, marginTop: space[6], marginBottom: space[2] },
-  hint: { fontFamily: font.regular, fontSize: text.post, color: color.neutral600, marginTop: space[4] },
+  sent: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6 },
+  sentText: { fontFamily: font.regular, fontSize: 13, color: color.pos },
+  label: { fontFamily: font.regular, fontSize: 13, color: color.muted, marginTop: 36, marginBottom: 14 },
+  hint: { fontFamily: font.regular, fontSize: 13, color: color.neutral600, marginTop: 14 },
+  wait: { color: color.muted },
   resend: { fontFamily: font.medium, color: color.pos },
-  switch: { alignSelf: "center", paddingVertical: space[1] },
-  switchText: { fontFamily: font.regular, fontSize: 16, color: color.neutral700 },
-  switchAction: { fontFamily: font.semibold, color: color.text },
+  switch: { alignSelf: "center", height: 44, justifyContent: "center", paddingHorizontal: 8 },
+  switchText: { fontFamily: font.regular, fontSize: 14, color: color.muted },
+  switchAction: { fontFamily: font.medium, color: color.text },
 });

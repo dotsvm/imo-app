@@ -12,7 +12,7 @@ export function Fab({ onPress, bottom }: { onPress: () => void; bottom: number }
       hitSlop={6}
       style={({ pressed }) => [styles.fab, { bottom }, pressed ? styles.pressed : styles.rest]}
     >
-      <PlusIcon size={26} weight="bold" color={PRIMARY_INK} />
+      <PlusIcon size={22} weight="bold" color={PRIMARY_INK} />
     </Pressable>
   );
 }
@@ -20,10 +20,10 @@ export function Fab({ onPress, bottom }: { onPress: () => void; bottom: number }
 const styles = StyleSheet.create({
   fab: {
     position: "absolute",
-    right: 16,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    right: 18,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#b5e6a1",
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     boxShadow: [
       { offsetX: 0, offsetY: 1, blurRadius: 0, color: "rgba(255, 255, 255, 0.55)", inset: true },
       { offsetX: 0, offsetY: -3, blurRadius: 8, color: "rgba(20, 60, 30, 0.22)", inset: true },
-      { offsetX: 0, offsetY: 14, blurRadius: 30, spreadDistance: -10, color: "rgba(0, 0, 0, 0.7)" },
+      { offsetX: 0, offsetY: 14, blurRadius: 30, spreadDistance: -10, color: "rgba(0, 0, 0, 0.75)" },
     ],
   },
   pressed: {

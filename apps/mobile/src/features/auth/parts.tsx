@@ -12,7 +12,7 @@ export function Screen({ children, footer }: { children: ReactNode; footer?: Rea
   const insets = useSafeAreaInsets();
   return (
     <KeyboardAvoidingView
-      style={[styles.screen, { paddingTop: insets.top + space[2] }]}
+      style={[styles.screen, { paddingTop: insets.top + 2 }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.body}>{children}</View>
@@ -23,8 +23,14 @@ export function Screen({ children, footer }: { children: ReactNode; footer?: Rea
 
 export function BackChevron({ onPress = () => router.back() }: { onPress?: () => void }) {
   return (
-    <Pressable onPress={onPress} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back" style={styles.chevron}>
-      <CaretLeftIcon size={22} weight="bold" color={color.text} />
+    <Pressable
+      onPress={onPress}
+      hitSlop={6}
+      accessibilityRole="button"
+      accessibilityLabel="Back"
+      style={({ pressed }) => [styles.chevron, pressed && styles.chevronPressed]}
+    >
+      <CaretLeftIcon size={20} weight="bold" color={color.text} />
     </Pressable>
   );
 }
@@ -39,7 +45,7 @@ export function Progress({ step, of, onSkip }: { step: number; of: number; onSki
         ))}
       </View>
       {onSkip ? (
-        <Pressable onPress={onSkip} hitSlop={10} accessibilityRole="button">
+        <Pressable onPress={onSkip} hitSlop={12} accessibilityRole="button" style={styles.skipHit}>
           <Text style={styles.skip}>Skip</Text>
         </Pressable>
       ) : null}
@@ -47,16 +53,18 @@ export function Progress({ step, of, onSkip }: { step: number; of: number; onSki
   );
 }
 
-export function Title({ children }: { children: ReactNode }) {
+/** The screen's question. `after`: what sits above it — a back chevron (16 below) or the progress bars (28 below). */
+export function Title({ children, after = "back" }: { children: ReactNode; after?: "back" | "progress" }) {
   return (
-    <Text style={styles.title} accessibilityRole="header">
+    <Text style={[styles.title, after === "progress" && styles.titleAfterProgress]} accessibilityRole="header">
       {children}
     </Text>
   );
 }
 
-export function Lede({ children }: { children: ReactNode }) {
-  return <Text style={styles.lede}>{children}</Text>;
+/** The line under a title: 15px on sign-in, `sm` (14px, a touch lighter) in onboarding. */
+export function Lede({ children, size = "md" }: { children: ReactNode; size?: "md" | "sm" }) {
+  return <Text style={[styles.lede, size === "sm" && styles.ledeSm]}>{children}</Text>;
 }
 
 /** A problem, said once, where it happened. Fades in. */
@@ -74,14 +82,18 @@ export function Problem({ message }: { message: string | null }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
   body: { flex: 1, paddingHorizontal: space[5] },
-  footer: { paddingHorizontal: space[5], paddingTop: space[3], gap: space[3] },
-  chevron: { width: 40, height: 40, marginLeft: -10, alignItems: "center", justifyContent: "center", borderRadius: radius.pill },
-  progress: { flexDirection: "row", alignItems: "center", gap: space[4], height: 40 },
+  footer: { paddingHorizontal: space[5], paddingTop: space[3], gap: 6 },
+  chevron: { width: 44, height: 44, marginLeft: -16, alignItems: "center", justifyContent: "center", borderRadius: radius.pill },
+  chevronPressed: { backgroundColor: "rgba(255, 255, 255, 0.06)" },
+  progress: { flexDirection: "row", alignItems: "center", paddingTop: 14 },
   bars: { flex: 1, flexDirection: "row", gap: 6 },
-  bar: { flex: 1, height: 4, borderRadius: 2, backgroundColor: color.neutral400 },
+  bar: { flex: 1, height: 4, borderRadius: radius.pill, backgroundColor: "rgba(255, 255, 255, 0.1)" },
   barOn: { backgroundColor: color.pos },
-  skip: { fontFamily: font.medium, fontSize: text.body + 1, color: color.neutral700 },
-  title: { fontFamily: font.medium, fontSize: 29, lineHeight: 35, letterSpacing: -0.9, color: color.text, marginTop: space[5] },
-  lede: { fontFamily: font.regular, fontSize: 16, lineHeight: 22, color: color.neutral700, marginTop: space[3] },
+  skipHit: { marginLeft: 10 },
+  skip: { fontFamily: font.regular, fontSize: 13, color: color.muted },
+  title: { fontFamily: font.semibold, fontSize: 30, lineHeight: 33, letterSpacing: -1.05, color: color.text, marginTop: 16 },
+  titleAfterProgress: { marginTop: 28 },
+  lede: { fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: color.muted, marginTop: 8 },
+  ledeSm: { fontSize: 14, lineHeight: 20, color: "#a7afab", marginTop: 10 },
   problem: { fontFamily: font.regular, fontSize: text.ui, lineHeight: 18, color: color.neg, marginTop: space[3] },
 });

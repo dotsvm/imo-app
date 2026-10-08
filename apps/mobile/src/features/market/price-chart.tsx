@@ -34,7 +34,7 @@ export function PriceChart({ points, height = 150 }: { points: number[]; height?
             </LinearGradient>
           </Defs>
           <Path d={area} fill="url(#wash)" />
-          <Path d={line} stroke={color.pos} strokeWidth={1.75} fill="none" strokeLinejoin="round" strokeLinecap="round" />
+          <Path d={line} stroke={color.pos} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
         </Svg>
       ) : null}
     </View>

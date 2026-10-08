@@ -15,11 +15,11 @@ import {
 } from "react-native";
 import { color, font, radius } from "~/theme/tokens";
 
-export type ButtonVariant = "primary" | "ivory" | "outline" | "quiet";
+export type ButtonVariant = "primary" | "ivory" | "outline" | "quiet" | "surface";
 
 interface Props {
   variant?: ButtonVariant;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "ml" | "lg" | "xl";
   label?: string;
   icon?: ReactNode;
   children?: ReactNode;
@@ -27,6 +27,8 @@ interface Props {
   disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Overrides for the label (weight, size) where a design calls for it. */
+  labelStyle?: StyleProp<TextStyle>;
   accessibilityLabel?: string;
 }
 
@@ -42,6 +44,7 @@ export function Button({
   disabled,
   loading,
   style,
+  labelStyle,
   accessibilityLabel,
 }: Props) {
   const v = VARIANTS[variant];
@@ -68,7 +71,7 @@ export function Button({
       ) : (
         <>
           {icon}
-          {label ? <Text style={[styles.label, size === "lg" && styles.labelLg, size === "sm" && styles.labelSm, { color: v.ink }]}>{label}</Text> : null}
+          {label ? <Text style={[styles.label, (size === "lg" || size === "xl") && styles.labelLg, size === "sm" && styles.labelSm, size === "xs" && styles.labelXs, size === "ml" && styles.labelMl, { color: v.ink }, labelStyle]}>{label}</Text> : null}
           {children}
         </>
       )}
@@ -140,6 +143,13 @@ const VARIANTS: Record<
     box: { backgroundColor: "transparent", borderWidth: 1, borderColor: color.neutral400 },
     pressed: { backgroundColor: color.neutral300 },
   },
+  // A raised surface with a faint edge: secondary actions beside content ("Edit profile").
+  surface: {
+    ink: color.text,
+    box: { backgroundColor: "#151b18", borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.07)" },
+    rest: { boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)" },
+    pressed: { backgroundColor: "#1b221e" },
+  },
 };
 
 const styles = StyleSheet.create({
@@ -150,11 +160,16 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: radius.pill,
   },
+  xs: { height: 30, paddingHorizontal: 12, gap: 5 },
   sm: { height: 34, paddingHorizontal: 14, gap: 6 },
   md: { height: 44, paddingHorizontal: 20 },
+  ml: { height: 46, paddingHorizontal: 20, gap: 8 },
   lg: { height: 52, paddingHorizontal: 24 },
+  xl: { height: 56, paddingHorizontal: 26 },
   inactive: { opacity: 0.45 },
   label: { fontFamily: font.semibold, fontSize: 15, letterSpacing: 0.1 },
   labelLg: { fontSize: 16 },
   labelSm: { fontSize: 13 },
+  labelXs: { fontSize: 12 },
+  labelMl: { fontSize: 14 },
 });

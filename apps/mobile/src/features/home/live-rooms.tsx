@@ -11,7 +11,8 @@ import type { RoomSummaryDTO } from "@imo/server/dto/api-types";
 import { api } from "~/lib/api";
 import { color, font, radius, space } from "~/theme/tokens";
 
-const LIVE = "#e8836f";
+const LIVE = "#ec8b78";
+const CHIP = "#121815";
 
 export function LiveRooms() {
   const rooms = useQuery({
@@ -66,41 +67,41 @@ export function LiveRooms() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: space[3], paddingTop: space[5] },
-  head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: space[4] },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: LIVE },
-  title: { fontFamily: font.medium, fontSize: 17, color: color.text },
-  all: { fontFamily: font.regular, fontSize: 14, color: color.neutral700 },
-  row: { gap: space[2], paddingHorizontal: space[4] },
+  wrap: { gap: 10, paddingTop: 14 },
+  head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: LIVE },
+  title: { fontFamily: font.semibold, fontSize: 14, color: color.text },
+  all: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  row: { gap: space[2], paddingHorizontal: 20, paddingBottom: 2 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    height: 56,
+    gap: 8,
+    height: 44,
     paddingLeft: 6,
-    paddingRight: 16,
+    paddingRight: 14,
     borderRadius: radius.pill,
-    backgroundColor: "#111513",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
+    backgroundColor: CHIP,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
   },
   chipPressed: { backgroundColor: "#161b18" },
-  pic: { width: 44, height: 44, borderRadius: 22 },
+  pic: { width: 32, height: 32, borderRadius: 16 },
   symbol: { alignItems: "center", justifyContent: "center" },
-  symbolText: { fontFamily: font.semibold, fontSize: 14, color: "#0b1410" },
+  symbolText: { fontFamily: font.semibold, fontSize: 12, color: "#0b1410" },
   picDot: {
     position: "absolute",
     right: -1,
     bottom: -1,
-    width: 13,
-    height: 13,
-    borderRadius: 7,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: LIVE,
     borderWidth: 2,
-    borderColor: "#111513",
+    borderColor: CHIP,
   },
-  name: { fontFamily: font.medium, fontSize: 15, color: color.text, maxWidth: 150 },
-  count: { fontFamily: font.medium, fontSize: 14, color: LIVE, fontVariant: ["tabular-nums"] },
+  name: { fontFamily: font.medium, fontSize: 13, color: color.text, maxWidth: 140 },
+  count: { fontFamily: font.regular, fontSize: 12, color: LIVE, fontVariant: ["tabular-nums"] },
   countQuiet: { color: color.neutral700 },
 });

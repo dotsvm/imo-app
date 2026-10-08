@@ -24,6 +24,7 @@ import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
 import { setFollowing } from "~/features/auth/onboarding";
 import { MarketRow } from "~/features/discover/market-row";
+import { Notice } from "~/features/home/notice";
 import { api } from "~/lib/api";
 import { openTrader } from "~/lib/nav";
 import { useVenues } from "~/lib/venues";
@@ -82,13 +83,17 @@ export default function Search() {
   });
 
   const venueName = (id: string) => venues.get(id)?.name ?? id;
+  // Short, real things people trade now: a market's short title, kept chip-sized.
+  const suggestions = [
+    ...new Set((trending.data?.items ?? []).map((m) => m.shortTitle || m.title).filter((t) => t.length <= 28)),
+  ].slice(0, 4);
   const show = (s: Exclude<Scope, "all">) => scope === "all" || scope === s;
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + space[2] }]}>
+    <View style={[styles.screen, { paddingTop: insets.top + space[1] }]}>
       <View style={styles.bar}>
         <View style={styles.field}>
-          <MagnifyingGlassIcon size={18} color={color.neutral600} />
+          <MagnifyingGlassIcon size={16} weight="bold" color={color.neutral700} />
           <TextInput
             value={q}
             onChangeText={setQ}
@@ -97,36 +102,28 @@ export default function Search() {
             autoFocus
             autoCorrect={false}
             returnKeyType="search"
+            cursorColor={color.pos}
+            selectionColor={color.pos}
             style={styles.input}
             accessibilityLabel="Search"
           />
           {q ? (
-            <Pressable
-              onPress={() => setQ("")}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Clear search"
-            >
-              <XCircleIcon size={19} weight="fill" color={color.neutral600} />
+            <Pressable onPress={() => setQ("")} hitSlop={8} style={styles.clear} accessibilityRole="button" accessibilityLabel="Clear search">
+              <XCircleIcon size={18} weight="fill" color={color.neutral700} />
             </Pressable>
           ) : null}
         </View>
         <Pressable
           onPress={() => router.back()}
-          hitSlop={8}
+          style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
           accessibilityRole="button"
         >
-          <Text style={styles.cancel}>Cancel</Text>
+          <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
       </View>
 
       {r && !empty ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scopes}
-          style={styles.scopeRow}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scopes} style={styles.scopeRow}>
           {(
             [
               ["all", "All", null],
@@ -145,35 +142,25 @@ export default function Search() {
                 accessibilityLabel={n === null ? label : `${label}, ${n}`}
                 accessibilityState={{ selected: on }}
               >
-                <Text style={[styles.scopeText, on && styles.scopeTextOn]}>
-                  {label}
-                </Text>
-                {n !== null ? (
-                  <Text style={[styles.scopeCount, on && styles.scopeTextOn]}>
-                    {n}
-                  </Text>
-                ) : null}
+                <Text style={[styles.scopeText, on && styles.scopeTextOn]}>{label}</Text>
+                {n !== null ? <Text style={[styles.scopeCount, on && styles.scopeTextOn]}>{n}</Text> : null}
               </Pressable>
             );
           })}
         </ScrollView>
       ) : null}
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: insets.bottom + space[6] }}
-      >
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: insets.bottom + space[6] }}>
         {!active ? (
-          <Text style={styles.hint}>
-            Find a market by its question, a trader by name or handle, or a
-            room.
-          </Text>
+          <Text style={styles.hint}>Find a market by its question, a trader by name or handle, or a room.</Text>
+        ) : results.isError && !r ? (
+          <Notice
+            title="Search didn't load"
+            body={results.error.message}
+            action={{ label: "Try again", onPress: () => results.refetch() }}
+          />
         ) : !r ? (
-          <View
-            style={styles.loading}
-            accessibilityLabel="Searching"
-            accessibilityRole="progressbar"
-          >
+          <View style={styles.loading} accessibilityLabel="Searching" accessibilityRole="progressbar">
             {[0, 1, 2].map((i) => (
               <View key={i} style={{ gap: 6 }}>
                 <Skeleton width="85%" height={14} />
@@ -185,43 +172,42 @@ export default function Search() {
           <View style={styles.none}>
             <Text style={styles.noneTitle}>Nothing yet.</Text>
             <Text style={styles.noneBody}>
-              No markets, traders or rooms match “{term}”. Try fewer words, or a
-              different one.
+              No markets, traders or rooms match “{term}”. Try fewer words, or a different one.
             </Text>
             {closest.data ? (
               <>
-                <Text style={styles.section}>Closest matches</Text>
+                <Text style={[styles.noneLabel, { marginTop: 40 }]}>Closest matches</Text>
                 {closest.data.markets.slice(0, 2).map((m) => (
                   <MarketRow
                     key={m.id}
                     market={m}
                     venue={venueName(m.venueId)}
                     variant="search"
+                    flush
                     onPress={() => router.push(`/market/${m.id}`)}
                   />
                 ))}
                 {closest.data.traders.slice(0, 2).map((t) => (
-                  <TraderRow key={t.id} trader={t} />
+                  <TraderRow key={t.id} trader={t} flush />
                 ))}
                 {closest.data.rooms.slice(0, 2).map((room) => (
-                  <RoomRow key={room.id} room={room} />
+                  <RoomRow key={room.id} room={room} flush />
                 ))}
               </>
             ) : null}
-            {trending.data?.items.length ? (
+            {suggestions.length ? (
               <>
-                <Text style={styles.section}>Try searching</Text>
+                <Text style={[styles.noneLabel, { marginTop: 28 }]}>Try searching</Text>
                 <View style={styles.tries}>
-                  {trending.data.items.slice(0, 4).map((m) => (
+                  {suggestions.map((label) => (
                     <Pressable
-                      key={m.id}
-                      onPress={() => setQ(m.shortTitle || m.title)}
-                      style={styles.try}
+                      key={label}
+                      onPress={() => setQ(label)}
+                      style={({ pressed }) => [styles.try, pressed && styles.pressed]}
                       accessibilityRole="button"
+                      accessibilityLabel={`Search ${label}`}
                     >
-                      <Text style={styles.tryText}>
-                        {m.shortTitle || m.title}
-                      </Text>
+                      <Text style={styles.tryText}>{label}</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -272,7 +258,7 @@ export default function Search() {
   );
 }
 
-function TraderRow({ trader: t }: { trader: Trader }) {
+function TraderRow({ trader: t, flush }: { trader: Trader; flush?: boolean }) {
   const [following, setState] = useState(t.viewer?.following ?? false);
   async function toggle() {
     setState(!following);
@@ -283,7 +269,7 @@ function TraderRow({ trader: t }: { trader: Trader }) {
     }
   }
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, flush && styles.flush]}>
       <Pressable
         onPress={() => openTrader(t.handle, t.isYou)}
         style={styles.traderLink}
@@ -303,6 +289,7 @@ function TraderRow({ trader: t }: { trader: Trader }) {
         <Button
           size="sm"
           variant={following ? "quiet" : "primary"}
+          style={styles.follow}
           label={following ? "Following" : "Follow"}
           onPress={toggle}
           accessibilityLabel={`${following ? "Unfollow" : "Follow"} ${t.name}`}
@@ -312,7 +299,7 @@ function TraderRow({ trader: t }: { trader: Trader }) {
   );
 }
 
-function RoomRow({ room }: { room: Room }) {
+function RoomRow({ room, flush }: { room: Room; flush?: boolean }) {
   const open = room.privacy === "Public";
   const [state, setState] = useState<"none" | "busy" | "joined" | "requested">(
     room.role ? "joined" : room.requested ? "requested" : "none",
@@ -337,8 +324,8 @@ function RoomRow({ room }: { room: Room }) {
           ? "Join"
           : "Request";
   return (
-    <View style={styles.row}>
-      <View style={styles.roomIcon}>
+    <View style={[styles.row, flush && styles.flushRoom]}>
+      <View style={[styles.roomIcon, flush && styles.roomIconSmall]}>
         <UsersThreeIcon size={18} weight="fill" color={color.neutral800} />
       </View>
       <View style={styles.rowText}>
@@ -346,20 +333,21 @@ function RoomRow({ room }: { room: Room }) {
           {room.name}
         </Text>
         <Text style={styles.rowMeta} numberOfLines={1}>
+          {flush ? "Room · " : ""}
           {room.memberCount.toLocaleString("en-US")} members
-          {room.online ? ` · ${room.online} online` : ""}
+          {!flush && room.online ? ` · ${room.online} online` : ""}
         </Text>
       </View>
       <Pressable
         onPress={join}
         disabled={state !== "none"}
-        hitSlop={8}
+        hitSlop={6}
+        style={({ pressed }) => [styles.join, pressed && styles.pressed]}
         accessibilityRole="button"
         accessibilityLabel={`${label} ${room.name}`}
+        accessibilityState={{ disabled: state !== "none", busy: state === "busy" }}
       >
-        <Text style={[styles.join, state !== "none" && styles.joined]}>
-          {label}
-        </Text>
+        <Text style={[styles.joinText, state !== "none" && styles.joined]}>{label}</Text>
       </Pressable>
     </View>
   );
@@ -367,95 +355,58 @@ function RoomRow({ room }: { room: Room }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
-  bar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space[3],
-    paddingHorizontal: space[4],
-    paddingBottom: space[3],
-  },
+  pressed: { backgroundColor: color.neutral300 },
+  bar: { flexDirection: "row", alignItems: "center", gap: space[1], paddingLeft: space[4], paddingRight: space[2], paddingBottom: space[3] },
   field: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: space[2],
-    height: 48,
-    paddingHorizontal: space[4],
+    gap: 10,
+    height: 44,
+    paddingLeft: space[4],
+    paddingRight: space[2],
     borderRadius: radius.pill,
-    backgroundColor: color.neutral100,
+    backgroundColor: color.neutral200,
     borderWidth: 1,
     borderColor: color.neutral400,
   },
-  input: { flex: 1, fontFamily: font.regular, fontSize: 16, color: color.text },
-  cancel: {
-    fontFamily: font.regular,
-    fontSize: text.post,
-    color: color.neutral800,
-  },
-  scopeRow: {
-    flexGrow: 0,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
-  },
-  scopes: {
-    gap: space[2],
-    paddingHorizontal: space[4],
-    paddingBottom: space[3],
-  },
+  input: { flex: 1, fontFamily: font.regular, fontSize: text.post, color: color.text, padding: 0 },
+  clear: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  cancel: { height: 44, paddingHorizontal: space[3], borderRadius: radius.pill, justifyContent: "center" },
+  cancelText: { fontFamily: font.regular, fontSize: text.body, color: color.neutral800 },
+  scopeRow: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.divider },
+  scopes: { gap: 6, paddingHorizontal: space[4], paddingBottom: space[3] },
   scope: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    height: 36,
-    paddingHorizontal: 14,
+    height: 32,
+    paddingHorizontal: 13,
     borderRadius: radius.pill,
     backgroundColor: color.neutral200,
   },
   scopeOn: { backgroundColor: "#eceadf" },
-  scopeText: {
-    fontFamily: font.medium,
-    fontSize: text.body,
-    color: color.neutral800,
-  },
-  scopeCount: {
-    fontFamily: font.regular,
-    fontSize: 12,
-    color: color.neutral600,
-    fontVariant: ["tabular-nums"],
-  },
+  scopeText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral800 },
+  scopeCount: { fontFamily: font.regular, fontSize: 11, color: color.neutral800, opacity: 0.6, fontVariant: ["tabular-nums"] },
   scopeTextOn: { color: "#0b0d0c" },
-  hint: {
-    fontFamily: font.regular,
-    fontSize: text.body,
-    lineHeight: 20,
-    color: color.neutral700,
-    padding: space[4],
-  },
+  hint: { fontFamily: font.regular, fontSize: text.body, lineHeight: 20, color: color.neutral700, padding: space[4] },
   loading: { gap: space[5], padding: space[4] },
   section: {
     fontFamily: font.regular,
-    fontSize: text.ui,
+    fontSize: 12,
     color: color.neutral700,
     paddingHorizontal: space[4],
-    paddingTop: space[5],
-    paddingBottom: space[2],
+    paddingTop: space[4],
+    paddingBottom: 6,
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space[3],
-    paddingHorizontal: space[4],
-    paddingVertical: 12,
-  },
+  row: { flexDirection: "row", alignItems: "center", gap: space[3], paddingHorizontal: space[4], paddingVertical: space[2] },
+  flush: { paddingHorizontal: 0 },
+  flushRoom: { paddingHorizontal: 0, paddingVertical: space[3] },
   rowText: { flex: 1, gap: 3 },
-  traderLink: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space[3],
-  },
-  rowTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
-  rowMeta: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  traderLink: { flex: 1, flexDirection: "row", alignItems: "center", gap: space[3] },
+  rowTitle: { fontFamily: font.medium, fontSize: text.body, color: color.text },
+  rowMeta: { fontFamily: font.regular, fontSize: 11, color: color.neutral700 },
+  follow: { height: 32 },
   roomIcon: {
     width: 40,
     height: 40,
@@ -464,40 +415,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: color.neutral200,
   },
-  join: { fontFamily: font.medium, fontSize: text.body, color: color.text },
+  roomIconSmall: { width: 36, height: 36 },
+  join: { height: 32, paddingHorizontal: space[3], borderRadius: radius.pill, justifyContent: "center", borderWidth: 1, borderColor: color.neutral400 },
+  joinText: { fontFamily: font.medium, fontSize: 12, color: color.neutral800 },
   joined: { color: color.neutral600 },
-  none: { paddingTop: space[6] },
-  noneTitle: {
-    fontFamily: font.displayItalic,
-    fontSize: 46,
-    lineHeight: 52,
-    color: color.text,
-    paddingHorizontal: space[4],
-  },
-  noneBody: {
-    fontFamily: font.regular,
-    fontSize: text.post,
-    lineHeight: 23,
-    color: color.neutral800,
-    paddingHorizontal: space[4],
-    marginTop: space[3],
-  },
-  tries: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space[2],
-    paddingHorizontal: space[4],
-  },
-  try: {
-    height: 38,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    justifyContent: "center",
-    backgroundColor: color.neutral200,
-  },
-  tryText: {
-    fontFamily: font.medium,
-    fontSize: text.body,
-    color: color.neutral800,
-  },
+  none: { paddingTop: 40, paddingHorizontal: space[5] },
+  noneTitle: { fontFamily: font.displayItalic, fontSize: 44, lineHeight: 44, color: color.neutral600 },
+  noneBody: { fontFamily: font.regular, fontSize: text.post, lineHeight: 22, color: color.neutral800, marginTop: 14 },
+  noneLabel: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  tries: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
+  try: { height: 32, paddingHorizontal: 13, borderRadius: radius.pill, justifyContent: "center", backgroundColor: color.neutral200 },
+  tryText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral800 },
 });

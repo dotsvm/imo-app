@@ -60,7 +60,7 @@ export default function Withdraw() {
 
   async function send() {
     if (trading.wallet.status !== "ready") {
-      setProblem(trading.wallet.status === "loading" ? "Your wallet is still connecting. Try again in a moment." : trading.wallet.reason);
+      setProblem(trading.wallet.status === "loading" ? "Your wallet is still loading. Try again in a moment." : trading.wallet.reason);
       return;
     }
     setProblem(null);

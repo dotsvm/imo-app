@@ -63,15 +63,16 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 10 },
   box: {
     flex: 1,
-    height: 60,
+    height: 52,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 10,
     borderBottomWidth: 2,
-    borderBottomColor: color.neutral400,
+    borderBottomColor: "rgba(255, 255, 255, 0.12)",
   },
-  filled: { borderBottomColor: color.neutral600 },
+  filled: { borderBottomColor: "rgba(255, 255, 255, 0.5)" },
   active: { borderBottomColor: color.pos },
-  digit: { fontFamily: font.medium, fontSize: 30, color: color.text, fontVariant: ["tabular-nums"] },
+  digit: { fontFamily: font.semibold, fontSize: 26, lineHeight: 30, color: color.text, fontVariant: ["tabular-nums"] },
   // Present for the keyboard and autofill, invisible on screen.
   hidden: { position: "absolute", width: 1, height: 1, opacity: 0 },
 });

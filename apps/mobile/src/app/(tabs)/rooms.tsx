@@ -1,6 +1,7 @@
 /**
- * Rooms: the ones you're in (latest word from #general, unread count) and
- * public rooms to find, with Join or Request. Search narrows both.
+ * Rooms: the ones you're in (latest word from #general, unread count, who's
+ * online), most recent first, and rooms to find, with Join or Request.
+ * Search narrows both.
  */
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -20,11 +21,11 @@ import { PlusIcon } from "phosphor-react-native/src/icons/Plus";
 import type { MessagesDTO, RoomSummaryDTO } from "@imo/server/dto/api-types";
 import { Button, PRIMARY_INK } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
-import { TAB_BAR_HEIGHT } from "~/components/tab-bar";
+import { tabBarSpace } from "~/components/tab-bar";
 import { Notice } from "~/features/home/notice";
 import { RoomTile } from "~/features/rooms/room-tile";
 import { api } from "~/lib/api";
-import { color, font, radius, space, text } from "~/theme/tokens";
+import { color, font, radius, space } from "~/theme/tokens";
 
 const clock = (iso: string) => {
   const d = new Date(iso);
@@ -71,28 +72,34 @@ export default function Rooms() {
     })),
   });
 
+  // Most recent conversation first; rooms whose latest word hasn't loaded keep their place after.
+  const yours = mine
+    .map((r, i) => ({ room: r, last: latest[i]?.data?.items.at(-1) }))
+    .sort((a, b) => (b.last ? Date.parse(b.last.at) : 0) - (a.last ? Date.parse(a.last.at) : 0));
+
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + space[2] }]}>
+    <View style={[styles.screen, { paddingTop: insets.top + 6 }]}>
       <View style={styles.head}>
-        <Text style={styles.title}>Rooms</Text>
-        <Pressable
+        <Text style={styles.title} accessibilityRole="header">
+          Rooms
+        </Text>
+        <Button
           onPress={() => router.push("/new-room")}
+          icon={<PlusIcon size={16} weight="bold" color={PRIMARY_INK} />}
           style={styles.add}
-          accessibilityRole="button"
-          accessibilityLabel="New room"
-        >
-          <PlusIcon size={20} weight="bold" color={PRIMARY_INK} />
-        </Pressable>
+          accessibilityLabel="Create room"
+        />
       </View>
       <View style={styles.search}>
-        <MagnifyingGlassIcon size={16} color={color.neutral600} />
+        <MagnifyingGlassIcon size={16} weight="bold" color={color.muted} />
         <TextInput
           value={q}
           onChangeText={setQ}
           placeholder="Search rooms"
-          placeholderTextColor={color.neutral600}
+          placeholderTextColor={color.muted}
           style={styles.input}
           autoCorrect={false}
+          returnKeyType="search"
           accessibilityLabel="Search rooms"
         />
       </View>
@@ -100,7 +107,7 @@ export default function Rooms() {
       <ScrollView
         contentContainerStyle={{
           paddingBottom:
-            TAB_BAR_HEIGHT + Math.max(insets.bottom, space[3]) + space[5],
+            tabBarSpace(insets.bottom) + space[5],
         }}
         refreshControl={
           <RefreshControl
@@ -112,13 +119,16 @@ export default function Rooms() {
         keyboardShouldPersistTaps="handled"
       >
         {rooms.isPending ? (
-          <View style={styles.pad}>
+          <View accessibilityLabel="Loading rooms" accessibilityRole="progressbar">
+            <View style={styles.sectionSkeleton}>
+              <Skeleton width={72} height={10} />
+            </View>
             {[0, 1, 2, 3].map((i) => (
               <View key={i} style={styles.row}>
-                <Skeleton width={44} height={44} style={{ borderRadius: 12 }} />
-                <View style={{ flex: 1, gap: 6 }}>
-                  <Skeleton width={120} height={14} />
-                  <Skeleton width="80%" height={11} />
+                <Skeleton width={48} height={48} style={{ borderRadius: 16 }} />
+                <View style={{ flex: 1, gap: 8 }}>
+                  <Skeleton width={130} height={13} />
+                  <Skeleton width="78%" height={11} />
                 </View>
               </View>
             ))}
@@ -131,54 +141,38 @@ export default function Rooms() {
           />
         ) : (
           <>
-            {mine.length ? (
+            {yours.length ? (
               <Text style={styles.section}>Your rooms</Text>
             ) : null}
-            {mine.map((r, i) => {
-              const last = latest[i]?.data?.items.at(-1);
-              return (
-                <Pressable
-                  key={r.id}
-                  onPress={() => router.push(`/room/${r.id}`)}
-                  style={({ pressed }) => [
-                    styles.row,
-                    pressed && styles.pressed,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${r.name}${r.unread ? `, ${r.unread} unread` : ""}`}
-                >
-                  <RoomTile id={r.id} symbol={r.symbol} color={r.color} avatarUrl={r.avatarUrl} online={r.online > 0} />
-                  <View style={styles.rowText}>
+            {yours.map(({ room: r, last }) => (
+              <Pressable
+                key={r.id}
+                onPress={() => router.push(`/room/${r.id}`)}
+                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+                accessibilityRole="button"
+                accessibilityLabel={`${r.name}${r.unread ? `, ${r.unread} unread` : ""}${r.online ? `, ${r.online} online` : ""}`}
+              >
+                <RoomTile id={r.id} symbol={r.symbol} color={r.color} avatarUrl={r.avatarUrl} online={r.online > 0} size={48} />
+                <View style={styles.rowText}>
+                  <View style={styles.line}>
                     <Text style={styles.name} numberOfLines={1}>
                       {r.name}
                     </Text>
-                    <Text
-                      style={[
-                        styles.preview,
-                        r.unread > 0 && styles.previewUnread,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {last
-                        ? `${last.author.name.split(" ")[0]}: ${last.text}`
-                        : r.description}
-                    </Text>
+                    {last ? <Text style={styles.time}>{clock(last.at)}</Text> : null}
                   </View>
-                  <View style={styles.side}>
-                    {last ? (
-                      <Text style={styles.time}>{clock(last.at)}</Text>
-                    ) : null}
+                  <View style={styles.line}>
+                    <Text style={styles.preview} numberOfLines={1}>
+                      {last ? preview(last) : r.description || `${r.memberCount.toLocaleString("en-US")} members`}
+                    </Text>
                     {r.unread ? (
                       <View style={styles.badge}>
-                        <Text style={styles.badgeText}>
-                          {r.unread > 99 ? "99+" : r.unread}
-                        </Text>
+                        <Text style={styles.badgeText}>{r.unread > 99 ? "99+" : r.unread}</Text>
                       </View>
                     ) : null}
                   </View>
-                </Pressable>
-              );
-            })}
+                </View>
+              </Pressable>
+            ))}
 
             {others.length ? (
               <Text style={styles.section}>Discover</Text>
@@ -201,6 +195,14 @@ export default function Rooms() {
       </ScrollView>
     </View>
   );
+}
+
+/** "Jordan: Bought 180 Yes…", a join line, or a linked market with no words. */
+function preview(m: MessagesDTO["items"][number]) {
+  const who = m.author.isYou ? "You" : m.author.name.split(" ")[0];
+  if (m.kind === "join") return `${who} joined`;
+  if (m.deleted) return `${who}: message deleted`;
+  return `${who}: ${m.text || (m.marketId ? "shared a market" : "")}`;
 }
 
 function DiscoverRow({ room: r }: { room: RoomSummaryDTO }) {
@@ -232,20 +234,20 @@ function DiscoverRow({ room: r }: { room: RoomSummaryDTO }) {
         accessibilityRole="button"
         accessibilityLabel={`${r.name}, ${r.memberCount} members`}
       >
-        <RoomTile id={r.id} symbol={r.symbol} color={r.color} avatarUrl={r.avatarUrl} muted />
+        <RoomTile id={r.id} symbol={r.symbol} color={r.color} avatarUrl={r.avatarUrl} size={48} muted />
         <View style={styles.rowText}>
           <Text style={styles.name} numberOfLines={1}>
             {r.name}
           </Text>
-          <Text style={styles.preview} numberOfLines={1}>
-            {r.memberCount.toLocaleString("en-US")} members
+          <Text style={styles.meta} numberOfLines={1}>
+            {r.memberCount.toLocaleString("en-US")} {r.memberCount === 1 ? "member" : "members"}
             {r.postsToday ? ` · ${r.postsToday} posts today` : ""}
-            {!open ? " · invite only" : ""}
           </Text>
         </View>
       </Pressable>
       <Button
-        size="sm"
+        size="xs"
+        style={styles.join}
         variant={state === "requested" ? "quiet" : "primary"}
         label={state === "requested" ? "Requested" : open ? "Join" : "Request"}
         onPress={join}
@@ -262,60 +264,50 @@ const styles = StyleSheet.create({
   head: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: space[4],
+    gap: space[2],
+    paddingLeft: 20,
+    paddingRight: space[4],
     marginBottom: space[3],
   },
   title: {
+    flex: 1,
     fontFamily: font.medium,
-    fontSize: 28,
-    letterSpacing: -0.8,
+    fontSize: 26,
+    letterSpacing: -0.52,
     color: color.text,
   },
-  add: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#b5e6a1",
-    boxShadow:
-      "inset 0 1px 0 rgba(255,255,255,0.55), 0 6px 14px -6px rgba(0,0,0,0.6)",
-  },
+  add: { width: 40, height: 40, paddingHorizontal: 0 },
   search: {
     flexDirection: "row",
     alignItems: "center",
-    gap: space[2],
+    gap: 10,
     height: 44,
     marginHorizontal: space[4],
-    marginBottom: space[2],
     paddingHorizontal: space[4],
     borderRadius: radius.pill,
-    backgroundColor: color.neutral100,
-    borderWidth: 1,
-    borderColor: color.neutral300,
+    backgroundColor: color.card,
   },
   input: {
     flex: 1,
     fontFamily: font.regular,
-    fontSize: text.body + 1,
+    fontSize: 14,
     color: color.text,
   },
-  pad: { paddingTop: space[3] },
   section: {
     fontFamily: font.regular,
     fontSize: 12,
-    color: color.neutral700,
-    paddingHorizontal: space[4],
-    paddingTop: space[5],
-    paddingBottom: space[2],
+    color: color.muted,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 6,
   },
+  sectionSkeleton: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 8 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: space[3],
-    paddingHorizontal: space[4],
-    paddingVertical: 11,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   pressed: { backgroundColor: color.neutral100 },
   openRoom: {
@@ -324,34 +316,46 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: space[3],
   },
-  rowText: { flex: 1, gap: 4 },
-  name: { fontFamily: font.medium, fontSize: text.post, color: color.text },
-  preview: {
-    fontFamily: font.regular,
-    fontSize: text.ui,
-    color: color.neutral700,
+  rowText: { flex: 1, gap: 2 },
+  line: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space[2],
   },
-  previewUnread: { color: color.neutral800 },
-  side: { alignItems: "flex-end", gap: 6, minWidth: 34 },
+  name: { flexShrink: 1, fontFamily: font.medium, fontSize: 15, color: color.text },
+  preview: {
+    flexShrink: 1,
+    fontFamily: font.regular,
+    fontSize: 13,
+    color: "#c6cec6",
+  },
+  meta: {
+    fontFamily: font.regular,
+    fontSize: 12,
+    color: color.muted,
+    fontVariant: ["tabular-nums"],
+  },
   time: {
     fontFamily: font.regular,
     fontSize: 11,
-    color: color.neutral600,
+    color: color.muted,
     fontVariant: ["tabular-nums"],
   },
   badge: {
-    minWidth: 22,
+    minWidth: 20,
     height: 20,
     paddingHorizontal: 6,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7fd47a",
+    backgroundColor: color.gain,
   },
   badgeText: {
     fontFamily: font.semibold,
     fontSize: 11,
-    color: PRIMARY_INK,
+    color: "#0c100e",
     fontVariant: ["tabular-nums"],
   },
+  join: { height: 32, paddingHorizontal: 14 },
 });

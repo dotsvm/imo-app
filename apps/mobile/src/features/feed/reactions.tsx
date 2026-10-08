@@ -1,5 +1,6 @@
 /**
- * A post's replies, likes and save, live. Like and save answer the instant
+ * A post's replies, reposts, likes and save, live: outline glyphs that fill
+ * in when they're yours. Repost, like and save answer the instant
  * they're tapped (a small spring pop, a light tick), then the server's count
  * takes over; if the server says no, they go back. Replies opens the post
  * with the reply box ready.
@@ -20,12 +21,13 @@ import Animated, {
 import { BookmarkSimpleIcon } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { ChatCircleIcon } from "phosphor-react-native/src/icons/ChatCircle";
 import { HeartIcon } from "phosphor-react-native/src/icons/Heart";
+import { RepeatIcon } from "phosphor-react-native/src/icons/Repeat";
 import type { PostDTO } from "@imo/server/dto/api-types";
 import { api } from "~/lib/api";
 import { count } from "~/lib/format";
 import { color, font } from "~/theme/tokens";
 
-type Kind = "like" | "bookmark";
+type Kind = "like" | "bookmark" | "repost";
 
 export function Reactions({
   post,
@@ -41,7 +43,9 @@ export function Reactions({
     base: post,
     liked: !!post.viewer?.liked,
     saved: !!post.viewer?.bookmarked,
+    reposted: !!post.viewer?.reposted,
     likes: post.likes,
+    reposts: post.reposts,
   });
   // Fresh data from the server (a refetch) replaces what was shown.
   if (state.base !== post)
@@ -49,17 +53,26 @@ export function Reactions({
       base: post,
       liked: !!post.viewer?.liked,
       saved: !!post.viewer?.bookmarked,
+      reposted: !!post.viewer?.reposted,
       likes: post.likes,
+      reposts: post.reposts,
     });
 
+  const [busy, setBusy] = useState<Kind | null>(null);
+
   async function react(kind: Kind) {
+    // One request per reaction at a time: a quick second tap waits for the first.
+    if (busy === kind) return;
+    setBusy(kind);
     if (Platform.OS !== "web") Haptics.selectionAsync();
-    const on = kind === "like" ? !state.liked : !state.saved;
+    const on = kind === "like" ? !state.liked : kind === "repost" ? !state.reposted : !state.saved;
     const before = state;
     setState((s) =>
       kind === "like"
         ? { ...s, liked: on, likes: Math.max(0, s.likes + (on ? 1 : -1)) }
-        : { ...s, saved: on },
+        : kind === "repost"
+          ? { ...s, reposted: on, reposts: Math.max(0, s.reposts + (on ? 1 : -1)) }
+          : { ...s, saved: on },
     );
     try {
       const fresh = await api<PostDTO>(`/posts/${post.id}/reactions/${kind}`, {
@@ -69,7 +82,9 @@ export function Reactions({
         ...s,
         liked: !!fresh.viewer?.liked,
         saved: !!fresh.viewer?.bookmarked,
+        reposted: !!fresh.viewer?.reposted,
         likes: fresh.likes,
+        reposts: fresh.reposts,
       }));
       // Other screens showing this post catch up on their next look.
       queryClient.setQueryData(["post", post.id], fresh);
@@ -77,6 +92,8 @@ export function Reactions({
         queryClient.invalidateQueries({ queryKey: ["feed", "bookmarks"] });
     } catch {
       setState(before);
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -93,9 +110,28 @@ export function Reactions({
             }))
         }
         icon={
-          <ChatCircleIcon size={18} weight="fill" color={color.neutral600} />
+          <ChatCircleIcon size={16} weight="bold" color={color.neutral700} />
         }
         n={post.commentCount}
+      />
+      <Action
+        label={
+          state.reposted
+            ? `Undo repost. ${state.reposts} reposts`
+            : `Repost. ${state.reposts} reposts`
+        }
+        selected={state.reposted}
+        onPress={() => react("repost")}
+        icon={
+          <RepeatIcon
+            size={16}
+            weight="bold"
+            color={state.reposted ? color.pos : color.neutral700}
+          />
+        }
+        n={state.reposts > 0 ? state.reposts : undefined}
+        tint={state.reposted ? color.pos : undefined}
+        pop
       />
       <Action
         label={
@@ -107,9 +143,9 @@ export function Reactions({
         onPress={() => react("like")}
         icon={
           <HeartIcon
-            size={18}
-            weight="fill"
-            color={state.liked ? "#f0718a" : color.neutral600}
+            size={16}
+            weight={state.liked ? "fill" : "bold"}
+            color={state.liked ? "#f0718a" : color.neutral700}
           />
         }
         n={state.likes}
@@ -123,9 +159,9 @@ export function Reactions({
           onPress={() => react("bookmark")}
           icon={
             <BookmarkSimpleIcon
-              size={18}
-              weight="fill"
-              color={state.saved ? color.pos : color.neutral600}
+              size={16}
+              weight={state.saved ? "fill" : "bold"}
+              color={state.saved ? color.pos : color.neutral700}
             />
           }
           pop
@@ -187,18 +223,18 @@ function Action({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 18 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12 },
   action: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
     minHeight: 36,
     paddingRight: 2,
   },
   pressed: { opacity: 0.6 },
   count: {
     fontFamily: font.regular,
-    fontSize: 14,
+    fontSize: 12,
     color: color.neutral700,
     fontVariant: ["tabular-nums"],
   },

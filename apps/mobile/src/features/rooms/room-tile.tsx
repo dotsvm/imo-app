@@ -24,36 +24,35 @@ interface Props {
 }
 
 export function RoomTile({ id, symbol, color: tint, avatarUrl, size = 44, online, muted }: Props) {
-  const shape = { width: size, height: size, borderRadius: size * 0.28 };
+  // 48 → 16, 36 → 12, 64 → ~21: the design's soft squares.
+  const shape = { width: size, height: size, borderRadius: Math.round(size / 3) };
+  const dot = Math.max(10, Math.round(size / 4));
   return (
     <View>
       {avatarUrl ? (
         <Image source={{ uri: avatarUrl }} style={[shape, muted && styles.photoMuted]} contentFit="cover" />
       ) : (
         <View style={[styles.tile, shape, muted ? styles.muted : { backgroundColor: tint || tintOf(id) }]}>
-          <Text style={[styles.symbol, { fontSize: size * 0.3 }, muted && styles.symbolMuted]}>{symbol}</Text>
+          <Text style={[styles.symbol, { fontSize: Math.round(size * 0.29) }, muted && styles.symbolMuted]}>{symbol}</Text>
         </View>
       )}
-      {online ? <View style={styles.dot} /> : null}
+      {online ? <View style={[styles.dot, { width: dot, height: dot, borderRadius: dot / 2 }]} /> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   tile: { alignItems: "center", justifyContent: "center" },
-  muted: { backgroundColor: color.neutral200 },
+  muted: { backgroundColor: color.card },
   photoMuted: { opacity: 0.7 },
-  symbol: { fontFamily: font.semibold, color: "#0b1410" },
-  symbolMuted: { color: color.neutral800 },
+  symbol: { fontFamily: font.semibold, color: "#0c100e" },
+  symbolMuted: { color: "#c6cec6" },
   dot: {
     position: "absolute",
     right: -2,
     bottom: -2,
-    width: 13,
-    height: 13,
-    borderRadius: 7,
-    backgroundColor: "#5bc46a",
-    borderWidth: 2,
+    backgroundColor: color.gain,
+    borderWidth: 3,
     borderColor: color.bg,
   },
 });

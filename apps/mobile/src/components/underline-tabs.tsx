@@ -6,7 +6,7 @@ import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { type LayoutRectangle, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useReducedMotion, withSpring } from "react-native-reanimated";
-import { color, font, space } from "~/theme/tokens";
+import { color, font, radius } from "~/theme/tokens";
 
 interface Props<T extends string> {
   options: readonly { id: T; label: string }[];
@@ -18,14 +18,17 @@ export function UnderlineTabs<T extends string>({ options, value, onChange }: Pr
   const reduced = useReducedMotion();
   const [frames, setFrames] = useState<Record<string, LayoutRectangle>>({});
   const frame = frames[value];
+  // The bar spans the label, not the tab's padded hit area.
+  const x = frame ? frame.x + PAD : 0;
+  const width = frame ? Math.max(0, frame.width - PAD * 2) : 0;
   const bar = useAnimatedStyle(() => {
     if (!frame) return { opacity: 0 };
-    const to = { transform: [{ translateX: frame.x }], width: frame.width, opacity: 1 };
+    const to = { transform: [{ translateX: x }], width, opacity: 1 };
     if (reduced) return to;
     return {
       opacity: 1,
-      width: withSpring(frame.width, { damping: 22, stiffness: 260 }),
-      transform: [{ translateX: withSpring(frame.x, { damping: 22, stiffness: 260 }) }],
+      width: withSpring(width, { damping: 22, stiffness: 260 }),
+      transform: [{ translateX: withSpring(x, { damping: 22, stiffness: 260 }) }],
     };
   });
 
@@ -60,11 +63,14 @@ export function UnderlineTabs<T extends string>({ options, value, onChange }: Pr
   );
 }
 
+/** Each tab's side padding: the hit area is wider than its label. */
+const PAD = 14;
+
 const styles = StyleSheet.create({
-  wrap: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.divider, marginTop: space[5] },
-  row: { paddingHorizontal: space[4], gap: space[6] },
-  tab: { paddingTop: 6, paddingBottom: 14 },
-  label: { fontFamily: font.medium, fontSize: 17, color: color.neutral600 },
+  wrap: { borderBottomWidth: 1, borderBottomColor: "rgba(255, 255, 255, 0.08)", marginTop: 10 },
+  row: { paddingHorizontal: 6 },
+  tab: { height: 48, paddingHorizontal: PAD, justifyContent: "center" },
+  label: { fontFamily: font.medium, fontSize: 15, color: color.neutral700 },
   labelOn: { color: color.text, fontFamily: font.semibold },
-  bar: { position: "absolute", left: 0, bottom: 0, height: 3, borderRadius: 2, backgroundColor: color.pos },
+  bar: { position: "absolute", left: 0, bottom: 0, height: 4, borderRadius: radius.pill, backgroundColor: color.pos },
 });

@@ -136,7 +136,7 @@ export default function Wallet() {
                     ? `This device signs for ${short(trading.wallet.address)}, not this account's wallet. Sign out and back in.`
                     : "This device can sign your trades. The key stays in Privy's secure enclave."
                   : trading.wallet.status === "loading"
-                    ? "Connecting your wallet…"
+                    ? "Loading your wallet…"
                     : trading.wallet.reason}
               </Text>
             </View>

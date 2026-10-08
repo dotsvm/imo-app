@@ -10,17 +10,18 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CaretLeftIcon } from "phosphor-react-native/src/icons/CaretLeft";
+import { BookmarkSimpleIcon } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { HandSwipeLeftIcon } from "phosphor-react-native/src/icons/HandSwipeLeft";
 import { PlusIcon } from "phosphor-react-native/src/icons/Plus";
 import type { MarketDTO, MarketPage, WatchlistsDTO } from "@imo/server/dto/api-types";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
-import { Sparkline } from "~/features/discover/sparkline";
+import { TrendLine } from "~/features/markets/trend-line";
 import { Notice } from "~/features/home/notice";
 import { api } from "~/lib/api";
 import { price } from "~/lib/format";
 import { useVenues } from "~/lib/venues";
-import { color, font, radius, space, text } from "~/theme/tokens";
+import { color, font, radius, space } from "~/theme/tokens";
 
 type List = WatchlistsDTO["items"][number];
 
@@ -62,14 +63,27 @@ export default function Watchlists() {
   }
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + space[1] }]}>
+    <View style={[styles.screen, { paddingTop: insets.top + 6 }]}>
       <View style={styles.head}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back} accessibilityRole="button" accessibilityLabel="Back">
-          <CaretLeftIcon size={22} weight="bold" color={color.text} />
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={4}
+          style={({ pressed }) => [styles.back, pressed && styles.circlePressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <CaretLeftIcon size={20} weight="bold" color={color.text} />
         </Pressable>
-        <Text style={styles.title}>Watchlists</Text>
-        <Pressable onPress={() => setCreating(true)} style={styles.add} accessibilityRole="button" accessibilityLabel="New watchlist">
-          <PlusIcon size={18} weight="bold" color={color.text} />
+        <Text style={styles.title} accessibilityRole="header">
+          Watchlists
+        </Text>
+        <Pressable
+          onPress={() => setCreating(true)}
+          style={({ pressed }) => [styles.add, pressed && styles.addPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="New watchlist"
+        >
+          <PlusIcon size={16} weight="bold" color={color.text} />
         </Pressable>
       </View>
 
@@ -90,7 +104,7 @@ export default function Watchlists() {
                   accessibilityState={{ selected: on }}
                 >
                   <Text style={[styles.tabText, on && styles.tabTextOn]}>{l.name}</Text>
-                  <Text style={[styles.count, on && styles.tabTextOn]}>{l.marketIds.length}</Text>
+                  <Text style={[styles.tabText, styles.count, on && styles.tabTextOn]}>{l.marketIds.length}</Text>
                 </Pressable>
               );
             })}
@@ -98,24 +112,44 @@ export default function Watchlists() {
 
           {rows.length ? (
             <View style={styles.summary}>
-              <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flex: 1, gap: 3 }}>
                 <Text style={styles.small}>Today across this list</Text>
                 <Text style={styles.summaryText}>
                   {up} up · {down} down{resolved ? ` · ${resolved} resolved` : ""}
                 </Text>
               </View>
-              <Bars up={up} down={down} resolved={resolved} />
+              <Bars markets={rows} />
             </View>
           ) : null}
 
           {lists.isPending || (ids.length && markets.isPending) ? (
-            <View style={{ padding: space[4], gap: space[4] }}>
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} height={44} />
+            <View accessibilityLabel="Loading the list" accessibilityRole="progressbar">
+              <View style={styles.summary}>
+                <View style={{ flex: 1, gap: 8 }}>
+                  <Skeleton width={130} height={10} />
+                  <Skeleton width={170} height={14} />
+                </View>
+              </View>
+              {[0, 1, 2, 3].map((i) => (
+                <View key={i} style={styles.row}>
+                  <View style={{ flex: 1, gap: 7 }}>
+                    <Skeleton width="70%" height={13} />
+                    <Skeleton width={120} height={10} />
+                  </View>
+                  <Skeleton width={64} height={24} />
+                  <Skeleton width={44} height={28} />
+                </View>
               ))}
             </View>
+          ) : markets.isError ? (
+            <Notice title="This list's markets didn't load" body={markets.error.message} action={{ label: "Try again", onPress: () => markets.refetch() }} />
           ) : !ids.length ? (
-            <Notice title="Nothing on this list yet" body="Tap the bookmark on any market to save it, then sort it into a list." />
+            <Notice
+              icon={<BookmarkSimpleIcon size={26} weight="fill" color={color.muted} />}
+              title="This list is empty"
+              body="Save markets from Discover, a post or a room with the bookmark icon."
+              action={{ label: "Find markets", onPress: () => router.navigate("/(tabs)/discover") }}
+            />
           ) : (
             rows.map((m) => (
               <Swipeable
@@ -124,9 +158,11 @@ export default function Watchlists() {
                 rightThreshold={60}
                 overshootRight={false}
                 renderRightActions={() => (
-                  <Pressable onPress={() => remove(m.id)} style={styles.remove} accessibilityRole="button" accessibilityLabel={`Remove ${m.title}`}>
-                    <Text style={styles.removeText}>Remove</Text>
-                  </Pressable>
+                  <View style={styles.removeWrap}>
+                    <Pressable onPress={() => remove(m.id)} style={styles.remove} accessibilityRole="button" accessibilityLabel={`Remove ${m.title}`}>
+                      <Text style={styles.removeText}>Remove</Text>
+                    </Pressable>
+                  </View>
                 )}
               >
                 <Row market={m} venue={venues.get(m.venueId)?.name ?? m.venueId} onRemove={() => remove(m.id)} />
@@ -136,7 +172,7 @@ export default function Watchlists() {
 
           {rows.length ? (
             <View style={styles.hint}>
-              <HandSwipeLeftIcon size={15} color={color.neutral600} />
+              <HandSwipeLeftIcon size={14} weight="bold" color={color.muted} />
               <Text style={styles.small}>Swipe a row left to remove</Text>
             </View>
           ) : null}
@@ -158,6 +194,7 @@ export default function Watchlists() {
 function Row({ market: m, venue, onRemove }: { market: MarketDTO; venue: string; onRemove: () => void }) {
   const resolved = m.status === "resolved";
   const date = new Date(m.closesAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const trend = resolved || !m.change ? "rgba(255, 255, 255, 0.3)" : m.change > 0 ? color.gain : color.neg;
   return (
     <Pressable
       onPress={() => router.push(`/market/${m.id}`)}
@@ -167,18 +204,20 @@ function Row({ market: m, venue, onRemove }: { market: MarketDTO; venue: string;
       accessibilityActions={[{ name: "remove", label: "Remove from list" }]}
       onAccessibilityAction={(e) => e.nativeEvent.actionName === "remove" && onRemove()}
     >
-      <View style={{ flex: 1, gap: 4 }}>
+      <View style={{ flex: 1, gap: 3 }}>
         <Text style={styles.rowTitle} numberOfLines={1}>
           {m.shortTitle || m.title}
         </Text>
-        <Text style={styles.small}>
+        <Text style={styles.meta} numberOfLines={1}>
           {venue} · {resolved ? `resolved ${date}` : `Closes ${date}`}
         </Text>
       </View>
-      <View style={[styles.spark, resolved && { opacity: 0.4 }]}>{m.series.length > 1 ? <Sparkline points={m.series} height={26} /> : null}</View>
+      <View style={styles.spark}>
+        {m.series.length > 1 ? <TrendLine points={m.series} height={24} width={64} stroke={trend} /> : null}
+      </View>
       <View style={styles.figure}>
         <Text style={styles.price}>{resolved ? m.resolution.outcome ?? "Void" : price(m.yesPrice)}</Text>
-        <Text style={[styles.change, { color: resolved || !m.change ? color.neutral700 : m.change > 0 ? color.pos : color.neg }]}>
+        <Text style={[styles.change, { color: resolved || !m.change ? color.muted : m.change > 0 ? color.gain : color.neg }]}>
           {resolved ? "resolved" : m.change ? `${m.change > 0 ? "▲" : "▼"} ${Math.abs(m.change)}¢` : "no change"}
         </Text>
       </View>
@@ -186,15 +225,28 @@ function Row({ market: m, venue, onRemove }: { market: MarketDTO; venue: string;
   );
 }
 
-/** Up, down and resolved as three little stacks, the summary's mark. */
-function Bars({ up, down, resolved }: { up: number; down: number; resolved: number }) {
-  const max = Math.max(1, up, down, resolved);
-  const bar = (n: number, c: string) => <View style={[styles.bar, { height: 4 + (n / max) * 18, backgroundColor: n ? c : color.neutral400 }]} />;
+/** One bar per market (up to 8): up green, down coral, by how far it moved; flat or resolved a stub. */
+function Bars({ markets }: { markets: MarketDTO[] }) {
+  const moving = (m: MarketDTO) => m.status !== "resolved" && m.change !== 0;
+  const order = [
+    ...markets.filter((m) => moving(m) && m.change > 0),
+    ...markets.filter((m) => moving(m) && m.change < 0),
+    ...markets.filter((m) => !moving(m)),
+  ].slice(0, 8);
+  const max = Math.max(1, ...order.filter(moving).map((m) => Math.abs(m.change)));
   return (
-    <View style={styles.bars} accessibilityElementsHidden>
-      {bar(up, color.pos)}
-      {bar(down, color.neg)}
-      {bar(resolved, color.neutral600)}
+    <View style={styles.bars} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      {order.map((m) => (
+        <View
+          key={m.id}
+          style={[
+            styles.bar,
+            moving(m)
+              ? { height: 4 + (Math.abs(m.change) / max) * 18, backgroundColor: m.change > 0 ? color.gain : color.neg }
+              : { height: 4, backgroundColor: "rgba(255, 255, 255, 0.2)" },
+          ]}
+        />
+      ))}
     </View>
   );
 }
@@ -238,39 +290,45 @@ function NewList({ open, onClose, onCreated }: { open: boolean; onClose: () => v
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
-  head: { flexDirection: "row", alignItems: "center", gap: space[2], paddingHorizontal: space[3], marginBottom: space[3] },
-  back: { width: 32, height: 36, alignItems: "center", justifyContent: "center" },
-  title: { flex: 1, fontFamily: font.medium, fontSize: 28, letterSpacing: -0.8, color: color.text },
-  add: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: color.neutral200 },
-  tabs: { gap: space[2], paddingHorizontal: space[4], paddingBottom: space[3] },
-  tab: { flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.neutral200 },
-  tabOn: { backgroundColor: "#eceadf" },
-  tabText: { fontFamily: font.medium, fontSize: text.body, color: color.neutral800 },
-  tabTextOn: { color: "#0b0d0c" },
-  count: { fontFamily: font.regular, fontSize: 12, color: color.neutral600 },
+  head: { flexDirection: "row", alignItems: "center", gap: 4, paddingLeft: space[2], paddingRight: space[4], marginBottom: space[3] },
+  back: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  circlePressed: { backgroundColor: color.card },
+  title: { flex: 1, fontFamily: font.medium, fontSize: 26, letterSpacing: -0.52, color: color.text },
+  add: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: color.card },
+  addPressed: { backgroundColor: "#1b241f" },
+  tabs: { gap: 6, paddingHorizontal: space[4], paddingBottom: 14 },
+  tab: { flexDirection: "row", alignItems: "center", gap: 6, height: 34, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.card },
+  tabOn: { backgroundColor: color.text },
+  tabText: { fontFamily: font.regular, fontSize: 13, color: "#c6cec6" },
+  tabTextOn: { color: "#0c100e" },
+  count: { fontSize: 11, opacity: 0.55, fontVariant: ["tabular-nums"] },
   summary: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 14,
     marginHorizontal: space[4],
-    marginBottom: space[3],
-    padding: space[4],
-    borderRadius: radius.panel,
-    backgroundColor: "#121714",
+    marginBottom: space[2],
+    paddingVertical: 14,
+    paddingHorizontal: space[4],
+    borderRadius: 18,
+    backgroundColor: color.card,
   },
-  small: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  summaryText: { fontFamily: font.medium, fontSize: text.post, color: color.text, fontVariant: ["tabular-nums"] },
-  bars: { flexDirection: "row", alignItems: "flex-end", gap: 4, height: 24 },
+  small: { fontFamily: font.regular, fontSize: 12, color: color.muted, fontVariant: ["tabular-nums"] },
+  meta: { fontFamily: font.regular, fontSize: 11, color: color.muted, fontVariant: ["tabular-nums"] },
+  summaryText: { fontFamily: font.medium, fontSize: 15, color: color.text, fontVariant: ["tabular-nums"] },
+  bars: { flexDirection: "row", alignItems: "flex-end", gap: 3, height: 26 },
   bar: { width: 6, borderRadius: 2 },
-  row: { flexDirection: "row", alignItems: "center", gap: space[3], paddingHorizontal: space[4], paddingVertical: 12, backgroundColor: color.bg },
+  row: { flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 20, paddingVertical: space[3], backgroundColor: color.bg },
   pressed: { backgroundColor: color.neutral100 },
-  rowTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
-  spark: { width: 64 },
-  figure: { alignItems: "flex-end", gap: 3, minWidth: 64 },
-  price: { fontFamily: font.semibold, fontSize: 16, color: color.text, fontVariant: ["tabular-nums"] },
-  change: { fontFamily: font.medium, fontSize: 11, fontVariant: ["tabular-nums"] },
-  remove: { width: 96, alignItems: "center", justifyContent: "center", backgroundColor: "#5a2a24" },
-  removeText: { fontFamily: font.semibold, fontSize: text.body, color: color.neg },
-  hint: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: space[4], paddingTop: space[4] },
+  rowTitle: { fontFamily: font.regular, fontSize: 14, lineHeight: 18, color: color.text },
+  spark: { width: 64, height: 24 },
+  figure: { alignItems: "flex-end", gap: 3, minWidth: 58 },
+  price: { fontFamily: font.medium, fontSize: 15, color: color.text, fontVariant: ["tabular-nums"] },
+  change: { fontFamily: font.regular, fontSize: 11, fontVariant: ["tabular-nums"] },
+  removeWrap: { justifyContent: "center", paddingHorizontal: space[3] },
+  remove: { height: 40, paddingHorizontal: space[4], borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: color.neg200, borderWidth: 1, borderColor: color.negLine },
+  removeText: { fontFamily: font.semibold, fontSize: 13, color: color.neg },
+  hint: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 14 },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(5, 8, 6, 0.6)" },
   dialog: {
     position: "absolute",

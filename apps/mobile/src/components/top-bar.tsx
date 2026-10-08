@@ -9,7 +9,7 @@ import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BellIcon } from "phosphor-react-native/src/icons/Bell";
+import { BellSimpleIcon } from "phosphor-react-native/src/icons/BellSimple";
 import { MagnifyingGlassIcon } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import type { NotificationsPage } from "@imo/server/dto/api-types";
 import { useConfig } from "~/features/auth/auth";
@@ -38,7 +38,7 @@ export function TopBar({ title = "imo", showSearch = true, extra, onSearch, onNo
     staleTime: 60_000,
   }).data?.unread;
   return (
-    <View style={[styles.bar, { paddingTop: insets.top + space[2] }]}>
+    <View style={[styles.bar, { paddingTop: insets.top + space[1] }]}>
       <View style={styles.brand} accessible accessibilityRole="header" accessibilityLabel={title}>
         {title === "imo" ? (
           <Image source={require("~/assets/brand/wordmark.png")} style={styles.wordmark} contentFit="contain" />
@@ -64,12 +64,12 @@ export function TopBar({ title = "imo", showSearch = true, extra, onSearch, onNo
           label={unread ? `Notifications, ${unread} unread` : "Notifications"}
           onPress={onNotifications ?? (() => router.push("/notifications"))}
         >
-          <BellIcon size={22} weight="regular" color={color.text} />
+          <BellSimpleIcon size={17} weight="bold" color={color.text} />
           {unread ? <View style={styles.unread} /> : null}
         </IconButton>
         {showSearch ? (
           <IconButton label="Search" onPress={onSearch}>
-            <MagnifyingGlassIcon size={22} weight="bold" color={color.text} />
+            <MagnifyingGlassIcon size={17} weight="bold" color={color.text} />
           </IconButton>
         ) : null}
       </View>
@@ -91,19 +91,22 @@ function IconButton({ label, onPress, children }: { label: string; onPress?: () 
   );
 }
 
+const ICON_FILL = "#141a17";
+
 const styles = StyleSheet.create({
   bar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: space[4],
-    paddingBottom: space[2],
+    paddingLeft: 22,
+    paddingRight: space[4],
+    paddingBottom: space[1],
     backgroundColor: color.bg,
   },
   brand: { flexDirection: "row", alignItems: "center", gap: 10 },
   mark: { width: 26, height: 26 },
   // The wordmark's own proportions (397 × 192).
-  wordmark: { width: 62, height: 30 },
+  wordmark: { width: 45, height: 22 },
   name: { fontFamily: font.medium, fontSize: 24, letterSpacing: -0.5, color: color.text },
   tools: { flexDirection: "row", alignItems: "center", gap: space[2] },
   demo: {
@@ -119,12 +122,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 9,
     right: 10,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#b5e6a1",
-    borderWidth: 2,
-    borderColor: "#14181a",
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: color.pos,
+    // A 2px ring in the button's own fill, outside the dot.
+    boxShadow: `0 0 0 2px ${ICON_FILL}`,
   },
-  icon: { width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: "#14181a" },
+  icon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: ICON_FILL },
 });

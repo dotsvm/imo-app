@@ -18,7 +18,7 @@ interface Props {
   gap?: number;
 }
 
-const THUMB = 26;
+const THUMB = 24;
 
 export function RangeSlider({ min, max, onChange, step = 5, gap = 5 }: Props) {
   const [width, setWidth] = useState(0);
@@ -79,14 +79,14 @@ function Thumb({ value, track, step, label, onChange }: ThumbProps) {
 
 const styles = StyleSheet.create({
   wrap: { height: THUMB + 8, justifyContent: "center" },
-  rail: { position: "absolute", left: THUMB / 2, right: THUMB / 2, height: 3, borderRadius: 2, backgroundColor: color.neutral400 },
+  rail: { position: "absolute", left: THUMB / 2, right: THUMB / 2, height: 2, borderRadius: 1, backgroundColor: color.neutral400 },
   fill: { position: "absolute", height: 3, borderRadius: 2, backgroundColor: color.pos },
   thumb: {
     position: "absolute",
     width: THUMB,
     height: THUMB,
     borderRadius: THUMB / 2,
-    backgroundColor: "#f3f1ea",
+    backgroundColor: "#eeefea",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.5), inset 0 -1px 2px rgba(0, 0, 0, 0.15)",
   },
 });

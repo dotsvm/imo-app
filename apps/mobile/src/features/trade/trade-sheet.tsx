@@ -3,8 +3,10 @@
  *  1. the sheet: side, amount, the live quote and what each result means;
  *  2. review: the order spelled out (price × shares, every fee, the total,
  *     when it cancels), placed by press-and-hold;
- *  3. filled: what you own now, and a nudge to say why.
- * Opened from a post (Back the author's side, or Fade it) or from a market.
+ *  3. filled: what you own now, and a nudge to say why (or, when the venue
+ *     hasn't filled it yet, that it's on its way).
+ * Opened from a post (Back the author's side, or Fade it) or from a market;
+ * one sheet for both, the post's call heading it when there is one.
  * With real money the order is the venue's own transaction, signed by the
  * trader's wallet on this device; on a paper server it fills against the
  * venue's real book with demo cash.
@@ -17,17 +19,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowRightIcon } from "phosphor-react-native/src/icons/ArrowRight";
 import { CaretLeftIcon } from "phosphor-react-native/src/icons/CaretLeft";
 import { CheckIcon } from "phosphor-react-native/src/icons/Check";
+import { ClockIcon } from "phosphor-react-native/src/icons/Clock";
 import { FingerprintIcon } from "phosphor-react-native/src/icons/Fingerprint";
-import { PencilSimpleIcon } from "phosphor-react-native/src/icons/PencilSimple";
+import { PencilSimpleLineIcon } from "phosphor-react-native/src/icons/PencilSimpleLine";
+import { WarningCircleIcon } from "phosphor-react-native/src/icons/WarningCircle";
 import { XIcon } from "phosphor-react-native/src/icons/X";
 import type { MarketDTO, PostDTO, QuoteDTO } from "@imo/server/dto/api-types";
 import { Avatar } from "~/components/avatar";
 import { Button, PRIMARY_INK } from "~/components/button";
 import { HoldButton } from "~/components/hold-button";
 import { VenueMark } from "~/components/venue-mark";
-import { useMe } from "~/features/auth/use-account";
 import { updateDraft } from "~/features/compose/draft";
 import { useRecords } from "~/features/feed/use-records";
+import { AddFundsSheet } from "~/features/wallet/add-funds-sheet";
 import { placeWalletOrder, STEP_LABEL, type OrderStep } from "~/features/wallet/orders";
 import { useTrading } from "~/features/wallet/use-trading";
 import { api } from "~/lib/api";
@@ -45,7 +49,7 @@ interface Props {
   onClose: () => void;
 }
 
-type Stage = "edit" | "review" | "done";
+type Stage = "edit" | "review" | "pending" | "done";
 interface Fill {
   shares: number;
   /** What was asked for, and the quoted price per share. */
@@ -65,13 +69,15 @@ interface PositionDTO {
 /** The server cancels a fill that would cost more than this past the quoted price. */
 const SLIPPAGE_CENTS = 2;
 const clientId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const clock = (iso: string) => new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+const shareCount = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
 export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const venues = useVenues();
   const records = useRecords();
-  const me = useMe().data;
   const presets = post ? [1000, 5000, 10000] : [2500, 10000, 25000];
   const [outcome, setOutcome] = useState<Outcome>(initial ?? post?.outcome ?? "Yes");
   const [amount, setAmount] = useState(post ? 5000 : 10000);
@@ -79,7 +85,9 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
   const [placing, setPlacing] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [fill, setFill] = useState<Fill | null>(null);
+  const [pending, setPending] = useState<{ shares: number; at: string } | null>(null);
   const [step, setStep] = useState<OrderStep | null>(null);
+  const [funding, setFunding] = useState(false);
   const trading = useTrading();
 
   // A fresh sheet each time it opens.
@@ -94,12 +102,16 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
       setStage("edit");
       setProblem(null);
       setFill(null);
+      setPending(null);
     }
   }
 
   const available = trading.availableCents ?? 0;
+  // The most this wallet can spend, in whole dollars.
+  const maxCents = Math.floor(available / 100) * 100;
   const tooSmall = amount < trading.minOrderCents;
   const venue = venues.get(market.venueId)?.name ?? market.venueId;
+  const short = market.shortTitle || market.title;
   const first = post?.author.name.split(" ")[0] ?? "";
   const stats = post ? records.byId.get(post.authorId) : undefined;
   const record =
@@ -111,14 +123,13 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
     queryKey: ["quote", market.id, outcome, amount],
     queryFn: ({ signal }) =>
       api<QuoteDTO>("/quotes", { body: { market: market.id, side: "Buy", outcome, amountCents: amount }, signal }),
-    enabled: open && amount > 0 && stage !== "done",
+    enabled: open && amount > 0 && (stage === "edit" || stage === "review"),
     staleTime: 5_000,
     placeholderData: (prev) => prev,
   });
   const q = quote.data && quote.data.outcome === outcome ? quote.data : undefined;
   // Unknown balance (the chain didn't answer) isn't zero: let the venue decide.
   const insufficient = trading.availableCents !== null && amount > trading.availableCents;
-  void me;
   const other = opposite(outcome);
   const sideLabel = (side: Outcome) =>
     post ? `${side === post.outcome ? "BACK" : "FADE"} ${first.toUpperCase()} · ${side.toUpperCase()}` : `BUY ${side.toUpperCase()}`;
@@ -126,7 +137,8 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
   async function place() {
     if (!q) return;
     if (trading.live && trading.wallet.status !== "ready") {
-      setProblem(trading.wallet.status === "loading" ? "Your wallet is still connecting. Try again in a moment." : trading.wallet.reason);
+      setProblem(trading.wallet.status === "loading" ? "Your wallet is still loading. Try again in a moment." : trading.wallet.reason);
+      setStage("edit");
       return;
     }
     setPlacing(true);
@@ -139,8 +151,14 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
           : await api<{ status: string; filledShares: number; filledTotalCents: number; reason: string | null; at: string }>("/orders", {
               body: { ...body, expectedPriceCents: q.priceCents },
             });
-      if (order.status === "pending")
-        throw new Error("Your order is on its way at Jupiter. It'll show in your portfolio when it fills.");
+      if (order.status === "pending") {
+        // Landed, not filled yet: it keeps going at the venue and shows in the portfolio when it does.
+        setPending({ shares: q.shares, at: order.at });
+        setStage("pending");
+        queryClient.invalidateQueries({ queryKey: ["portfolio"] });
+        if (trading.live) trading.refresh();
+        return;
+      }
       if (order.status === "rejected" || order.status === "failed" || order.filledShares === 0)
         throw new Error(order.reason ?? "The order didn't fill. Nothing was charged.");
       // What they hold now, and what's left to trade.
@@ -177,6 +195,11 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
     }
   }
 
+  const toPortfolio = () => {
+    onClose();
+    router.navigate("/portfolio");
+  };
+
   if (stage === "done" && fill)
     return (
       <Modal visible={open} animationType="fade" onRequestClose={onClose} statusBarTranslucent>
@@ -184,16 +207,12 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
           fill={fill}
           outcome={outcome}
           market={market}
-          venue={venue}
           onPostCall={() => {
             onClose();
             updateDraft({ market, outcome });
             router.push("/compose");
           }}
-          onPortfolio={() => {
-            onClose();
-            router.navigate("/portfolio");
-          }}
+          onPortfolio={toPortfolio}
           onClose={onClose}
         />
       </Modal>
@@ -201,16 +220,37 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
 
   const win = q ? q.payoutCents - q.totalCents : 0;
   const lose = q ? q.totalCents : 0;
-  const winShare = q ? Math.max(0.12, Math.min(0.88, win / (win + lose || 1))) : 0.5;
+  const problemText =
+    problem ??
+    (tooSmall
+      ? `The minimum order is ${usd(trading.minOrderCents)}.`
+      : insufficient
+        ? trading.live
+          ? `You have ${usd(available)} USDC.`
+          : `That's more than your ${usd(available)} available.`
+        : quote.error
+          ? (quote.error as Error).message
+          : null);
+  const canUseMax = insufficient && !problem && maxCents >= trading.minOrderCents;
 
   return (
     <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.anchor}>
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom + space[2], 28) }]}>
           <View style={styles.grip} />
 
-          {stage === "review" && q ? (
+          {stage === "pending" && pending ? (
+            <Pending
+              shares={pending.shares}
+              at={pending.at}
+              outcome={outcome}
+              short={short}
+              venue={venue}
+              onPortfolio={toPortfolio}
+              onClose={onClose}
+            />
+          ) : stage === "review" && q ? (
             <Review
               q={q}
               market={market}
@@ -227,7 +267,7 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
               <View style={styles.head}>
                 {post ? (
                   <>
-                    <Avatar url={post.author.avatarUrl} size={26} />
+                    <Avatar url={post.author.avatarUrl} size={24} />
                     <Text style={styles.headText} numberOfLines={1}>
                       <Text style={styles.headName}>{post.author.name}</Text>
                       {record ? ` · ${record}` : ""}
@@ -235,14 +275,14 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
                   </>
                 ) : (
                   <>
-                    <VenueMark venueId={market.venueId} size={22} />
+                    <VenueMark venueId={market.venueId} size={24} />
                     <Text style={styles.headText} numberOfLines={1}>
-                      <Text style={styles.headName}>{market.shortTitle || market.title}</Text> · {venue}
+                      <Text style={styles.headName}>{short}</Text> · {venue}
                     </Text>
                   </>
                 )}
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Close">
-                  <XIcon size={20} color={color.neutral700} />
+                <Pressable onPress={onClose} style={styles.close} accessibilityRole="button" accessibilityLabel="Close">
+                  <XIcon size={16} weight="bold" color={color.neutral700} />
                 </Pressable>
               </View>
 
@@ -257,6 +297,9 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
                   <Text style={styles.title} numberOfLines={2}>
                     {post.text.split(/(?<=[.!?])\s/)[0] ?? post.text}
                   </Text>
+                  <Text style={styles.meta} numberOfLines={1}>
+                    {short} · {venue} · closes {shortDate(market.closesAt)}
+                  </Text>
                 </>
               ) : null}
 
@@ -270,10 +313,10 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
                       style={[styles.side, i === 0 && styles.sideFirst, on && styles.sideOn]}
                       accessibilityRole="tab"
                       accessibilityState={{ selected: on }}
-                      accessibilityLabel={sideLabel(side).toLowerCase()}
+                      accessibilityLabel={`${sideLabel(side).toLowerCase()}, ${price(bestAsk(market, side))}`}
                     >
-                      <Text style={[styles.sideLabel, on && styles.sideLabelOn]}>{sideLabel(side)}</Text>
-                      <Text style={[styles.sidePrice, on && styles.sidePriceOn]}>{price(bestAsk(market, side))}</Text>
+                      <Text style={[styles.sideLabel, on && styles.sideOnText]}>{sideLabel(side)}</Text>
+                      <Text style={[styles.sidePrice, on && styles.sideOnText]}>{price(bestAsk(market, side))}</Text>
                     </Pressable>
                   );
                 })}
@@ -284,24 +327,29 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
                 <AmountInput cents={amount} onChange={setAmount} />
                 <View style={styles.presets}>
                   {[...presets, -1].map((p) => {
-                    const value = p === -1 ? Math.floor(available / 100) * 100 : p;
-                    const on = value === amount;
+                    const max = p === -1;
+                    const value = max ? maxCents : p;
+                    const disabled = max && maxCents < trading.minOrderCents;
+                    const on = !disabled && value === amount;
+                    const label = max ? "Max" : `$${p / 100}`;
                     return (
                       <Pressable
                         key={p}
-                        onPress={() => value > 0 && setAmount(value)}
-                        style={[styles.preset, on && styles.presetOn]}
+                        onPress={() => setAmount(value)}
+                        disabled={disabled}
+                        style={[styles.preset, on && styles.presetOn, disabled && styles.presetOff]}
                         accessibilityRole="button"
-                        accessibilityLabel={p === -1 ? "Max" : `$${p / 100}`}
+                        accessibilityLabel={max ? `Max, ${usd(maxCents)}` : label}
+                        accessibilityState={{ selected: on, disabled }}
                       >
-                        <Text style={[styles.presetText, on && styles.presetTextOn]}>{p === -1 ? "Max" : `$${p / 100}`}</Text>
+                        <Text style={[styles.presetText, on && styles.presetTextOn]}>{label}</Text>
                       </Pressable>
                     );
                   })}
                 </View>
               </View>
               <Text style={styles.sub}>
-                {q ? `${q.shares.toLocaleString("en-US")} shares at ${price(q.priceCents)} · ` : ""}
+                {q ? `${shareCount(q.shares)} shares at ${price(q.priceCents)} · ` : ""}
                 {trading.live
                   ? trading.availableCents === null
                     ? "Wallet balance unavailable"
@@ -309,38 +357,45 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
                   : `${usd(available)} available`}
               </Text>
 
-              <View style={styles.bar} accessibilityElementsHidden>
-                <View style={[styles.barLose, { flex: 1 - winShare }]} />
-                <View style={[styles.barWin, { flex: winShare }]} />
-              </View>
-              <View style={styles.barLabels}>
-                <Text style={styles.barText}>
-                  Lose if {other} <Text style={{ color: color.neg }}>{q ? `−${usd(lose)}` : "—"}</Text>
-                </Text>
-                <Text style={styles.barText}>
-                  Win if {outcome} <Text style={{ color: color.pos }}>{q ? `+${usd(win)}` : "—"}</Text>
-                </Text>
+              <View style={styles.outcomes} accessibilityLabel={q ? `If ${outcome} wins, plus ${usd(win)}. If ${other} wins, minus ${usd(lose)}.` : undefined}>
+                <View style={[styles.oc, styles.ocWin]}>
+                  <Text style={styles.ocLabel}>If {outcome} wins</Text>
+                  <Text style={[styles.ocValue, { color: color.gain }]}>{q ? `+${usd(win)}` : "—"}</Text>
+                </View>
+                <View style={[styles.oc, styles.ocLose]}>
+                  <Text style={styles.ocLabel}>If {other} wins</Text>
+                  <Text style={[styles.ocValue, { color: color.neutral800 }]}>{q ? `−${usd(lose)}` : "—"}</Text>
+                </View>
               </View>
 
-              {problem || quote.error || insufficient || tooSmall ? (
-                <Text style={styles.problem}>
-                  {problem ??
-                    (tooSmall
-                      ? `The minimum order is ${usd(trading.minOrderCents)}.`
-                      : insufficient
-                        ? trading.live
-                          ? `You have ${usd(available)} USDC. Add funds from your wallet in Me → Wallet.`
-                          : `That's more than your ${usd(available)} available.`
-                        : (quote.error as Error).message)}
-                </Text>
+              {problemText ? (
+                <View style={styles.problem} accessibilityLiveRegion="polite">
+                  <View style={styles.problemRow}>
+                    <WarningCircleIcon size={14} weight="fill" color={color.neg} />
+                    <Text style={styles.problemText}>{problemText}</Text>
+                  </View>
+                  {insufficient && !problem ? (
+                    <View style={styles.fixes}>
+                      {canUseMax ? <Button size="xs" variant="quiet" label={`Use max ${usd(maxCents)}`} onPress={() => setAmount(maxCents)} /> : null}
+                      {trading.live ? <Button size="xs" variant="quiet" label="Add funds" onPress={() => setFunding(true)} /> : null}
+                    </View>
+                  ) : null}
+                </View>
+              ) : q && !q.complete ? (
+                <Text style={styles.note}>Only {shareCount(q.shares)} shares available at this price.</Text>
               ) : null}
 
               <View style={styles.foot}>
-                <View>
+                <View style={{ gap: 2 }}>
                   <Text style={styles.total}>{q ? usd(q.totalCents) : "—"}</Text>
                   <Text style={styles.fees}>{q ? `incl. ${usd(q.feeCents)} fees` : "Getting a price…"}</Text>
                 </View>
-                <Button label="Review order" onPress={() => setStage("review")} disabled={!q || insufficient || tooSmall || quote.isFetching}>
+                <Button
+                  size="lg"
+                  label="Review order"
+                  onPress={() => setStage("review")}
+                  disabled={!q || insufficient || tooSmall || quote.isFetching}
+                >
                   <ArrowRightIcon size={16} weight="bold" color={PRIMARY_INK} />
                 </Button>
               </View>
@@ -348,6 +403,13 @@ export function TradeSheet({ post, market, outcome: initial, onClose }: Props) {
           )}
         </View>
       </KeyboardAvoidingView>
+      <AddFundsSheet
+        open={funding}
+        onClose={() => {
+          setFunding(false);
+          if (trading.live) trading.refresh();
+        }}
+      />
     </Modal>
   );
 }
@@ -377,33 +439,39 @@ function Review({
   return (
     <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
       <View style={styles.reviewHead}>
-        <Pressable onPress={onBack} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back to the order">
+        <Pressable
+          onPress={onBack}
+          disabled={placing}
+          style={({ pressed }) => [styles.reviewBack, pressed && styles.circlePressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Back to the order"
+        >
           <CaretLeftIcon size={18} weight="bold" color={color.neutral700} />
         </Pressable>
         <Text style={styles.reviewHeadText}>Review order</Text>
       </View>
       <Text style={styles.small}>You’re buying</Text>
       <Text style={styles.buying}>
-        {q.shares.toLocaleString("en-US")} {outcome} <Text style={styles.buyingAt}>at</Text> {price(q.priceCents)}
+        {shareCount(q.shares)} {outcome} <Text style={styles.buyingAt}>at</Text> {price(q.priceCents)}
       </Text>
-      <Text style={styles.small}>
+      <Text style={styles.marketLine}>
         {market.title} · {venue}
       </Text>
 
-      <View style={styles.cases}>
+      <View style={[styles.cases, styles.reviewCases]}>
         <View style={[styles.case, styles.caseFirst]}>
-          <Text style={styles.small}>If {outcome}, you get</Text>
-          <Text style={[styles.caseValue, { color: color.pos }]}>{usd(q.payoutCents)}</Text>
-          <Text style={[styles.caseNote, { color: color.pos }]}>+{usd(q.payoutCents - q.totalCents)} profit</Text>
+          <Text style={styles.caseLabel}>If {outcome}, you get</Text>
+          <Text style={[styles.caseValue, { color: color.gain }]}>{usd(q.payoutCents)}</Text>
+          <Text style={[styles.caseNote, { color: color.gain }]}>+{usd(q.payoutCents - q.totalCents)} profit</Text>
         </View>
         <View style={styles.case}>
-          <Text style={styles.small}>If {other}, you lose</Text>
+          <Text style={styles.caseLabel}>If {other}, you lose</Text>
           <Text style={[styles.caseValue, { color: color.neg }]}>{usd(q.totalCents)}</Text>
           <Text style={styles.caseNote}>your whole stake</Text>
         </View>
       </View>
 
-      <Line label={`${q.shares.toLocaleString("en-US")} × ${price(q.priceCents)}`} value={usd(q.notionalCents)} />
+      <Line label={`${shareCount(q.shares)} × ${price(q.priceCents)}`} value={usd(q.notionalCents)} />
       {q.fees.map((f) => (
         <Line key={f.label} label={f.source === "venue" ? `${venue} fee` : f.label} value={usd(f.cents)} />
       ))}
@@ -413,21 +481,67 @@ function Review({
       </View>
       <Text style={styles.fine}>
         {live
-          ? `Real money: paid in USDC from your wallet. ${venue} fills at the best price it can, within a few cents of ${price(q.priceCents)}; anything unfilled returns to your wallet. You'll need a little SOL for the network fee.`
+          ? `Paid in USDC from your wallet. ${venue} fills at the best price it can, within a few cents of ${price(q.priceCents)}; anything unfilled returns to your wallet. Needs a little SOL for the network fee.`
           : `Cancels if the price moves above ${price(q.priceCents + SLIPPAGE_CENTS)} before it fills. Simulated funds.`}
       </Text>
-      <HoldButton
-        label={live ? "Hold to sign and place" : "Hold to place order"}
-        icon={<FingerprintIcon size={20} weight="bold" color={PRIMARY_INK} />}
-        onComplete={onPlace}
-        loading={placing}
-      />
+      <View style={styles.hold}>
+        <HoldButton
+          label="Hold to place order"
+          icon={<FingerprintIcon size={18} weight="bold" color={PRIMARY_INK} />}
+          onComplete={onPlace}
+          loading={placing}
+        />
+      </View>
       {placing && step ? (
         <Text style={styles.step} accessibilityLiveRegion="polite">
           {STEP_LABEL[step]}
         </Text>
       ) : null}
     </ScrollView>
+  );
+}
+
+/** Sent and landed, but the venue hasn't filled it yet. */
+function Pending({
+  shares,
+  at,
+  outcome,
+  short,
+  venue,
+  onPortfolio,
+  onClose,
+}: {
+  shares: number;
+  at: string;
+  outcome: Outcome;
+  short: string;
+  venue: string;
+  onPortfolio: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <View style={styles.pending} accessibilityLiveRegion="polite">
+      <View style={styles.head}>
+        <ClockIcon size={18} weight="fill" color={color.gold} />
+        <Text style={styles.pendingTitle}>Order pending</Text>
+        <View style={styles.pendingTag}>
+          <Text style={styles.pendingTagText}>Pending</Text>
+        </View>
+        <View style={{ flex: 1 }} />
+        <Pressable onPress={onClose} style={styles.close} accessibilityRole="button" accessibilityLabel="Close">
+          <XIcon size={16} weight="bold" color={color.neutral700} />
+        </Pressable>
+      </View>
+      <Text style={styles.pendingBody}>
+        Buy {shareCount(shares)} {outcome} · {short}. Filling at {venue}; it shows in your portfolio when it fills.
+      </Text>
+      <Text style={styles.small}>
+        0 / {shareCount(shares)} filled · {clock(at)}
+      </Text>
+      <Button variant="quiet" size="md" label="View portfolio" onPress={onPortfolio} style={{ marginTop: space[2] }}>
+        <ArrowRightIcon size={15} weight="bold" color={color.text} />
+      </Button>
+    </View>
   );
 }
 
@@ -444,7 +558,6 @@ function Filled({
   fill,
   outcome,
   market,
-  venue,
   onPostCall,
   onPortfolio,
   onClose,
@@ -452,54 +565,51 @@ function Filled({
   fill: Fill;
   outcome: Outcome;
   market: MarketDTO;
-  venue: string;
   onPostCall: () => void;
   onPortfolio: () => void;
   onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const at = new Date(fill.at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
   const owned = fill.ownedShares ?? fill.shares;
   return (
-    <View style={[styles.filled, { paddingTop: insets.top + space[6], paddingBottom: Math.max(insets.bottom, space[4]) }]}>
-      <Pressable onPress={onClose} hitSlop={10} style={[styles.filledClose, { top: insets.top + space[3] }]} accessibilityRole="button" accessibilityLabel="Close">
-        <XIcon size={22} color={color.neutral700} />
+    <View style={[styles.filled, { paddingTop: insets.top + 56, paddingBottom: Math.max(insets.bottom, 28) }]}>
+      <Pressable onPress={onClose} style={[styles.filledClose, { top: insets.top + space[2] }]} accessibilityRole="button" accessibilityLabel="Close">
+        <XIcon size={20} color={color.neutral700} />
       </Pressable>
       <View style={styles.check}>
-        <CheckIcon size={28} weight="bold" color={PRIMARY_INK} />
+        <CheckIcon size={24} weight="bold" color={PRIMARY_INK} />
       </View>
       <Text style={styles.small}>
-        {fill.status === "filled" ? "Filled" : "Partly filled"} at {at} · {fill.shares.toLocaleString("en-US")} /{" "}
-        {fill.requested.toLocaleString("en-US")}
+        {fill.status === "filled" ? "Filled" : "Partly filled"} at {clock(fill.at)} · {shareCount(fill.shares)} / {shareCount(fill.requested)}
       </Text>
-      <Text style={styles.own}>
+      <Text style={styles.own} accessibilityRole="header">
         You own{"\n"}
-        {owned.toLocaleString("en-US")} {outcome}.
+        {shareCount(owned)} {outcome}.
       </Text>
       <Text style={styles.ownBody}>
-        Added {fill.shares.toLocaleString("en-US")} at {price(fill.priceCents)} to “{market.shortTitle || market.title}”.
+        Added {shareCount(fill.shares)} at {price(fill.priceCents)} to “{market.shortTitle || market.title}”.
         {fill.averageCents !== null && owned !== fill.shares ? ` Your average is now ${price(fill.averageCents)}.` : ""}
       </Text>
-      <View style={styles.cases}>
+      <View style={[styles.cases, styles.filledCases]}>
         <View style={[styles.case, styles.caseFirst]}>
-          <Text style={styles.small}>Paid incl. fees</Text>
-          <Text style={styles.caseValue}>{usd(fill.totalCents)}</Text>
+          <Text style={styles.caseLabel}>Paid incl. fees</Text>
+          <Text style={[styles.caseValue, styles.filledValue]}>{usd(fill.totalCents)}</Text>
         </View>
         <View style={styles.case}>
-          <Text style={styles.small}>Pays if {outcome}</Text>
-          <Text style={[styles.caseValue, { color: color.pos }]}>{usd(owned * 100)}</Text>
+          <Text style={styles.caseLabel}>Pays if {outcome}</Text>
+          <Text style={[styles.caseValue, styles.filledValue, { color: color.gain }]}>{usd(owned * 100)}</Text>
         </View>
       </View>
-      {fill.availableCents !== null ? <Text style={styles.small}>{usd(fill.availableCents)} left to trade · {venue}</Text> : null}
+      {fill.availableCents !== null ? <Text style={[styles.small, { marginTop: space[3] }]}>{usd(fill.availableCents)} left to trade</Text> : null}
       <View style={{ flex: 1 }} />
       <View style={styles.why}>
         <Text style={styles.whyTitle}>Tell people why.</Text>
         <Text style={styles.whyBody}>Say what you see that the price doesn’t. Your position shows on the post.</Text>
-        <Button size="lg" label="Post your call" onPress={onPostCall} icon={<PencilSimpleIcon size={17} weight="bold" color={PRIMARY_INK} />} />
+        <Button size="md" label="Post your call" onPress={onPostCall} icon={<PencilSimpleLineIcon size={17} weight="bold" color={PRIMARY_INK} />} />
       </View>
-      <Pressable onPress={onPortfolio} style={styles.view} accessibilityRole="button">
+      <Pressable onPress={onPortfolio} style={({ pressed }) => [styles.view, pressed && styles.circlePressed]} accessibilityRole="button">
         <Text style={styles.viewText}>View portfolio</Text>
-        <ArrowRightIcon size={15} color={color.text} />
+        <ArrowRightIcon size={15} weight="bold" color={color.text} />
       </Pressable>
     </View>
   );
@@ -522,8 +632,10 @@ function AmountInput({ cents, onChange }: { cents: number; onChange: (cents: num
           if (n > 0) onChange(n * 100);
         }}
         keyboardType="number-pad"
+        cursorColor={color.pos}
+        selectionColor={color.pos}
         // Sized to its digits so the presets keep their place beside it.
-        style={[styles.amountInput, { width: Math.max(1, shown.length) * 28 + 6 }]}
+        style={[styles.amountInput, { width: Math.max(1, shown.length) * 30 + 6 }]}
         accessibilityLabel="Amount in dollars"
         selectTextOnFocus
       />
@@ -531,123 +643,134 @@ function AmountInput({ cents, onChange }: { cents: number; onChange: (cents: num
   );
 }
 
+const RULE = "rgba(255, 255, 255, 0.08)";
+
 const styles = StyleSheet.create({
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(5, 8, 6, 0.6)" },
   anchor: { flex: 1, justifyContent: "flex-end", pointerEvents: "box-none" },
   sheet: {
     maxHeight: "92%",
     paddingHorizontal: space[5],
-    paddingTop: space[2],
-    borderTopLeftRadius: radius.drawer + 4,
-    borderTopRightRadius: radius.drawer + 4,
-    backgroundColor: "#0d1210",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
+    paddingTop: 10,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    backgroundColor: "#0c100e",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 -20px 60px rgba(0, 0, 0, 0.6)",
   },
-  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: color.neutral500, marginBottom: space[4] },
+  grip: { alignSelf: "center", width: 36, height: 4, borderRadius: radius.pill, backgroundColor: "rgba(255, 255, 255, 0.14)", marginBottom: 14 },
   head: { flexDirection: "row", alignItems: "center", gap: 10 },
-  headText: { flex: 1, fontFamily: font.regular, fontSize: text.body, color: color.neutral700 },
-  headName: { fontFamily: font.medium, color: color.neutral800 },
+  headText: { flex: 1, fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
+  headName: { fontFamily: font.regular, color: color.text },
+  // A 44pt target around a 16pt glyph, its edge on the sheet's padding.
+  close: { width: 44, height: 44, marginVertical: -14, marginRight: -14, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   called: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    marginTop: space[4],
+    height: 24,
+    marginTop: 18,
     paddingHorizontal: 10,
-    paddingVertical: 5,
     borderRadius: radius.pill,
-    backgroundColor: color.neutral200,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  calledText: { fontFamily: font.medium, fontSize: 12, color: color.neutral800 },
-  title: { fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: color.text, marginTop: space[3] },
-  sides: {
-    flexDirection: "row",
-    marginTop: space[4],
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
-  },
-  side: { flex: 1, paddingVertical: space[4], paddingLeft: space[4], gap: 8, borderBottomWidth: 2, borderBottomColor: "transparent" },
-  sideFirst: { paddingLeft: 0, borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: color.neutral400 },
+  calledText: { fontFamily: font.medium, fontSize: 11, color: color.neutral800 },
+  title: { fontFamily: font.semibold, fontSize: 26, lineHeight: 30, letterSpacing: -0.8, color: color.text, marginTop: space[2] },
+  meta: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, marginTop: space[2] },
+  sides: { flexDirection: "row", marginTop: 22, borderTopWidth: 1, borderBottomWidth: 1, borderColor: RULE },
+  side: { flex: 1, paddingVertical: 14, paddingLeft: space[4], gap: 4, borderBottomWidth: 2, marginBottom: -1, borderBottomColor: "transparent" },
+  sideFirst: { paddingLeft: 0, borderRightWidth: 1, borderRightColor: RULE },
   sideOn: { borderBottomColor: color.text },
-  sideLabel: { fontFamily: font.medium, fontSize: 11, letterSpacing: 0.8, color: color.neutral600 },
-  sideLabelOn: { color: color.neutral800 },
-  sidePrice: { fontFamily: font.medium, fontSize: 22, color: color.neutral600, fontVariant: ["tabular-nums"] },
-  sidePriceOn: { color: color.text },
-  label: { fontFamily: font.medium, fontSize: 11, letterSpacing: 0.8, color: color.neutral700, marginTop: space[5] },
-  amountRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space[1] },
+  sideLabel: { fontFamily: font.medium, fontSize: 11, letterSpacing: 0.66, color: color.neutral700 },
+  sidePrice: { fontFamily: font.medium, fontSize: 24, letterSpacing: -0.48, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  sideOnText: { color: color.text },
+  label: { fontFamily: font.medium, fontSize: 11, letterSpacing: 0.66, color: color.neutral700, marginTop: 20 },
+  amountRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginTop: 2 },
   amount: { flexDirection: "row", alignItems: "center" },
-  amountDollar: { fontFamily: font.medium, fontSize: 48, color: color.text },
-  amountInput: { fontFamily: font.medium, fontSize: 48, color: color.text, padding: 0, fontVariant: ["tabular-nums"] },
-  presets: { flexDirection: "row", gap: 2 },
-  preset: { height: 34, paddingHorizontal: 10, borderRadius: radius.pill, justifyContent: "center" },
-  presetOn: { borderWidth: 1, borderColor: color.neutral500, backgroundColor: color.neutral200 },
-  presetText: { fontFamily: font.medium, fontSize: text.ui, color: color.neutral700 },
+  amountDollar: { fontFamily: font.medium, fontSize: 52, lineHeight: 52, letterSpacing: -2, color: color.text },
+  amountInput: { fontFamily: font.medium, fontSize: 52, lineHeight: 52, letterSpacing: -2, color: color.text, padding: 0, fontVariant: ["tabular-nums"] },
+  presets: { flexDirection: "row", flexShrink: 1, gap: 4, paddingBottom: 4 },
+  preset: { height: 34, paddingHorizontal: 11, borderRadius: radius.pill, justifyContent: "center", borderWidth: 1, borderColor: "transparent" },
+  presetOn: { borderColor: "rgba(255, 255, 255, 0.22)" },
+  presetOff: { opacity: 0.4 },
+  presetText: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, fontVariant: ["tabular-nums"] },
   presetTextOn: { color: color.text },
-  sub: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700, marginTop: space[1], fontVariant: ["tabular-nums"] },
-  bar: { flexDirection: "row", gap: 4, height: 5, marginTop: space[5] },
-  barLose: { borderRadius: 3, backgroundColor: color.neg },
-  barWin: { borderRadius: 3, backgroundColor: "#7fd47a" },
-  barLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: space[2] },
-  barText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700, fontVariant: ["tabular-nums"] },
-  problem: { fontFamily: font.regular, fontSize: text.ui, color: color.neg, marginTop: space[3] },
-  foot: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space[5] },
-  total: { fontFamily: font.medium, fontSize: 20, color: color.text, fontVariant: ["tabular-nums"] },
-  fees: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, marginTop: 2 },
-  reviewHead: { flexDirection: "row", alignItems: "center", gap: space[3], marginBottom: space[4] },
-  reviewHeadText: { fontFamily: font.regular, fontSize: text.body, color: color.neutral800 },
+  sub: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, marginTop: 6, fontVariant: ["tabular-nums"] },
+  outcomes: { flexDirection: "row", gap: space[2], marginTop: 22 },
+  oc: { flex: 1, gap: 2, paddingVertical: space[3], paddingHorizontal: 14, borderRadius: radius.sheet },
+  ocWin: { backgroundColor: "rgba(111, 211, 143, 0.08)" },
+  ocLose: { backgroundColor: "rgba(255, 255, 255, 0.04)" },
+  ocLabel: { fontFamily: font.regular, fontSize: 11, color: color.neutral700 },
+  ocValue: { fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.4, fontVariant: ["tabular-nums"] },
+  problem: { gap: space[2], marginTop: space[3] },
+  problemRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  problemText: { flex: 1, fontFamily: font.regular, fontSize: 12, color: color.neg },
+  fixes: { flexDirection: "row", gap: space[2] },
+  note: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, marginTop: space[3] },
+  foot: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[3], marginTop: space[5] },
+  total: { fontFamily: font.medium, fontSize: 18, color: color.text, fontVariant: ["tabular-nums"] },
+  fees: { fontFamily: font.regular, fontSize: 11, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  reviewHead: { flexDirection: "row", alignItems: "center", gap: space[2], marginBottom: 14 },
+  reviewBack: { width: 36, height: 36, marginLeft: -8, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  circlePressed: { backgroundColor: color.neutral300 },
+  reviewHeadText: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700 },
   small: { fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: color.neutral700 },
-  buying: { fontFamily: font.medium, fontSize: 34, letterSpacing: -1, color: color.text, marginVertical: 4, fontVariant: ["tabular-nums"] },
+  buying: { fontFamily: font.medium, fontSize: 38, lineHeight: 40, letterSpacing: -1.14, color: color.text, marginTop: 4, fontVariant: ["tabular-nums"] },
   buyingAt: { color: color.neutral600 },
-  cases: {
-    flexDirection: "row",
-    marginVertical: space[4],
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: color.neutral400,
-  },
-  case: { flex: 1, gap: 5, paddingVertical: space[4], paddingLeft: space[4] },
-  caseFirst: { paddingLeft: 0, borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: color.neutral400 },
+  marketLine: { fontFamily: font.regular, fontSize: text.ui, lineHeight: 18, color: color.neutral700, marginTop: space[2] },
+  cases: { flexDirection: "row", borderTopWidth: 1, borderBottomWidth: 1, borderColor: RULE },
+  reviewCases: { marginTop: 22, marginBottom: space[3] },
+  filledCases: { marginTop: 28 },
+  case: { flex: 1, gap: 3, paddingVertical: 14, paddingLeft: space[4] },
+  caseFirst: { paddingLeft: 0, borderRightWidth: 1, borderRightColor: RULE },
+  caseLabel: { fontFamily: font.regular, fontSize: 11, lineHeight: 16, color: color.neutral700 },
   caseValue: { fontFamily: font.medium, fontSize: 22, color: color.text, fontVariant: ["tabular-nums"] },
-  caseNote: { fontFamily: font.regular, fontSize: 11, color: color.neutral700 },
+  filledValue: { fontSize: 20 },
+  caseNote: { fontFamily: font.regular, fontSize: 11, color: color.neutral700, fontVariant: ["tabular-nums"] },
   line: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 9 },
-  lineLabel: { fontFamily: font.regular, fontSize: text.body, color: color.neutral800 },
-  lineValue: { fontFamily: font.regular, fontSize: text.body, color: color.text, fontVariant: ["tabular-nums"] },
+  lineLabel: { fontFamily: font.regular, fontSize: text.ui, color: color.neutral700, fontVariant: ["tabular-nums"] },
+  lineValue: { fontFamily: font.regular, fontSize: text.ui, color: color.text, fontVariant: ["tabular-nums"] },
   totalLine: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingTop: space[3],
-    marginTop: space[2],
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: color.neutral400,
+    marginTop: space[1],
+    borderTopWidth: 1,
+    borderTopColor: RULE,
   },
   totalLabel: { fontFamily: font.medium, fontSize: text.post, color: color.text, fontVariant: ["tabular-nums"] },
-  fine: { fontFamily: font.regular, fontSize: 11, lineHeight: 16, color: color.neutral700, marginTop: space[4], marginBottom: space[3] },
+  fine: { fontFamily: font.regular, fontSize: 11, lineHeight: 16.5, color: color.neutral700, marginTop: 18 },
+  hold: { marginTop: 14 },
   step: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, textAlign: "center", marginTop: space[3] },
+  pending: { gap: space[2] },
+  pendingTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
+  pendingTag: { height: 22, paddingHorizontal: 9, borderRadius: radius.pill, justifyContent: "center", backgroundColor: color.gold200 },
+  pendingTagText: { fontFamily: font.medium, fontSize: 11, color: color.gold },
+  pendingBody: { fontFamily: font.regular, fontSize: text.body, lineHeight: 21, color: color.neutral800, marginTop: space[2] },
   filled: {
     flex: 1,
     paddingHorizontal: space[5],
     backgroundColor: color.bg,
-    experimental_backgroundImage: "radial-gradient(120% 55% at 30% 0%, rgba(181, 230, 161, 0.12) 0%, rgba(9, 13, 11, 0) 70%)",
+    experimental_backgroundImage: "radial-gradient(80% 40% at 50% 22%, rgba(111, 211, 143, 0.14) 0%, rgba(9, 13, 11, 0) 100%)",
   },
-  filledClose: { position: "absolute", right: space[4], zIndex: 1 },
+  filledClose: { position: "absolute", right: space[2], zIndex: 1, width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   check: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#b5e6a1",
-    marginBottom: space[5],
+    experimental_backgroundImage: "linear-gradient(180deg, #c3edb1, #a7dd92)",
+    marginBottom: 28,
     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55), 0 10px 24px -8px rgba(0,0,0,0.6)",
   },
-  own: { fontFamily: font.medium, fontSize: 38, lineHeight: 42, letterSpacing: -1.2, color: color.text, marginTop: space[2] },
-  ownBody: { fontFamily: font.regular, fontSize: text.body, lineHeight: 21, color: color.neutral800, marginTop: space[3] },
+  own: { fontFamily: font.medium, fontSize: 40, lineHeight: 42, letterSpacing: -1.2, color: color.text, marginTop: 6 },
+  ownBody: { fontFamily: font.regular, fontSize: text.body, lineHeight: 21, color: color.neutral800, marginTop: 10 },
   why: { gap: space[3], padding: space[4], borderRadius: radius.drawer, backgroundColor: "#121714" },
-  whyTitle: { fontFamily: font.medium, fontSize: text.post, color: color.text },
+  whyTitle: { fontFamily: font.medium, fontSize: text.body, color: color.text },
   whyBody: { fontFamily: font.regular, fontSize: 12, lineHeight: 18, color: color.neutral700 },
-  view: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: space[4] },
-  viewText: { fontFamily: font.medium, fontSize: text.post, color: color.text },
+  view: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, height: 48, marginTop: 10, borderRadius: radius.pill },
+  viewText: { fontFamily: font.medium, fontSize: text.body, color: color.text },
 });

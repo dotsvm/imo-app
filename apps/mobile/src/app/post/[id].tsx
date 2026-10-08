@@ -24,7 +24,7 @@ import { CaretLeftIcon } from "phosphor-react-native/src/icons/CaretLeft";
 import { ChatCircleIcon } from "phosphor-react-native/src/icons/ChatCircle";
 import type { CommentDTO, MarketPage, PostDTO } from "@imo/server/dto/api-types";
 import { Avatar } from "~/components/avatar";
-import { BackButton } from "~/components/back-button";
+import { BackButton, FadeButton } from "~/components/back-button";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
 import { useConfig } from "~/features/auth/auth";
@@ -38,6 +38,7 @@ import { openTrader } from "~/lib/nav";
 import { ago, arrowUsd, price } from "~/lib/format";
 import { bestAsk, bestBid, opposite, type Outcome } from "~/lib/market";
 import { color, font, radius, space, text } from "~/theme/tokens";
+import { useCanTrade } from "~/features/trade/use-tradable";
 
 export default function PostDetail() {
   const { id, reply: wantsReply } = useLocalSearchParams<{
@@ -46,6 +47,7 @@ export default function PostDetail() {
   }>();
   const replyBox = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
+  const canTrade = useCanTrade();
   const queryClient = useQueryClient();
   const records = useRecords();
   const snapshot = useConfig().data?.dataSnapshot;
@@ -131,7 +133,7 @@ export default function PostDetail() {
   }
 
   const header = (
-    <View style={[styles.header, { paddingTop: insets.top + space[1] }]}>
+    <View style={[styles.header, { paddingTop: insets.top }]}>
       <Pressable
         onPress={() => router.back()}
         hitSlop={12}
@@ -139,7 +141,7 @@ export default function PostDetail() {
         accessibilityLabel="Back"
         style={styles.headerIcon}
       >
-        <CaretLeftIcon size={22} weight="bold" color={color.text} />
+        <CaretLeftIcon size={20} weight="bold" color={color.text} />
       </Pressable>
       <Text style={styles.headerTitle}>Prediction</Text>
       <View style={styles.spacer} />
@@ -152,7 +154,7 @@ export default function PostDetail() {
           style={styles.headerIcon}
         >
           <BookmarkSimpleIcon
-            size={21}
+            size={18}
             weight="fill"
             color={isSaved ? color.pos : color.text}
           />
@@ -183,17 +185,17 @@ export default function PostDetail() {
           accessibilityRole="progressbar"
         >
           <View style={styles.author}>
-            <Skeleton width={44} height={44} round />
+            <Skeleton width={36} height={36} round />
             <View style={styles.who}>
               <Skeleton width={120} height={14} />
               <Skeleton width={170} height={11} />
             </View>
           </View>
-          <Skeleton width={130} height={22} round />
+          <Skeleton width={150} height={22} round />
           <Skeleton height={14} />
           <Skeleton height={14} />
           <Skeleton width="60%" height={14} />
-          <Skeleton height={64} style={{ borderRadius: radius.card }} />
+          <Skeleton height={56} round />
         </View>
       </View>
     );
@@ -204,7 +206,8 @@ export default function PostDetail() {
     m && disclosed
       ? (bestBid(m, p.outcome) - p.entryPrice) * p.evidenceShares
       : 0;
-  const open = m?.status === "open";
+  // Back and Fade only where an order can actually go through.
+  const open = !!m && canTrade(m);
   const items = comments.data?.items ?? [];
   const yes = p.outcome === "Yes";
 
@@ -225,7 +228,7 @@ export default function PostDetail() {
               style={styles.authorLink}
               accessibilityRole="link"
             >
-              <Avatar url={p.author.avatarUrl} size={44} />
+              <Avatar url={p.author.avatarUrl} size={36} />
               <View style={styles.who}>
                 <Text style={styles.name}>{p.author.name}</Text>
                 <Text style={styles.meta}>
@@ -240,8 +243,8 @@ export default function PostDetail() {
             </Pressable>
             {!p.author.isYou ? (
               <Button
-                size="sm"
-                variant={isFollowing ? "quiet" : "primary"}
+                size="md"
+                variant={isFollowing ? "outline" : "primary"}
                 label={isFollowing ? "Following" : "Follow"}
                 onPress={toggleFollow}
                 accessibilityLabel={`${isFollowing ? "Unfollow" : "Follow"} ${p.author.name}`}
@@ -295,8 +298,9 @@ export default function PostDetail() {
                           unrealized < 0
                             ? color.neg
                             : unrealized > 0
-                              ? color.pos
+                              ? color.gain
                               : color.neutral700,
+                        fontFamily: font.medium,
                       }}
                     >
                       {arrowUsd(unrealized)}
@@ -321,10 +325,18 @@ export default function PostDetail() {
           DISCUSSION · {Math.max(p.commentCount, items.length)}
         </Text>
         {comments.isPending ? (
-          <ActivityIndicator
-            color={color.neutral600}
-            style={{ margin: space[5] }}
-          />
+          <View
+            accessibilityLabel="Loading the discussion"
+            accessibilityRole="progressbar"
+          >
+            {[0, 1].map((i) => (
+              <View key={i} style={styles.comment}>
+                <Skeleton width={140} height={12} />
+                <Skeleton height={13} />
+                <Skeleton width="65%" height={13} />
+              </View>
+            ))}
+          </View>
         ) : (
           items.map((c) => (
             <Comment key={c.id} comment={c} authorId={p.authorId} />
@@ -335,12 +347,17 @@ export default function PostDetail() {
             No replies yet. Be the first to add your read.
           </Text>
         ) : null}
-        <View style={styles.join}>
-          <ChatCircleIcon size={16} color={color.neutral600} />
+        <Pressable
+          onPress={() => replyBox.current?.focus()}
+          style={({ pressed }) => [styles.join, pressed && styles.joinPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Reply: join the discussion"
+        >
+          <ChatCircleIcon size={16} weight="bold" color={color.neutral600} />
           <Text style={styles.joinText}>
             Join the discussion — add your read
           </Text>
-        </View>
+        </Pressable>
       </ScrollView>
 
       <View
@@ -358,7 +375,8 @@ export default function PostDetail() {
               value={reply}
               onChangeText={setReply}
               placeholder="Reply…"
-              placeholderTextColor={color.neutral600}
+              placeholderTextColor="#94a197"
+              selectionColor={color.pos}
               style={styles.replyInput}
               multiline
               maxLength={2000}
@@ -384,13 +402,14 @@ export default function PostDetail() {
           {open && m && !reply.trim() ? (
             <>
               <BackButton
+                tone="side"
                 outcome={p.outcome}
                 price={price(bestAsk(m, p.outcome))}
                 onPress={() => setTrade(p.outcome)}
               />
-              <Button
-                variant="quiet"
-                label="Fade"
+              <FadeButton
+                side={opposite(p.outcome)}
+                price={price(bestAsk(m, opposite(p.outcome)))}
                 onPress={() => setTrade(opposite(p.outcome))}
               />
             </>
@@ -461,28 +480,29 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: space[2],
-    paddingHorizontal: space[3],
-    paddingBottom: space[2],
+    minHeight: 48,
+    paddingHorizontal: space[2],
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: color.divider,
   },
   headerIcon: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontFamily: font.medium,
-    fontSize: text.post,
+    fontSize: 15,
     color: color.text,
   },
   spacer: { flex: 1 },
   scroll: { paddingBottom: space[6] },
   body: {
-    padding: space[4],
-    gap: 14,
+    paddingHorizontal: space[4],
+    paddingVertical: 14,
+    gap: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: color.divider,
   },
@@ -491,27 +511,28 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: space[3],
+    gap: 10,
   },
-  who: { flex: 1, gap: 4 },
-  name: { fontFamily: font.medium, fontSize: 16, color: color.text },
+  who: { flex: 1, gap: 3 },
+  name: { fontFamily: font.medium, fontSize: 14, color: color.text },
   meta: {
     fontFamily: font.regular,
-    fontSize: text.ui,
+    fontSize: 11,
     color: color.neutral700,
+    fontVariant: ["tabular-nums"],
   },
   predicts: {
     alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radius.chip,
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    borderWidth: 1,
   },
   predictsText: { fontFamily: font.medium, fontSize: 12 },
   text: {
     fontFamily: font.regular,
-    fontSize: 17,
-    lineHeight: 26,
+    fontSize: 16,
+    lineHeight: 23,
     color: color.text,
   },
   invalidation: {
@@ -521,47 +542,49 @@ const styles = StyleSheet.create({
     color: color.neutral700,
   },
   market: {
-    gap: 6,
-    padding: space[4],
-    borderRadius: radius.panel,
-    backgroundColor: "#121714",
+    gap: 2,
+    paddingVertical: 10,
+    paddingHorizontal: space[4],
+    marginTop: 2,
+    borderRadius: radius.pill,
+    backgroundColor: "#101613",
   },
   marketTitle: {
     fontFamily: font.medium,
-    fontSize: text.post,
+    fontSize: 13,
     color: color.text,
   },
   marketMeta: {
     fontFamily: font.regular,
-    fontSize: text.ui,
+    fontSize: 11,
     color: color.neutral700,
     fontVariant: ["tabular-nums"],
   },
   section: {
     fontFamily: font.medium,
-    fontSize: 11,
-    letterSpacing: 1,
-    color: color.neutral700,
+    fontSize: 12,
+    letterSpacing: 0.72,
+    color: "#94a197",
     paddingHorizontal: space[4],
-    paddingVertical: space[4],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
+    paddingTop: 14,
+    paddingBottom: space[2],
   },
   comment: {
-    gap: 8,
-    padding: space[4],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: color.divider,
+    gap: 4,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.divider,
   },
   commentHead: { flexDirection: "row", alignItems: "center", gap: space[2] },
   commentName: {
     fontFamily: font.medium,
-    fontSize: text.ui,
+    fontSize: 12,
     color: color.text,
   },
   stake: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 1,
     borderRadius: radius.pill,
     backgroundColor: color.neutral300,
   },
@@ -573,30 +596,35 @@ const styles = StyleSheet.create({
   },
   commentText: {
     fontFamily: font.regular,
-    fontSize: text.post,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
     color: color.text,
   },
   empty: {
     fontFamily: font.regular,
     fontSize: text.body,
     color: color.neutral700,
-    padding: space[4],
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.divider,
   },
   join: {
     flexDirection: "row",
     alignItems: "center",
     gap: space[2],
-    padding: space[4],
+    paddingHorizontal: space[4],
+    paddingVertical: 18,
   },
+  joinPressed: { opacity: 0.6 },
   joinText: {
     fontFamily: font.regular,
     fontSize: text.ui,
     color: color.neutral600,
   },
   bar: {
-    paddingHorizontal: space[3],
-    paddingTop: space[3],
+    paddingHorizontal: space[4],
+    paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: color.divider,
     backgroundColor: color.bg,
@@ -610,10 +638,10 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingLeft: space[3],
     paddingRight: 4,
-    borderRadius: radius.field,
+    borderRadius: radius.control,
     borderWidth: 1,
-    borderColor: color.neutral400,
-    backgroundColor: color.neutral100,
+    borderColor: "#223029",
+    backgroundColor: "#0c110f",
   },
   replyInput: {
     flex: 1,

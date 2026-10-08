@@ -51,7 +51,7 @@ export function BalanceHeader() {
                 <Image source={TOKEN_LOGOS.USDC} style={styles.coin} />
                 <Image source={TOKEN_LOGOS.SOL} style={[styles.coin, styles.coinBack]} />
               </View>
-              <Text style={styles.label}>USDC on Solana</Text>
+              <Text style={styles.chain}>USDC on Solana</Text>
             </>
           ) : null}
         </View>
@@ -65,10 +65,10 @@ export function BalanceHeader() {
             —
           </Text>
         ) : (
-          <Skeleton width={190} height={44} style={{ marginVertical: 4 }} />
+          <Skeleton width={190} height={38} style={styles.amountSkeleton} />
         )}
         {showToday ? (
-          <Text style={[styles.today, { color: today > 0 ? color.pos : today < 0 ? color.neg : color.neutral700 }]}>
+          <Text style={[styles.today, { color: today > 0 ? color.gain : today < 0 ? color.neg : color.neutral700 }]}>
             {today > 0 ? "▲ " : today < 0 ? "▼ " : ""}
             {usd(Math.abs(Math.round(today)))} today
           </Text>
@@ -77,9 +77,9 @@ export function BalanceHeader() {
       {trading.live ? (
         <Button
           label="Deposit"
-          size="lg"
+          size="ml"
           onPress={() => setAdding(true)}
-          icon={<PlusIcon size={18} weight="bold" color={PRIMARY_INK} />}
+          icon={<PlusIcon size={13} weight="bold" color={PRIMARY_INK} />}
         />
       ) : null}
       <AddFundsSheet open={adding} onClose={() => setAdding(false)} />
@@ -88,15 +88,26 @@ export function BalanceHeader() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flexDirection: "row", alignItems: "center", gap: space[3], paddingHorizontal: space[4], paddingTop: space[4] },
-  text: { flex: 1, gap: 2 },
+  wrap: { flexDirection: "row", alignItems: "center", gap: space[3], paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
+  text: { flex: 1, gap: 6 },
   labelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  label: { fontFamily: font.regular, fontSize: 14, color: color.neutral700 },
-  coins: { flexDirection: "row", alignItems: "center" },
-  coin: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: color.bg },
-  coinBack: { marginLeft: -6 },
-  amount: { fontFamily: font.semibold, fontSize: 46, letterSpacing: -2, color: color.text, fontVariant: ["tabular-nums"], marginTop: 2 },
-  cents: { color: color.neutral600 },
+  label: { fontFamily: font.regular, fontSize: 12, color: color.neutral700 },
+  chain: { fontFamily: font.regular, fontSize: 12, color: "#c9cfcb", marginLeft: -3 },
+  coins: { flexDirection: "row", alignItems: "center", marginHorizontal: -2 },
+  // 16px coins, each ringed 2px in the page color (the ring sits outside the coin).
+  coin: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: color.bg },
+  coinBack: { marginLeft: -8 },
+  amount: {
+    fontFamily: font.semibold,
+    fontSize: 38,
+    lineHeight: 38,
+    letterSpacing: -1.5,
+    color: color.text,
+    fontVariant: ["tabular-nums"],
+    marginTop: 2,
+  },
+  amountSkeleton: { marginTop: 2 },
+  cents: { color: "#5b6460" },
   unknown: { color: color.neutral600 },
-  today: { fontFamily: font.medium, fontSize: 15, fontVariant: ["tabular-nums"] },
+  today: { fontFamily: font.medium, fontSize: 13, fontVariant: ["tabular-nums"] },
 });

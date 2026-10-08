@@ -1,6 +1,7 @@
 /**
- * The way in: the promise, real calls from the feed, then every way to sign
- * in. A way this server hasn't switched on says so when tapped.
+ * The way in: real calls from the feed, the promise, then the ways to sign
+ * in this server has switched on — Apple, Google, X (each only when it's
+ * on), and email. No wallet sign-in: every account gets its wallet itself.
  */
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -12,11 +13,14 @@ import { GoogleLogoIcon } from "phosphor-react-native/src/icons/GoogleLogo";
 import { XLogoIcon } from "phosphor-react-native/src/icons/XLogo";
 import { Button } from "~/components/button";
 import { Rise } from "~/components/rise";
+import { Skeleton } from "~/components/skeleton";
 import { type Provider, signInWith, useConfig } from "~/features/auth/auth";
 import { Problem } from "~/features/auth/parts";
 import { WelcomeCards } from "~/features/auth/welcome-cards";
 import { wholeDollars } from "~/lib/format";
-import { color, font, space, text } from "~/theme/tokens";
+import { color, font } from "~/theme/tokens";
+
+const PROVIDERS: Provider[] = ["apple", "google", "x"];
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
@@ -24,21 +28,17 @@ export default function Welcome() {
   const [busy, setBusy] = useState<Provider | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
-  // Every way in is on the screen, as designed. One this server hasn't
-  // switched on says so when tapped, instead of quietly vanishing.
-  const social: Provider[] = ["apple", "google", "x"];
-  const cash = config.data ? wholeDollars(config.data.paper.startingBalanceCents) : null;
+  const data = config.data;
+  // Only the ways in this server has switched on.
+  const social = data?.supabase ? PROVIDERS.filter((p) => data.auth[p]) : [];
+  const cash = data ? wholeDollars(data.paper.startingBalanceCents) : null;
 
   async function go(provider: Provider) {
-    if (!config.data) return;
+    if (!data) return;
     setProblem(null);
-    if (!config.data.supabase || !config.data.auth[provider]) {
-      setProblem(`${NAMES[provider]} sign-in isn’t switched on for this server yet. Use email for now.`);
-      return;
-    }
     setBusy(provider);
     try {
-      await signInWith(config.data, provider);
+      await signInWith(data, provider);
       // Signed in: the root layout moves on by itself.
     } catch (error) {
       setProblem(error instanceof Error ? error.message : "Sign-in didn't finish. Try again.");
@@ -47,9 +47,8 @@ export default function Welcome() {
     }
   }
 
-
   return (
-    <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+    <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 16) }]}>
       <View style={styles.glow} />
       <WelcomeCards />
       <View style={styles.hero}>
@@ -64,7 +63,7 @@ export default function Welcome() {
         {cash ? (
           <Rise delay={120}>
             <Text style={styles.lede}>
-              {config.data?.trading === "wallet"
+              {data?.trading === "wallet"
                 ? "Trade real prediction markets from your own wallet."
                 : `Paper-trade real markets with ${cash} demo cash.`}
             </Text>
@@ -76,14 +75,19 @@ export default function Welcome() {
         {config.isError ? (
           <>
             <Problem message="Can't reach imo. Check your connection." />
-            <Button variant="outline" size="lg" label="Try again" onPress={() => config.refetch()} />
+            <Button variant="surface" size="lg" label="Try again" onPress={() => config.refetch()} />
           </>
+        ) : config.isPending ? (
+          <View style={styles.loading} accessibilityLabel="Loading ways to sign in" accessibilityRole="progressbar">
+            <Skeleton height={52} round />
+            <Skeleton height={52} round />
+          </View>
         ) : (
           <>
             {social.map((provider) => (
               <Button
                 key={provider}
-                variant={provider === "apple" ? "ivory" : "outline"}
+                variant={provider === "apple" ? "ivory" : "surface"}
                 size="lg"
                 loading={busy === provider}
                 disabled={!!busy && busy !== provider}
@@ -92,9 +96,18 @@ export default function Welcome() {
                 label={LABELS[provider]}
               />
             ))}
-            <Pressable onPress={() => router.push("/email")} hitSlop={8} style={styles.emailLink} accessibilityRole="button">
-              <Text style={styles.emailLinkText}>Use email instead</Text>
-            </Pressable>
+            {social.length ? (
+              <Pressable
+                onPress={() => router.push("/email")}
+                style={({ pressed }) => [styles.emailLink, pressed && { opacity: 0.7 }]}
+                accessibilityRole="button"
+              >
+                <Text style={styles.emailLinkText}>Use email instead</Text>
+              </Pressable>
+            ) : (
+              // Email is the only way in on this server: make it the button.
+              <Button size="lg" label="Continue with email" onPress={() => router.push("/email")} />
+            )}
             <Problem message={problem} />
           </>
         )}
@@ -109,7 +122,6 @@ const ICONS: Record<Provider, ReactNode> = {
   google: <GoogleLogoIcon size={17} weight="bold" color={color.text} />,
   x: <XLogoIcon size={16} weight="bold" color={color.text} />,
 };
-const NAMES: Record<Provider, string> = { apple: "Apple", google: "Google", x: "X" };
 const LABELS: Record<Provider, string> = {
   apple: "Continue with Apple",
   google: "Continue with Google",
@@ -117,21 +129,21 @@ const LABELS: Record<Provider, string> = {
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: color.bg, paddingHorizontal: space[5] },
-  // A faint green light from the top left, as in the design.
+  screen: { flex: 1, backgroundColor: color.bg, paddingHorizontal: 24 },
+  // A faint green light over the cards, as in the design.
   glow: {
     ...StyleSheet.absoluteFill,
     pointerEvents: "none",
-    experimental_backgroundImage:
-      "radial-gradient(120% 60% at 15% 0%, rgba(181, 230, 161, 0.08) 0%, rgba(181, 230, 161, 0) 70%)",
+    experimental_backgroundImage: "radial-gradient(70% 35% at 50% 28%, rgba(181, 230, 161, 0.09) 0%, rgba(181, 230, 161, 0) 100%)",
   },
-  hero: { paddingBottom: space[5] },
+  hero: { gap: 12 },
   // The wordmark file is 397×192.
-  wordmark: { width: 74, height: 36, marginBottom: space[3] },
-  headline: { fontFamily: font.semibold, fontSize: 34, lineHeight: 38, letterSpacing: -1, color: color.text },
-  lede: { fontFamily: font.regular, fontSize: 16, lineHeight: 22, color: color.neutral700, marginTop: space[3] },
-  actions: { gap: space[3] },
-  emailLink: { alignSelf: "center", paddingVertical: space[2] },
-  emailLinkText: { fontFamily: font.medium, fontSize: 16, color: color.text },
-  legal: { fontFamily: font.regular, fontSize: text.label, color: color.neutral600, textAlign: "center", marginTop: space[2] },
+  wordmark: { width: 54, height: 26 },
+  headline: { fontFamily: font.semibold, fontSize: 30, lineHeight: 34, letterSpacing: -1.05, color: color.text },
+  lede: { fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: color.muted },
+  actions: { gap: 10, marginTop: 20 },
+  loading: { gap: 10 },
+  emailLink: { alignSelf: "center", height: 44, justifyContent: "center", paddingHorizontal: 12 },
+  emailLinkText: { fontFamily: font.medium, fontSize: 14, color: color.text },
+  legal: { fontFamily: font.regular, fontSize: 11, color: "#6f7975", textAlign: "center", marginTop: 4 },
 });
