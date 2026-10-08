@@ -10,16 +10,12 @@ export function VenueMark({ venueId, size = 18, tile }: { venueId: string; size?
   const v = useVenues().get(venueId);
   const logo = VENUE_LOGOS[venueId];
   const round = { width: size, height: size, borderRadius: tile ? Math.round(size * 0.31) : size / 2 };
-  const ground = tile ? VENUE_LOGO_GROUND[venueId] : undefined;
-  if (logo)
-    return (
-      <Image
-        source={logo}
-        style={[round, ground ? { backgroundColor: ground } : null]}
-        contentFit="cover"
-        accessibilityLabel={v?.name ?? venueId}
-      />
-    );
+  if (logo) {
+    const image = <Image source={logo} style={round} contentFit="cover" accessibilityLabel={v?.name ?? venueId} />;
+    // A round logo drawn as a tile sits on its own ground color, so no corners show.
+    const ground = tile ? VENUE_LOGO_GROUND[venueId] : undefined;
+    return ground ? <View style={[round, styles.ground, { backgroundColor: ground }]}>{image}</View> : image;
+  }
   return (
     <View style={[styles.mark, round, { backgroundColor: v?.color ?? color.neutral400 }]}>
       <Text style={[styles.text, { fontSize: size * 0.52 }]}>{v?.mark ?? venueId[0]?.toUpperCase()}</Text>
@@ -29,5 +25,6 @@ export function VenueMark({ venueId, size = 18, tile }: { venueId: string; size?
 
 const styles = StyleSheet.create({
   mark: { alignItems: "center", justifyContent: "center" },
+  ground: { overflow: "hidden" },
   text: { fontFamily: font.semibold, color: "#06140d" },
 });
