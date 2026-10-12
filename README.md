@@ -79,6 +79,14 @@ sequenceDiagram
 The mobile app (Expo) is the product, built for the **Solana Seeker** first, then iOS and Android.
 The web app shares the same API and brings the same experience to desktop.
 
+The app has been redesigned with a dark, green-accented look: Home, the feed and posts, Discover and
+markets, trading, rooms, portfolio, profiles, notifications, settings and sign-in.
+
+<p align="center">
+  <img src="docs/screenshots/mobile-welcome.png" width="280" alt="imo mobile app: the welcome screen" />
+  <br/><sub>The mobile app's welcome screen in the new design</sub>
+</p>
+
 <table>
   <tr>
     <td align="center"><img src="docs/screenshots/home-375.png" width="200" /><br/><sub>Calls from people you follow</sub></td>
@@ -87,6 +95,7 @@ The web app shares the same API and brings the same experience to desktop.
     <td align="center"><img src="docs/screenshots/portfolio-375.png" width="200" /><br/><sub>Portfolio and positions</sub></td>
   </tr>
 </table>
+<p align="center"><sub>The web app at phone width.</sub></p>
 
 <p align="center">
   <img src="docs/screenshots/home-1440.png" width="100%" alt="imo on the web: leaderboard, feed and trending markets" />
