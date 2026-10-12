@@ -8,16 +8,14 @@ import { z } from "zod";
 
 /** Numbers as plain decimal strings — never exponent notation, which
     String(1e-7) would produce and no decimal parser accepts. */
-const num = z
-  .union([z.number(), z.string()])
-  .transform((v) =>
-    typeof v === "number"
-      ? v.toLocaleString("en-US", {
-          useGrouping: false,
-          maximumFractionDigits: 20,
-        })
-      : v,
-  );
+const num = z.union([z.number(), z.string()]).transform((v) =>
+  typeof v === "number"
+    ? v.toLocaleString("en-US", {
+        useGrouping: false,
+        maximumFractionDigits: 20,
+      })
+    : v,
+);
 /** Gamma encodes some arrays as JSON strings: '["Yes","No"]'. */
 const jsonList = z
   .union([z.array(z.string()), z.string()])
@@ -105,8 +103,11 @@ const HistoryPoint = z.looseObject({
   price: z.union([z.number(), z.string()]).optional(),
 });
 
+/** A token's price history. The Data API v2 answers with the points under
+    `data`; the CLOB's older endpoint put them under `history`. Either is read. */
 export const PriceHistory = z.looseObject({
-  history: z.array(HistoryPoint).default([]),
+  data: z.array(HistoryPoint).optional(),
+  history: z.array(HistoryPoint).optional(),
 });
 
 export const DataTrades = z.array(

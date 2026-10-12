@@ -257,12 +257,45 @@ test("price history reads both documented point shapes, oldest first", () => {
   );
 });
 
+test("price history reads the Data API v2 answer, its points under data", () => {
+  const candles = toCandles(
+    PriceHistory.parse({
+      data: [
+        { timestamp: 1_791_176_400, price: 0.0255, resolution_seconds: 3_600 },
+        { timestamp: 1_791_180_000, price: 0.025, resolution_seconds: 3_600 },
+      ],
+    }),
+    3_600,
+  );
+  assert.deepEqual(
+    candles.map((c) => [c.start, c.close]),
+    [
+      ["2026-10-05T04:00:00.000Z", 25_500],
+      ["2026-10-05T05:00:00.000Z", 25_000],
+    ],
+  );
+});
+
 test("a market closes when it says, else on its date or its event's; with no date it isn't listed", () => {
   const without = { ...OPEN, endDate: undefined };
-  assert.equal(toCanonicalMarket(GammaMarket.parse({ ...without, endDateIso: "2026-11-03" }))?.closesAt, "2026-11-03T00:00:00.000Z");
   assert.equal(
-    toCanonicalMarket(GammaMarket.parse({ ...without, events: [{ id: "1", endDate: "2026-11-04T12:00:00Z" }] }))?.closesAt,
+    toCanonicalMarket(
+      GammaMarket.parse({ ...without, endDateIso: "2026-11-03" }),
+    )?.closesAt,
+    "2026-11-03T00:00:00.000Z",
+  );
+  assert.equal(
+    toCanonicalMarket(
+      GammaMarket.parse({
+        ...without,
+        events: [{ id: "1", endDate: "2026-11-04T12:00:00Z" }],
+      }),
+    )?.closesAt,
     "2026-11-04T12:00:00.000Z",
   );
-  assert.equal(toCanonicalMarket(GammaMarket.parse({ ...without, events: [] })), null, "never an invented date");
+  assert.equal(
+    toCanonicalMarket(GammaMarket.parse({ ...without, events: [] })),
+    null,
+    "never an invented date",
+  );
 });

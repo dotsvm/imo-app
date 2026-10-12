@@ -113,7 +113,10 @@ export function toCanonicalMarket(market: GammaMarket): CanonicalMarket | null {
   const event = market.events?.[0];
   // When it closes: the market's own end, its date-only end, or its event's.
   // A market with none can't say when it settles, so it isn't listed.
-  const closesAt = validDate(market.endDate) ?? validDate(market.endDateIso) ?? validDate(event?.endDate);
+  const closesAt =
+    validDate(market.endDate) ??
+    validDate(market.endDateIso) ??
+    validDate(event?.endDate);
   if (!closesAt) return null;
   return {
     ref: { venueId: polymarket.id, externalId: market.conditionId },
@@ -229,7 +232,7 @@ export function toCandles(
   page: z.infer<typeof PriceHistory>,
   bucketSeconds: number,
 ): Candle[] {
-  return page.history
+  return (page.data ?? page.history ?? [])
     .flatMap((point) => {
       const at = epochSeconds(point.t ?? point.timestamp);
       const value = point.p ?? point.price;
