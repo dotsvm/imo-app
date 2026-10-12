@@ -131,6 +131,26 @@ of configuration, with no changes to the core or the apps. Package boundaries ar
 the core imports nothing, and venue modules import only the core and the SDK.
 See [docs/architecture/extensibility.md](docs/architecture/extensibility.md).
 
+## Backend
+
+The backend is in this repo, not a hosted black box:
+
+- **API** (`apps/web/src/app/api/v1`): one versioned REST API that the mobile app, the web app and
+  the waitlist all use. It covers markets, posts, Back/Fade, rooms, watchlists, portfolio, wallet
+  trading (build, submit, sell, claim, withdraw), notifications and admin. It is described in
+  [docs/openapi.json](docs/openapi.json) (96 paths).
+- **Use cases** (`packages/server/src/usecases`): every route is a thin handler over a use case, so
+  the business rules live in one place and are tested without HTTP.
+- **Database** (`packages/server/src/db`, `packages/server/drizzle`): Postgres through Drizzle, with
+  19 migrations. Venue fills are written exactly once, and side effects go through a transactional
+  outbox, so a crash can't double-count a trade or drop a notification.
+- **Worker** (`apps/worker`, `packages/server/src/worker`): leased lanes that run on one replica at
+  a time. They ingest venue catalogs and prices, track wallet orders until they fill, sweep
+  settlements, deliver the outbox, fire price alerts and closing reminders, snapshot equity, refresh
+  stats and the leaderboard, and send digests.
+- **Profiles**: `demo` runs everything on a built-in dataset with no external keys; `production`
+  wires in Supabase, Privy and Jupiter Predict. Health checks are at `/api/health` and `/api/ready`.
+
 ## Tech
 
 | Area | Stack |
@@ -181,7 +201,7 @@ More in [apps/mobile/README.md](apps/mobile/README.md).
 | `npm run dev` | Web app + API |
 | `npm run worker` | Background worker |
 | `npm run verify` | Typecheck, lint and unit tests across every package (Turborepo) |
-| `npm run test:db` | API integration tests against Postgres (`DATABASE_URL=…/hunch_test`) |
+| `npm run test:db` | API integration tests against Postgres (`DATABASE_URL=…/imo_test`) |
 | `npm run test:e2e` | Browser end-to-end tests (Playwright) |
 | `npm run db:generate` · `npm run db:migrate` | Create · apply database migrations |
 | `npm run mobile` | Start the Expo app |
