@@ -33,6 +33,7 @@ import { recordLine, useRecords } from "~/features/feed/use-records";
 import { Notice } from "~/features/home/notice";
 import { Reactions } from "~/features/feed/reactions";
 import { TradeSheet } from "~/features/trade/trade-sheet";
+import { TipSkr } from "~/features/wallet/tip-skr";
 import { api } from "~/lib/api";
 import { openTrader } from "~/lib/nav";
 import { ago, arrowUsd, price } from "~/lib/format";
@@ -319,6 +320,7 @@ export default function PostDetail() {
             showSave={false}
             onReply={() => replyBox.current?.focus()}
           />
+          <TipSkr postId={p.id} authorName={first} isYou={p.author.isYou} />
         </View>
 
         <Text style={styles.section}>

@@ -17,7 +17,7 @@ import { ShareNetworkIcon } from "phosphor-react-native/src/icons/ShareNetwork";
 import { Button } from "~/components/button";
 import { Skeleton } from "~/components/skeleton";
 import { useTrading } from "~/features/wallet/use-trading";
-import { usd } from "~/lib/format";
+import { skr, usd } from "~/lib/format";
 import { color, font, radius, space, text } from "~/theme/tokens";
 
 /** Enough SOL for a few dozen trades' network fees and new accounts' rent. */
@@ -83,6 +83,16 @@ export default function Wallet() {
                   : " "}
             </Text>
 
+            {balance && balance.skr > 0 ? (
+              <View style={styles.skr}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.small}>SKR</Text>
+                  <Text style={styles.skrAmount}>{skr(balance.skr)}</Text>
+                </View>
+                <Button label="Swap to USDC" size="sm" onPress={() => router.push("/swap-skr")} />
+              </View>
+            ) : null}
+
             <View style={styles.card}>
               {address ? (
                 <View style={styles.qr} accessibilityLabel="QR code of your wallet address">
@@ -124,7 +134,7 @@ export default function Wallet() {
               <Step n={3} text={`Trade from $${((trading.minOrderCents ?? 500) / 100).toFixed(0)}. Winnings and sales come back here.`} />
             </View>
             <Text style={styles.warn}>
-              Only send USDC or SOL on Solana. Tokens sent from other networks can’t be recovered.
+              Only send USDC, SOL or SKR on Solana. Tokens sent from other networks can’t be recovered.
             </Text>
 
             <Text style={styles.section}>Signing</Text>
@@ -166,6 +176,8 @@ const styles = StyleSheet.create({
   small: { fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: color.neutral700 },
   balance: { fontFamily: font.medium, fontSize: 44, letterSpacing: -1.6, color: color.text, fontVariant: ["tabular-nums"], marginVertical: 2 },
   note: { fontFamily: font.regular, fontSize: text.body, color: color.neutral700, marginTop: space[4] },
+  skr: { flexDirection: "row", alignItems: "center", gap: space[3], marginTop: space[4], padding: space[4], borderRadius: radius.panel, backgroundColor: "#121714" },
+  skrAmount: { fontFamily: font.medium, fontSize: 20, color: color.text, fontVariant: ["tabular-nums"], marginTop: 2 },
   card: { marginTop: space[5], padding: space[4], gap: space[3], borderRadius: radius.panel, backgroundColor: "#121714" },
   qr: { alignSelf: "center", padding: 0, borderRadius: radius.card, overflow: "hidden" },
   label: { fontFamily: font.regular, fontSize: 12, color: color.neutral700, marginTop: space[1] },

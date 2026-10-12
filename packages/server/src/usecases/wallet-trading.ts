@@ -13,7 +13,7 @@ import { and, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
 import { isTradable } from "@imo/core/lifecycle";
 import type { Deps } from "../composition";
 import { type ExecutionVenue, type OrderTicket, type UnsignedTransaction, VenueRejection } from "@imo/venues/sdk/execution";
-import { WALLET_ROUTE } from "../catalogs";
+import { SKR, WALLET_ROUTE } from "../catalogs";
 import type { Db, Tx } from "../db/client";
 import * as t from "../db/schema";
 import { cents, micros } from "../dto/money";
@@ -63,11 +63,16 @@ function asApiError(error: unknown): never {
 export async function walletInfo(deps: WalletDeps, db: Db, viewer: Viewer) {
   const address = await walletOf(db, viewer.userId);
   const collateral = [...deps.venues.execution.values()][0]?.module.collateral;
-  let balance: { usdcCents: number; solLamports: number } | null = null;
+  let balance: { usdcCents: number; solLamports: number; skr: number } | null = null;
   if (deps.chain && collateral) {
     try {
-      const b = await deps.chain.balances(address, [collateral.mint]);
-      balance = { usdcCents: cents(b.tokens[collateral.mint] ?? 0), solLamports: b.lamports };
+      const b = await deps.chain.balances(address, [collateral.mint, SKR.mint]);
+      balance = {
+        usdcCents: cents(b.tokens[collateral.mint] ?? 0),
+        solLamports: b.lamports,
+        /** Whole SKR (base units ÷ 10^6). */
+        skr: (b.tokens[SKR.mint] ?? 0) / 10 ** SKR.decimals,
+      };
     } catch (error) {
       deps.log.warn("wallet balance unavailable", { error: (error as Error).message });
     }

@@ -145,3 +145,31 @@ export const reactions = pgTable(
     index("reactions_subject").on(t.subjectType, t.subjectId, t.kind),
   ],
 );
+
+/** SKR sent to a prediction's author, from the tipper's own wallet. One row
+    per transaction that landed; the transfer itself is onchain. */
+export const tips = pgTable(
+  "tips",
+  {
+    id: id(),
+    postId: ref()
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    fromUserId: ref()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    toUserId: ref()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** SKR base units (6 decimals). */
+    amount: units().notNull(),
+    signature: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("tips_signature").on(t.signature),
+    index("tips_post").on(t.postId),
+    check("tips_positive", sql`${t.amount} > 0`),
+    check("tips_not_self", sql`${t.fromUserId} <> ${t.toUserId}`),
+  ],
+);

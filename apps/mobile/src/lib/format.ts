@@ -26,3 +26,6 @@ export const signedUsd = (cents: number) => `${cents > 0 ? "+" : cents < 0 ? "�
 
 /** A gain or loss with its arrow: "▲ +$48.00", "▼ −$16.00". */
 export const arrowUsd = (cents: number) => (cents === 0 ? usd(0) : `${cents > 0 ? "▲" : "▼"} ${signedUsd(cents)}`);
+
+/** SKR, the Seeker's token: whole tokens, up to two decimals. */
+export const skr = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });

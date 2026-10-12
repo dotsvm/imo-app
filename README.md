@@ -74,6 +74,18 @@ sequenceDiagram
   fill exactly once) so feeds, profiles and the leaderboard stay fast and always come from real fills.
 - **Deposit and withdraw USDC** to and from any Solana address, from inside the app.
 
+### SKR, the Seeker's token
+
+imo is built for the Solana Seeker, so SKR (`SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3`) works in
+the app the same way USDC does, signed on the device and never held by imo:
+
+- **In your wallet.** Your SKR balance sits beside your USDC.
+- **Swap SKR to USDC** in one hold, through Jupiter, to trade with it. Before you're asked to sign,
+  the API refuses any route Jupiter builds that would need another signer or fee payer.
+- **Tip a good call.** Send SKR to a prediction's author from the post. The API builds the
+  transfer to their wallet without ever showing you their address, and each tip that lands is
+  recorded against the post.
+
 ## Screens
 
 The mobile app (Expo) is the product, built for the **Solana Seeker** first, then iOS and Android.
@@ -152,7 +164,7 @@ The backend is in this repo, not a hosted black box:
 - **API** (`apps/web/src/app/api/v1`): one versioned REST API that the mobile app, the web app and
   the waitlist all use. It covers markets, posts, Back/Fade, rooms, watchlists, portfolio, wallet
   trading (build, submit, sell, claim, withdraw), notifications and admin. It is described in
-  [docs/openapi.json](docs/openapi.json) (96 paths).
+  [docs/openapi.json](docs/openapi.json) (107 paths).
 - **Use cases** (`packages/server/src/usecases`): every route is a thin handler over a use case, so
   the business rules live in one place and are tested without HTTP.
 - **Database** (`packages/server/src/db`, `packages/server/drizzle`): Postgres through Drizzle, with

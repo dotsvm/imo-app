@@ -461,7 +461,7 @@ export async function listPosts(deps: PostDeps, db: Db, viewer: Viewer | null, q
   return { items: await hydratePosts(deps, db, viewer, rows.slice(0, limit)), next };
 }
 
-async function visiblePost(db: Queryable, viewer: Viewer | null, id: string) {
+export async function visiblePost(db: Queryable, viewer: Viewer | null, id: string) {
   const [post] = await db.select().from(t.posts).where(and(eq(t.posts.id, id), visibleTo(viewer)));
   if (!post) throw notFound("That prediction");
   return post;

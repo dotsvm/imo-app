@@ -96,6 +96,13 @@ export const PAPER_ROUTE = "paper";
 export const WALLET_ROUTE = "wallet";
 export const NO_APP_FEE: FeeModel = { kind: "none" };
 
+/** SKR, the Solana Seeker's token (SPL Token program, 6 decimals). */
+export const SKR = {
+  mint: "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+  decimals: 6,
+  symbol: "SKR",
+} as const;
+
 /** The beta's floor for ranking: fewer resolved calls is too little to judge. */
 export const MIN_SAMPLE = 10;
 

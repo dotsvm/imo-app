@@ -322,7 +322,7 @@ export function createDeps(options: CreateDepsOptions = {}): Deps {
   if (privyConfigured(config)) providerHosts.push(...PRIVY_HOSTS);
   if (config.RESEND_API_KEY) providerHosts.push(...RESEND_HOSTS);
   // Wallet trading reads balances over Solana RPC and trades on Jupiter.
-  if (tradingMode(config) === "wallet") providerHosts.push(new URL(config.SOLANA_RPC_URL).hostname, "api.jup.ag");
+  if (tradingMode(config) === "wallet") providerHosts.push(new URL(config.SOLANA_RPC_URL).hostname, "api.jup.ag", "lite-api.jup.ag");
   const http: HttpClient = test
     ? new ScriptedHttp([])
     : createFetchClient({

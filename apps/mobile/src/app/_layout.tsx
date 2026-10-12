@@ -89,6 +89,7 @@ function App() {
         <Stack.Screen name="wallet" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="deposit" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="withdraw" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="swap-skr" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="notification-settings" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="edit-profile" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
       </Stack.Protected>
