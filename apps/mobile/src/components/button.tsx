@@ -1,7 +1,8 @@
 /**
  * imo's buttons: every one a pill. `primary` is the lit green key (gradient,
  * top highlight, inner shade, drop shadow) that sinks 2px when pressed;
- * `ivory` is the same key in white, for Apple; `outline` for other ways in; `quiet` for small actions.
+ * `ivory` is the same key in white, for Apple; `glass` the same key in dark smoked glass, for
+ * Google; `outline` for other ways in; `quiet` for small actions.
  */
 import type { ReactNode } from "react";
 import {
@@ -15,7 +16,8 @@ import {
 } from "react-native";
 import { color, font, radius } from "~/theme/tokens";
 
-export type ButtonVariant = "primary" | "ivory" | "outline" | "quiet" | "surface";
+export type ButtonVariant =
+  "primary" | "ivory" | "glass" | "outline" | "quiet" | "surface";
 
 interface Props {
   variant?: ButtonVariant;
@@ -71,7 +73,21 @@ export function Button({
       ) : (
         <>
           {icon}
-          {label ? <Text style={[styles.label, (size === "lg" || size === "xl") && styles.labelLg, size === "sm" && styles.labelSm, size === "xs" && styles.labelXs, size === "ml" && styles.labelMl, { color: v.ink }, labelStyle]}>{label}</Text> : null}
+          {label ? (
+            <Text
+              style={[
+                styles.label,
+                (size === "lg" || size === "xl") && styles.labelLg,
+                size === "sm" && styles.labelSm,
+                size === "xs" && styles.labelXs,
+                size === "ml" && styles.labelMl,
+                { color: v.ink },
+                labelStyle,
+              ]}
+            >
+              {label}
+            </Text>
+          ) : null}
           {children}
         </>
       )}
@@ -83,7 +99,13 @@ const GRADIENT = "linear-gradient(180deg, #c3edb1, #a7dd92)";
 
 const VARIANTS: Record<
   ButtonVariant,
-  { box: ViewStyle; rest?: ViewStyle; pressed?: ViewStyle; ink: string; text?: TextStyle }
+  {
+    box: ViewStyle;
+    rest?: ViewStyle;
+    pressed?: ViewStyle;
+    ink: string;
+    text?: TextStyle;
+  }
 > = {
   primary: {
     ink: PRIMARY_INK,
@@ -94,17 +116,53 @@ const VARIANTS: Record<
     },
     rest: {
       boxShadow: [
-        { offsetX: 0, offsetY: 1, blurRadius: 0, color: "rgba(255, 255, 255, 0.55)", inset: true },
-        { offsetX: 0, offsetY: -2, blurRadius: 4, color: "rgba(20, 60, 30, 0.28)", inset: true },
-        { offsetX: 0, offsetY: 6, blurRadius: 14, spreadDistance: -4, color: "rgba(0, 0, 0, 0.6)" },
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.55)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -2,
+          blurRadius: 4,
+          color: "rgba(20, 60, 30, 0.28)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 6,
+          blurRadius: 14,
+          spreadDistance: -4,
+          color: "rgba(0, 0, 0, 0.6)",
+        },
       ],
     },
     pressed: {
       transform: [{ translateY: 2 }],
       boxShadow: [
-        { offsetX: 0, offsetY: 1, blurRadius: 0, color: "rgba(255, 255, 255, 0.4)", inset: true },
-        { offsetX: 0, offsetY: -1, blurRadius: 2, color: "rgba(20, 60, 30, 0.3)", inset: true },
-        { offsetX: 0, offsetY: 2, blurRadius: 6, spreadDistance: -3, color: "rgba(0, 0, 0, 0.6)" },
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.4)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -1,
+          blurRadius: 2,
+          color: "rgba(20, 60, 30, 0.3)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 2,
+          blurRadius: 6,
+          spreadDistance: -3,
+          color: "rgba(0, 0, 0, 0.6)",
+        },
       ],
     },
   },
@@ -118,35 +176,151 @@ const VARIANTS: Record<
     },
     rest: {
       boxShadow: [
-        { offsetX: 0, offsetY: 1, blurRadius: 0, color: "rgba(255, 255, 255, 0.9)", inset: true },
-        { offsetX: 0, offsetY: -2, blurRadius: 4, color: "rgba(70, 62, 40, 0.2)", inset: true },
-        { offsetX: 0, offsetY: 6, blurRadius: 14, spreadDistance: -4, color: "rgba(0, 0, 0, 0.6)" },
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.9)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -2,
+          blurRadius: 4,
+          color: "rgba(70, 62, 40, 0.2)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 6,
+          blurRadius: 14,
+          spreadDistance: -4,
+          color: "rgba(0, 0, 0, 0.6)",
+        },
       ],
     },
     pressed: {
       transform: [{ translateY: 2 }],
       boxShadow: [
-        { offsetX: 0, offsetY: 1, blurRadius: 0, color: "rgba(255, 255, 255, 0.7)", inset: true },
-        { offsetX: 0, offsetY: -1, blurRadius: 2, color: "rgba(70, 62, 40, 0.24)", inset: true },
-        { offsetX: 0, offsetY: 2, blurRadius: 6, spreadDistance: -3, color: "rgba(0, 0, 0, 0.6)" },
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.7)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -1,
+          blurRadius: 2,
+          color: "rgba(70, 62, 40, 0.24)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 2,
+          blurRadius: 6,
+          spreadDistance: -3,
+          color: "rgba(0, 0, 0, 0.6)",
+        },
+      ],
+    },
+  },
+  glass: {
+    ink: color.text,
+    box: {
+      backgroundColor: "#141b17",
+      experimental_backgroundImage:
+        "linear-gradient(180deg, #1f2823 0%, #131915 55%, #0e1311 100%)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.1)",
+    },
+    rest: {
+      boxShadow: [
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.14)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -2,
+          blurRadius: 4,
+          color: "rgba(0, 0, 0, 0.35)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 10,
+          blurRadius: 24,
+          spreadDistance: -10,
+          color: "rgba(0, 0, 0, 0.8)",
+        },
+        {
+          offsetX: 0,
+          offsetY: 0,
+          blurRadius: 0,
+          spreadDistance: 4,
+          color: "rgba(255, 255, 255, 0.025)",
+        },
+      ],
+    },
+    pressed: {
+      transform: [{ translateY: 2 }],
+      boxShadow: [
+        {
+          offsetX: 0,
+          offsetY: 1,
+          blurRadius: 0,
+          color: "rgba(255, 255, 255, 0.1)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: -1,
+          blurRadius: 2,
+          color: "rgba(0, 0, 0, 0.4)",
+          inset: true,
+        },
+        {
+          offsetX: 0,
+          offsetY: 4,
+          blurRadius: 10,
+          spreadDistance: -6,
+          color: "rgba(0, 0, 0, 0.8)",
+        },
       ],
     },
   },
   outline: {
     ink: color.text,
-    box: { backgroundColor: color.neutral100, borderWidth: 1, borderColor: color.neutral400 },
+    box: {
+      backgroundColor: color.neutral100,
+      borderWidth: 1,
+      borderColor: color.neutral400,
+    },
     rest: { boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.035)" },
     pressed: { backgroundColor: color.neutral300 },
   },
   quiet: {
     ink: color.text,
-    box: { backgroundColor: "transparent", borderWidth: 1, borderColor: color.neutral400 },
+    box: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: color.neutral400,
+    },
     pressed: { backgroundColor: color.neutral300 },
   },
   // A raised surface with a faint edge: secondary actions beside content ("Edit profile").
   surface: {
     ink: color.text,
-    box: { backgroundColor: "#151b18", borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.07)" },
+    box: {
+      backgroundColor: "#151b18",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.07)",
+    },
     rest: { boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)" },
     pressed: { backgroundColor: "#1b221e" },
   },
