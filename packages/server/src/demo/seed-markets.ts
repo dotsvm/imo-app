@@ -1,6 +1,6 @@
 /**
  * Seed the design's markets through the normal ingestion path, keeping the
- * design ids as slugs (/market/fed-dec), plus their quotes and the Hunch
+ * design ids as slugs (/market/fed-dec), plus their quotes and the imo
  * holder split the cards show.
  */
 import { eq, inArray } from "drizzle-orm";
@@ -18,7 +18,7 @@ import {
 } from "./design-source";
 
 export async function seedDesignMarkets(db: Db, log: Logger) {
-  // Design markets carry Hunch categories already: map each to itself.
+  // Design markets carry imo categories already: map each to itself.
   const categories = new Map<string, string>();
   for (const venueId of new Set(designMarkets.map((m) => m.venueId)))
     for (const category of HUNCH_CATEGORIES)

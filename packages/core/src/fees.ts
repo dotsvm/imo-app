@@ -54,7 +54,7 @@ export interface FeeFill {
 
 export type FeeSource = "venue" | "app" | "route" | "network" | "rounding";
 
-/** A fee as the ticket names it: "Kalshi trading fee", "Hunch · 0.5%". */
+/** A fee as the ticket names it: "Kalshi trading fee", "imo · 0.5%". */
 export interface FeeSchedule {
   source: FeeSource;
   label: string;

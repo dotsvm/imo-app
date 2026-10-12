@@ -37,7 +37,7 @@ const fillTime = (iso: string) =>
   })}`;
 
 /** A fill's fee, split the way the ticket shows it: the venue's, then
-    Hunch's 0.5%. */
+    imo's 0.5%. */
 const splitFee = (market: Market, fill: Fill) => {
   const venue = Math.min(
     fill.feeCents,

@@ -46,7 +46,7 @@ const fill = (priceCents: Cents, shares: number) => ({
   ...CENTS,
   liquidity: "taker" as const,
 });
-/** Hunch's 0.5% of notional, always its own line on the ticket. */
+/** imo's 0.5% of notional, always its own line on the ticket. */
 export const APP_FEE: FeeModel = {
   kind: "bps",
   bps: 50,
@@ -54,7 +54,7 @@ export const APP_FEE: FeeModel = {
   rounding: { mode: "half-up", decimals: 2 },
 };
 /**
- * Each market carries its venue's fee as data, and Hunch adds 0.5% of
+ * Each market carries its venue's fee as data, and imo adds 0.5% of
  * notional. The design shows both as separate lines.
  */
 export const venueFeeFor = (

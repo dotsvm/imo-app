@@ -11,7 +11,7 @@ export default defineConfig({
     url:
       process.env.DIRECT_URL ??
       process.env.DATABASE_URL ??
-      "postgres://localhost:5432/hunch_dev",
+      "postgres://localhost:5432/imo_dev",
   },
   migrations: { table: "__drizzle_migrations", schema: "public" },
   strict: true,

@@ -102,7 +102,7 @@ function Prices({ market, phone }: { market: Market; phone: boolean }) {
 }
 
 function Stats({ market, phone }: { market: Market; phone: boolean }) {
-  // People on Hunch holding either side, as the server counts them.
+  // People on imo holding either side, as the server counts them.
   const holders = (market.holders.yes + market.holders.no).toLocaleString("en-US");
   const stats: [string, string][] = phone
     ? [

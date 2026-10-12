@@ -53,7 +53,7 @@ const ROLLOUT_TAGS: Record<
 export const rolloutTag = (id: VenueId) =>
   ROLLOUT_TAGS[venueEntry(id).rollout.stage];
 
-/** The venue Hunch supports first. */
+/** The venue imo supports first. */
 export const primaryVenue = (): VenueId => venueIds[0];
 
 /** What a ticket says beside the venue fee. */

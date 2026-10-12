@@ -137,7 +137,7 @@ test("a resting limit fills as a maker when the book comes to it", async () => {
   assert.deepEqual([filled.status, filled.filledShares, filled.averagePriceCents], ["filled", 50, 60]);
   const p = await holdings("maker");
   assert.equal(p.account.reservedCents, 0, "the reservation is released");
-  // Makers pay no fixture venue fee; Hunch's 0.5% of $30.00 is $0.15.
+  // Makers pay no fixture venue fee; imo's 0.5% of $30.00 is $0.15.
   assert.deepEqual([p.positions[0].shares, p.positions[0].costCents, p.positions[0].feeCents], [50, 3000, 15]);
   assert.equal(p.account.cashCents, 1_000_000 - 3015);
   await ledgerBalanced();

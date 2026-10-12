@@ -237,7 +237,7 @@ export function PostDetail({ id }: { id: string }) {
   const yourPosition = holdings.get("you");
   const stats = author.stats["30D"];
   const categoryRecord = author.categories[market.category];
-  // A headcount of Hunch traders on each side, which is not the price.
+  // A headcount of imo traders on each side, which is not the price.
   const holderCount = market.holders.yes + market.holders.no;
   const yesShare = holderCount ? Math.round((market.holders.yes / holderCount) * 100) : 50;
   // 07.1 names who is in the thread and where they stand.

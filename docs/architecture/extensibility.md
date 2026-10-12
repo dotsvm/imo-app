@@ -175,7 +175,7 @@ type FeeModel =
 
 interface FeeLine {
   source: "venue" | "app" | "route" | "network" | "rounding";
-  label: string; // "Kalshi trading fee", "Hunch · 0.5%"
+  label: string; // "Kalshi trading fee", "imo · 0.5%"
   amount: number; // minor units
 }
 
@@ -282,7 +282,7 @@ interface ExecutionRouteModule {
   venues: VenueId[];
   mode: "paper" | "live";
   accountModel: "none" | "api-key" | "oauth" | "wallet" | "broker";
-  fees: FeeModel; // e.g. the Hunch app fee
+  fees: FeeModel; // e.g. the imo app fee
   create(ctx: AdapterContext): ExecutionVenue;
 }
 

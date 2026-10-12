@@ -1,5 +1,5 @@
 "use client";
-/* Report something to Hunch's moderators: a reason, an optional note. The
+/* Report something to imo's moderators: a reason, an optional note. The
    admin queue (/api/v1/admin/reports) picks it up. */
 import { useState } from "react";
 import { Modal } from "@/components/ui";

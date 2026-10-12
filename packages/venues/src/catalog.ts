@@ -1,5 +1,5 @@
 /**
- * The venue registry: every venue the product lists, in order, with Hunch's
+ * The venue registry: every venue the product lists, in order, with imo's
  * rollout plan for it. Manifests are static facts about a venue; rollout is
  * ours. In production the stage comes from the `venues` table; these are the
  * defaults. Adding a venue means one manifest import and one entry here.
@@ -19,7 +19,7 @@ export interface VenueEntry {
   rollout: { stage: RolloutStage; summary: string };
 }
 
-/** The first entry is the venue Hunch supports first. */
+/** The first entry is the venue imo supports first. */
 export const VENUE_CATALOG: readonly VenueEntry[] = [
   {
     manifest: kalshi,

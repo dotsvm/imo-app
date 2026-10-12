@@ -396,7 +396,7 @@ export async function relatedMarkets(db: Db, slug: string, now: Date) {
 }
 
 /**
- * Who holds a market on Hunch, biggest first on each side — people who keep
+ * Who holds a market on imo, biggest first on each side — people who keep
  * their positions private stay out (you always see your own).
  */
 export async function marketHolders(db: Db, viewer: { userId: string } | null, slug: string, limit = 20) {

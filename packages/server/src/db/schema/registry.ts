@@ -82,7 +82,7 @@ export const routeVenues = pgTable(
   (t) => [primaryKey({ columns: [t.routeId, t.venueId] })],
 );
 
-/** A venue's own category or tag → one of Hunch's categories. */
+/** A venue's own category or tag → one of imo's categories. */
 export const categoryMap = pgTable(
   "category_map",
   {

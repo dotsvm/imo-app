@@ -37,13 +37,13 @@ jobs:
       - run: npm ci
       - name: Test database
         run: |
-          createdb hunch_test
-          DIRECT_URL=postgres://localhost:5432/hunch_test npm run db:migrate
+          createdb imo_test
+          DIRECT_URL=postgres://localhost:5432/imo_test npm run db:migrate
       - run: npm run verify
       - name: Database integration tests
         run: npm run test:db
         env:
-          DATABASE_URL: postgres://localhost:5432/hunch_test
+          DATABASE_URL: postgres://localhost:5432/imo_test
       - name: Dependency audit
         run: npm audit --omit=dev --audit-level=high
 

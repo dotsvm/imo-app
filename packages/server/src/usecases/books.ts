@@ -207,7 +207,7 @@ export async function refreshVenueStatus(
 }
 
 /**
- * Trending for live markets: 24-hour volume, depth, Hunch's own activity and
+ * Trending for live markets: 24-hour volume, depth, imo's own activity and
  * holders, and how far the price moved. The design dataset keeps its curated
  * order; ranks are then numbered across everything.
  */
@@ -243,7 +243,7 @@ export async function computeTrending(db: Db, now: Date) {
   return { ranked: ranked.count ?? 0 };
 }
 
-/** Hunch's own holders per side, for live markets (the design seeds its own). */
+/** imo's own holders per side, for live markets (the design seeds its own). */
 export async function refreshHolders(db: Db) {
   await db.execute(sql`
     insert into market_holders (market_id, yes, no, yes_share)

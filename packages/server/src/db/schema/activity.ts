@@ -146,7 +146,7 @@ export const traderStats = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     period: text({ enum: STAT_PERIODS }).notNull(),
-    /** "All", or one of Hunch's categories. */
+    /** "All", or one of imo's categories. */
     category: text().notNull(),
     returnPct: doublePrecision().notNull(),
     correct: integer().notNull(),

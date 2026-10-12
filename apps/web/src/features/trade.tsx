@@ -775,7 +775,7 @@ export function TradeTicket({
   useStepFocus(t.step, root);
   const order = t.order;
   // "Share this trade … after it fills": the composer opens on the fill,
-  // since a prediction on Hunch always carries its reasoning.
+  // since a prediction on imo always carries its reasoning.
   useEffect(() => {
     if (
       t.step === "result" &&

@@ -8,7 +8,7 @@
  *   series:<source>    7-day sparklines for the most-seen markets
  *   status:<source>    venue trading status
  *   hot                books for watched markets and resting orders; matching
- *   trending           trending ranks and Hunch holder counts
+ *   trending           trending ranks and imo holder counts
  *   outbox             committed events → realtime, notifications, jobs
  *   jobs               queued work: settlement, email, wallet provisioning
  *   alerts             price alerts crossed since the last pass
@@ -82,7 +82,7 @@ export function workerLanes(deps: WorkerDeps): Lane[] {
 
   const lanes: Lane[] = [];
   for (const sourceId of deps.venues.feeds) {
-    // A venue's data is fetched only while Hunch may show it: display rights
+    // A venue's data is fetched only while imo may show it: display rights
     // in the registry, which stand for written consent where a venue's terms
     // ask for it (Kalshi's). Checked every run, so granting them takes effect
     // without a restart.

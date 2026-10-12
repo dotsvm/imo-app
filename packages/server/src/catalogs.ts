@@ -72,7 +72,7 @@ export const NOTIFICATION_PREFERENCES: readonly PreferenceDefinition[] = [
   },
 ];
 
-/** Hunch's 0.5% of notional: the paper route's fee, its own ticket line. */
+/** imo's 0.5% of notional: the paper route's fee, its own ticket line. */
 export const APP_FEE_MODEL: FeeModel = {
   kind: "bps",
   bps: 50,

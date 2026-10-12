@@ -1,4 +1,4 @@
-# Deploying Hunch
+# Deploying imo
 
 Three pieces: the web app and API on **Vercel**, the **worker** on any host that runs a
 long-lived process (Fly.io or Railway), and **Supabase** for Postgres, auth, realtime and storage.
@@ -36,7 +36,7 @@ twin.
 Create an app, then set custom auth (JWT) to Supabase's JWKS:
 `https://<project>.supabase.co/auth/v1/.well-known/jwks.json`. Set `NEXT_PUBLIC_PRIVY_APP_ID` and
 `PRIVY_APP_SECRET`. Each person gets self-custodial Solana and Ethereum wallets on first sign-in;
-Hunch never holds keys.
+imo never holds keys.
 
 ## 3. The web app on Vercel
 

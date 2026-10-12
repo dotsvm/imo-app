@@ -53,7 +53,7 @@ export const markets = pgTable(
     description: text().notNull().default(""),
     rules: text().notNull(),
     resolutionSource: text().notNull().default(""),
-    /** One of Hunch's categories, from the category map (or an override). */
+    /** One of imo's categories, from the category map (or an override). */
     category: text().notNull(),
     categoryHints: text()
       .array()
@@ -143,7 +143,7 @@ export const marketTrending = pgTable("market_trending", {
   computedAt: when().notNull().defaultNow(),
 });
 
-/** Hunch's own holders per side, for "who's on each side". */
+/** imo's own holders per side, for "who's on each side". */
 export const marketHolders = pgTable("market_holders", {
   marketId: ref()
     .primaryKey()

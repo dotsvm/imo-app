@@ -597,7 +597,7 @@ function series(seed: string, end: number, change: number) {
   }).map((v, i, a) => (i === a.length - 1 ? end : v));
 }
 
-/** A slice of the venue's traders also hold the contract on Hunch. Their
+/** A slice of the venue's traders also hold the contract on imo. Their
     Yes/No split leans with the price but never matches it exactly — a price
     is a probability, not a headcount. */
 const holdersFor = (id: string, traders: number, yes: number) => {

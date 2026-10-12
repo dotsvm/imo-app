@@ -46,7 +46,7 @@ export interface Market {
   description: string;
   series: number[];
   traders: number;
-  /** Hunch traders holding each side, for the "who's on each side" split. */
+  /** imo traders holding each side, for the "who's on each side" split. */
   holders: { yes: number; no: number };
 }
 export interface TraderRecord {
@@ -260,7 +260,7 @@ export interface Quote {
   notionalCents: Cents;
   /** The venue's own trading fee, from the market's fee model. */
   venueFeeCents: Cents;
-  /** Hunch's 0.5% app fee, always a separate line. */
+  /** imo's 0.5% app fee, always a separate line. */
   appFeeCents: Cents;
   feeCents: Cents;
   totalCents: Cents;

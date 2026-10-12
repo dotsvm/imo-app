@@ -2,7 +2,7 @@ import { z } from "zod";
 import { route } from "@imo/server/http/route";
 import { marketHolders } from "@imo/server/usecases/markets";
 
-/** Who holds this market on Hunch, biggest first (private positions stay out). */
+/** Who holds this market on imo, biggest first (private positions stay out). */
 export const GET = route({
   auth: "optional",
   limit: "api:read",

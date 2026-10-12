@@ -236,7 +236,7 @@ test("Supabase Realtime only when the database is Supabase's: its policy authori
     SUPABASE_SECRET_KEY: "sb_secret_test",
   };
   const quiet = { logSink: () => {} };
-  const local = createDeps({ env: { APP_PROFILE: "demo", DATABASE_URL: "postgres://localhost:5432/hunch_dev", ...supabase }, ...quiet });
+  const local = createDeps({ env: { APP_PROFILE: "demo", DATABASE_URL: "postgres://localhost:5432/imo_dev", ...supabase }, ...quiet });
   assert.equal(local.realtimeTransport.kind, "sse", "a local database: the API's own stream");
   const hosted = createDeps({
     env: {

@@ -1,5 +1,5 @@
 /**
- * Default mapping from each venue's own categories and tags onto Hunch's
+ * Default mapping from each venue's own categories and tags onto imo's
  * eight. Seeded into category_map at boot; admins edit rows, not code. A
  * market whose hints match nothing stays hidden in the beta.
  */
@@ -15,7 +15,7 @@ export const HUNCH_CATEGORIES = [
 ] as const;
 export type HunchCategory = (typeof HUNCH_CATEGORIES)[number];
 
-/** Venue category or tag (lower case) → Hunch category, per venue. */
+/** Venue category or tag (lower case) → imo category, per venue. */
 export const DEFAULT_CATEGORY_MAP: Record<
   string,
   Record<string, HunchCategory>

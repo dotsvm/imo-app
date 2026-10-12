@@ -1,4 +1,4 @@
-# Hunch
+# imo
 Status: active
 Social prediction-trading demo ("Outlook" is the repository's working name). Source of truth: `design/00-Design-System.html`; tokens live in `apps/web/src/app/globals.css`.
 

@@ -69,7 +69,7 @@ from people's own activity:
   are the settlement's (void markets pay 50¢); a claim shows the server's receipt; Back/Fade and the
   ticket report what actually filled, at the real average price, without an artificial delay.
 - **People:** leaderboard rank, the board's update time, room presence (seen in the last five
-  minutes) and Hunch holder counts are the server's; avatars without a photo are initials on the
+  minutes) and imo holder counts are the server's; avatars without a photo are initials on the
   person's own color (no third-party avatar service).
 - **The demo's workbench** (DEMO tag, demo controls, `?state=` previews, the design dataset) exists
   only in the demo profile, which the test suites use.
@@ -83,7 +83,7 @@ are on their way", "No ranked traders yet", "No rooms yet") instead of placehold
 ## Live on real data
 
 The worker runs on Fly (Tokyo, beside the Supabase database in Seoul) against Polymarket's public
-APIs: the first catalog pass stored over 15,000 open markets, tagged into Hunch's categories
+APIs: the first catalog pass stored over 15,000 open markets, tagged into imo's categories
 (Politics, Sports, Crypto, Culture, Tech, Economics…), with live quotes, trending ranks and
 realtime price updates. First contact found and fixed three adapter issues: tags only arrive when
 asked for (`include_tag=true`), some markets carry only a date-only end or their event's, and one

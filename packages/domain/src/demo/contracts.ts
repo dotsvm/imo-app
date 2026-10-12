@@ -37,7 +37,7 @@ export interface MarketService {
   /** Markets like this one, as the server picks them (same category, by
       volume): undefined while loading. */
   related(id: string): Market[] | undefined;
-  /** Who holds it on Hunch, biggest first: undefined while loading. */
+  /** Who holds it on imo, biggest first: undefined while loading. */
   holders(id: string): { trader: Trader; outcome: Outcome; shares: number }[] | undefined;
   /** Markets matching filters, as the server orders them (up to 100):
       undefined while loading. */

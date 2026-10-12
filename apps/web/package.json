@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "tsx --test test/*.test.ts",
-    "test:db": "APP_PROFILE=test DATABASE_URL=${DATABASE_URL:-postgres://localhost:5432/hunch_test} tsx --test --test-concurrency=1 test/db/*.test.ts",
+    "test:db": "APP_PROFILE=test DATABASE_URL=${DATABASE_URL:-postgres://localhost:5432/imo_test} tsx --test --test-concurrency=1 test/db/*.test.ts",
     "test:e2e": "playwright test",
     "brand-assets": "node scripts/brand-assets.mjs",
     "avatars": "tsx scripts/avatars.ts"
