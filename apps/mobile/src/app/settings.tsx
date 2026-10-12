@@ -112,12 +112,12 @@ export default function Settings() {
           <Text style={styles.section}>Account</Text>
           <View style={styles.group}>
             <Row icon={icon(KeyIcon)} label="Login & security" value={me?.signIn.method ? (METHODS[me.signIn.method] ?? me.signIn.method) : "—"} />
-            {/* Real money: the wallet's USDC ("—" while it can't be read, never $0). Paper: the demo balance. */}
+            {/* Real money: the wallet's USDC ($0 when there's none). Paper: the demo balance. */}
             {trading.live ? (
               <Row
                 icon={icon(WalletIcon)}
                 label="Wallet"
-                value={trading.availableCents !== null ? `${usd(trading.availableCents)} USDC` : "—"}
+                value={`${usd(trading.availableCents ?? 0)} USDC`}
                 onPress={() => router.push("/wallet")}
                 last
               />

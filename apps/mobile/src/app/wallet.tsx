@@ -69,8 +69,8 @@ export default function Wallet() {
           <>
             <Text style={styles.small}>USDC to trade with</Text>
             {info ? (
-              <Text style={styles.balance} accessibilityLabel={balance ? usd(balance.usdcCents) : "Balance unavailable"}>
-                {balance ? usd(balance.usdcCents) : "—"}
+              <Text style={styles.balance} accessibilityLabel={usd(balance?.usdcCents ?? 0)}>
+                {usd(balance?.usdcCents ?? 0)}
               </Text>
             ) : (
               <Skeleton width={160} height={44} style={{ marginVertical: 6 }} />

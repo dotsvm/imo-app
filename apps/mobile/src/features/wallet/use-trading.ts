@@ -24,8 +24,8 @@ export function useTrading() {
     live,
     wallet,
     info: info.data,
-    /** Cents to spend: the wallet's USDC, or paper cash. Null while unknown. */
-    availableCents: live ? (info.data?.balance?.usdcCents ?? null) : (me?.account.availableCents ?? null),
+    /** Cents to spend: the wallet's USDC, or paper cash. Null while loading; 0 once loaded with no balance. */
+    availableCents: live ? (info.data ? (info.data.balance?.usdcCents ?? 0) : null) : (me?.account.availableCents ?? null),
     minOrderCents: live ? (config?.wallet?.minOrderCents ?? 500) : 100,
     refresh: () => info.refetch(),
   };

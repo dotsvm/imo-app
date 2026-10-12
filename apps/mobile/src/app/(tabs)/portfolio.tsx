@@ -300,7 +300,7 @@ export default function Portfolio() {
         <View style={styles.split}>
           <Figure
             label={trading.live ? "In wallet" : "Cash"}
-            value={p.account.cashKnown ? usd(p.account.availableCents) : "—"}
+            value={usd(p.account.cashKnown ? p.account.availableCents : 0)}
           />
           <Figure
             label="In positions"

@@ -60,10 +60,6 @@ export function BalanceHeader() {
             {dollars}
             <Text style={styles.cents}>.{fraction}</Text>
           </Text>
-        ) : trading.live && trading.info ? (
-          <Text style={[styles.amount, styles.unknown]} accessibilityLabel="Balance unavailable">
-            —
-          </Text>
         ) : (
           <Skeleton width={190} height={38} style={styles.amountSkeleton} />
         )}
@@ -108,6 +104,5 @@ const styles = StyleSheet.create({
   },
   amountSkeleton: { marginTop: 2 },
   cents: { color: "#5b6460" },
-  unknown: { color: color.neutral600 },
   today: { fontFamily: font.medium, fontSize: 13, fontVariant: ["tabular-nums"] },
 });

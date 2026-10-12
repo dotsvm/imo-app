@@ -146,7 +146,7 @@ export default function Deposit() {
           <Fact label="Fee" value="Free" />
           <Fact
             label="In your wallet"
-            value={balance ? (token === "USDC" ? `${usd(balance.usdcCents)} USDC` : `${sol(balance.solLamports)} SOL`) : wallet.data ? "Unavailable" : "—"}
+            value={token === "USDC" ? `${usd(balance?.usdcCents ?? 0)} USDC` : `${sol(balance?.solLamports ?? 0)} SOL`}
             last
           />
         </View>
