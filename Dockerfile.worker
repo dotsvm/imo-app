@@ -1,0 +1,8 @@
+# The worker: one long-running Node process (feeds, order tracking, settlement,
+# the outbox). Built from the repo root so the workspace packages resolve.
+FROM node:24-slim
+WORKDIR /app
+ENV NODE_ENV=production
+COPY . .
+RUN npm ci --workspace @imo/worker --include-workspace-root --ignore-scripts
+CMD ["npm", "run", "worker"]

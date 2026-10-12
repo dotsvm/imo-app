@@ -1,0 +1,11 @@
+# The worker on Fly.io: no ports, one always-on machine. Secrets (the same as
+# the web app's) are set with `fly secrets import`.
+app = "imo-worker"
+primary_region = "bom"
+
+[build]
+  dockerfile = "Dockerfile.worker"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
