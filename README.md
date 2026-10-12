@@ -79,27 +79,32 @@ sequenceDiagram
 The mobile app (Expo) is the product, built for the **Solana Seeker** first, then iOS and Android.
 The web app shares the same API and brings the same experience to desktop.
 
-The app has been redesigned with a dark, green-accented look: Home, the feed and posts, Discover and
-markets, trading, rooms, portfolio, profiles, notifications, settings and sign-in.
-
-<p align="center">
-  <img src="docs/screenshots/mobile-welcome.png" width="280" alt="imo mobile app: the welcome screen" />
-  <br/><sub>The mobile app's welcome screen in the new design</sub>
-</p>
+The app has a new dark, green-accented design across every screen: sign-in, Home and the feed, posts,
+Discover and markets, trading, rooms, portfolio, profiles, notifications and settings.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/home-375.png" width="200" /><br/><sub>Calls from people you follow</sub></td>
-    <td align="center"><img src="docs/screenshots/market-375.png" width="200" /><br/><sub>A market: chart, book, discussion</sub></td>
-    <td align="center"><img src="docs/screenshots/home-mobile-ticket.png" width="200" /><br/><sub>Back or Fade a call</sub></td>
-    <td align="center"><img src="docs/screenshots/portfolio-375.png" width="200" /><br/><sub>Portfolio and positions</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-welcome.png" width="190" alt="Welcome" /><br/><sub>Welcome</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-home.png" width="190" alt="Home: calls from people you follow" /><br/><sub>Home: calls from people you follow</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-post.png" width="190" alt="A call and its discussion" /><br/><sub>A call and its discussion</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-trade.png" width="190" alt="Back it: the trade sheet" /><br/><sub>Back it: the trade sheet</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/mobile-discover.png" width="190" alt="Discover markets" /><br/><sub>Discover markets</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-market.png" width="190" alt="A market: price, chart, book" /><br/><sub>A market: price, chart, book</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-portfolio.png" width="190" alt="Portfolio and claims" /><br/><sub>Portfolio and claims</sub></td>
+    <td align="center"><img src="docs/screenshots/mobile-profile.png" width="190" alt="A trader’s track record" /><br/><sub>A trader’s track record</sub></td>
   </tr>
 </table>
-<p align="center"><sub>The web app at phone width.</sub></p>
+
+<p align="center">
+  <img src="docs/screenshots/mobile-room.png" width="190" alt="A room: members’ positions on their messages" />
+  <br/><sub>Rooms: team chat per topic, with each member’s position on their messages</sub>
+</p>
 
 <p align="center">
   <img src="docs/screenshots/home-1440.png" width="100%" alt="imo on the web: leaderboard, feed and trending markets" />
-  <br/><sub>The web app: top traders, the feed and trending markets side by side. Screenshots use the demo dataset.</sub>
+  <br/><sub>The web app: top traders, the feed and trending markets side by side. All screens show the demo dataset.</sub>
 </p>
 
 ## What's inside
